@@ -1,4 +1,4 @@
-from ecctestbench.ui.repositories.run_repository import *
+from ui.repositories.run_repository import *
 from ecctestbench.ecc_testbench import *
 from ecctestbench.settings import *
 from ecctestbench.loss_simulator import *

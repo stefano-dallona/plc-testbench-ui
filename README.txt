@@ -40,3 +40,10 @@ docker image rm --force plc-testbench-ui
 
 #GitHub Repo:
 #https://github.com/stefano-dallona/plc-testbench-ui/
+
+# install eccworkbench from local archive
+cd <eccworkbench-src-directory>
+python setup.py sdist
+
+# solving librosa installation exception
+# install Visual Studio build tools from https://visualstudio.microsoft.com/visual-cpp-build-tools/

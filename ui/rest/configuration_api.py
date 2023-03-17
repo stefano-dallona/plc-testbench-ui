@@ -1,11 +1,9 @@
 from flask import Blueprint, json, request, make_response
 from flask_api import status
-from ecctestbench.ui.services.configuration_service import ConfigurationService, UploadException
 
-import os
 
-from ecctestbench.path_manager import *
 from ..config.app_config import config
+from ..services.configuration_service import ConfigurationService, UploadException
 
 
 
