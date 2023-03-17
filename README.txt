@@ -36,3 +36,7 @@ docker rm <container-id>  # after stop or docker rm --force <container-id> # wit
 docker image rm --force plc-testbench-ui
 
 #access the application at URL http://<any-ip-of-the-host-except-loopback>:5000/
+
+
+#GitHub Repo:
+#https://github.com/stefano-dallona/plc-testbench-ui/
