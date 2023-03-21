@@ -23,8 +23,11 @@ docker build --tag plc-testbench-ui .
 # running the image
 docker run --rm -it -p 5000:5000 [-d (detached mode)] [--entrypoint sh (to override the entrypoint)] plc-testbench-ui
 
-# connect to a running image
-docker exec <container-id> sh
+# connect to a running image in a shell
+docker exec <container-id> -it sh
+
+# attach to a running image
+docker attach 0425a3719996
 
 # stopping the container
 docker stop <container-id>
@@ -35,15 +38,24 @@ docker rm <container-id>  # after stop or docker rm --force <container-id> # wit
 # deleting the image
 docker image rm --force plc-testbench-ui
 
+# free space in docker machine
+docker system prune --all --force --volumes
+
 #access the application at URL http://<any-ip-of-the-host-except-loopback>:5000/
 
 
 #GitHub Repo:
 #https://github.com/stefano-dallona/plc-testbench-ui/
 
-# install eccworkbench from local archive
+# compile eccworkbench
 cd <eccworkbench-src-directory>
 python setup.py sdist
 
-# solving librosa installation exception
-# install Visual Studio build tools from https://visualstudio.microsoft.com/visual-cpp-build-tools/
+# install eccworkbench from local archive
+# after activating plc-testbench-ui virtualenv
+(env) python -m pip install -f dist ecc_testbench
+
+# running with waitress (WSGI server)
+python -m pip install waitress
+# switch app.run instruction with serve
+python app.py

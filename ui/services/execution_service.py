@@ -18,10 +18,12 @@ class ExecutionService:
         self.ecctestbench_service = ecctestbench_service
         
     def get_execution_hierarchy(self, run_id, execution_id) -> List[Node]:
-        ecctestbench = self.ecctestbench_service.loadRun(run_id)
-        self._logger.info(f"Loaded ecctestbench for {run_id} ...")
-        execution = RunExecution(run_id=run_id)
-        for file_tree in ecctestbench.data_manager.get_data_trees():
+        run = self.ecctestbench_service.load_run(run_id)
+        if run == None:
+            return None
+        self._logger.info(f"Loaded run for {run_id} ...")
+        execution = RunExecution(run_id=run_id, hierarchy=[])
+        for file_tree in run.__ecctestbench__.data_manager.get_data_trees():
             execution.hierarchy.append(self.__build_output_hierarchy__(file_tree))
         return execution.hierarchy
     

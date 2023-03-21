@@ -1,0 +1,190 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="./dropzone-5.4.0/css/dropzone.min.css" />
+    <link rel="stylesheet" href="./dropzone-5.4.0/css/basic.min.css" />
+
+    <script src="./d3/v3/js/d3.v3.min.js"></script>
+    <script src='./d3/v4.5.0/js/d3.min.js'></script>
+    <script src="./dropzone-5.4.0/js/dropzone.min.js"></script>
+
+    <script src="./js/services/testbench-configuration-service.js"></script>
+    <script src="./js/controllers/run.configuration.controller.js"></script>
+    <script src="./js/models/run.configuration.model.js"></script>
+    <script src="./js/views/run.configuration.view.js"></script>
+    <script src="./js/configuration/config.js"></script>
+</head>
+<style>
+    body {
+        background-color: #333;
+    }
+
+    svg {
+        vertical-align: top
+    }
+
+    .label {
+        width: 200px;
+        display: inline-block;
+    }
+
+    .topbar {
+        vertical-align: 10px;
+    }
+
+    #settings {
+        overflow-y: scroll;
+        height: 400px;
+    }
+
+    .widget {
+        height: 100vh;
+        width: 200px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .progress-bar {
+        fill: #ddd;
+    }
+
+    .progress-bar-bg {
+        fill: #3f3f3f;
+    }
+
+    .progress-label {
+        fill: #000;
+        font-family: 'Open Sans', sans-serif;
+        font-size: 15;
+        text-anchor: middle;
+        dominant-baseline: central;
+    }
+
+    .node {
+        cursor: pointer;
+    }
+
+    circle {
+        fill: #fff;
+        stroke: steelblue;
+        stroke-width: 1.5px;
+    }
+
+    .node text {
+        font: 10px sans-serif;
+        color: red;
+    }
+
+    .link {
+        fill: none;
+        stroke: #5623e2;
+        stroke-width: 3px;
+    }
+
+    .hierarchy {
+        --background-color: #555458;
+    }
+
+    .lossSimulator {
+        white-space: nowrap;
+    }
+
+    .lossModel {
+        white-space: nowrap;
+    }
+
+</style>
+
+<body>
+    <form method="POST" action='/upload' class="dropzone dz-clickable" id="dropper" enctype="multipart/form-data">
+    </form>
+    <button id="clear-dropzone">Clear</button>
+    <form id="run-configuration-form" onsubmit="event.preventDefault();">
+        <table>
+            <tr>
+                <td>
+                    <div>
+                        <span class="label">Input Files Path</span>
+                        <input id="inputFilesPath" name="inputFilesPath"
+                            value="C:\Data\personale\Università\2022-2023\original_tracks"></input>
+                    </div>
+                    <div>
+                        <span class="label">Selected Input Files</span>
+                        <select id="selectedInputFiles" name="selectedInputFiles" multiple></select>
+                    </div>
+                    <br />
+                    <div id="settings"></div>
+                    <br />
+                    <table>
+                        <tr>
+                            <td>
+                                <span class="label">Loss Simulator</span>
+                            </td>
+                            <td>
+                                <div id="lossSimulators">
+                                    <select class="lossSimulator" id="lossSimulator-0" name="lossSimulator-0"></select>
+                                    <br />
+                                </div>
+                            </td>
+                            <td>
+                                <span class="label">Loss Model</span>
+                            </td>
+                            <td>
+                                <div id="lossModels">
+                                    <select class="lossModel" id="lossModel-0" name="lossModel-0"></select>
+                                    <br />
+                                </div>
+                            </td>
+                            <td>
+                                <button id="btn_add_loss_simulator">Add Loss Simulator</button>
+                            </td>
+                        </tr>
+                    </table>
+                    <br />
+                    <div>
+                        <span class="label">Ecc Algorithms</span>
+                        <select id="eccAlgorithms" name="eccAlgorithms" multiple></select>
+                    </div>
+                    <br />
+                    <div>
+                        <span class="label">Output Analyser</span>
+                        <select id="outputAnalysers" name="outputAnalysers" multiple></select>
+                    </div>
+                    <br />
+                    <br />
+                    <br />
+                </td>
+                <td>
+                    <div class="topbar">
+                        <button id="btn_save" type="submit">Save</button>
+                        <button id="btn_run" type="submit" onclick="//triggerSSE(sseBaseUrl)">Run</button>
+                        <button id="btn_stop" type="submit">Stop</button>
+                        <button id="btn_delete" type="submit">Delete</button>
+                    </div>
+                    <br />
+                    <br />
+                    <br />
+                    <div id="hierarchy"></div>
+
+                    <ul id="list"></ul>
+                </td>
+            </tr>
+        </table>
+    </form>
+</body>
+<script>
+
+    const config = appConfig({})
+    const runUuid = create_UUID()
+    console.log("runUuid:" + runUuid)
+
+    const runConfigurationModel = new RunConfigurationModel(runUuid, null)
+    const runService = new RunService(config.backendBaseUrl)
+    const runConfigurationController = new RunConfigurationController(runConfigurationModel, runService)
+    const runConfigurationView = new RunConfigurationView(runConfigurationController)
+
+    runConfigurationController.init(config.rootFolder)
+
+</script>
+
+</html>

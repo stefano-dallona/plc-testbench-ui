@@ -18,15 +18,18 @@ analysis_service = AnalysisService(ecctestbench_service=ecctestbench_service)
 def find_lost_samples(run_id, original_file_node_id, loss_simulation_node_id):
   unit_of_meas = request.args.get('unit_of_meas')
   unit_of_meas = unit_of_meas if unit_of_meas != None else "samples"
+  
   current_app.logger.info(f"Retrieving lost samples from run_id {run_id} and file {original_file_node_id} and loss simulation {loss_simulation_node_id}")
   lost_samples = analysis_service.find_lost_samples(run_id, original_file_node_id, loss_simulation_node_id, unit_of_meas)
-  return json.dumps(lost_samples, default=lost_samples.to_json()), status.HTTP_200_OK if lost_samples != None \
-    else ({}, status.HTTP_404_NOT_FOUND)
+  if lost_samples != None:
+    return json.dumps(lost_samples, default=lost_samples.to_json()), status.HTTP_200_OK
+  else:
+    return {}, status.HTTP_404_NOT_FOUND
 
 #http://localhost:5000/analysis/runs/76728771-9de8-42bd-a71e-f4d3c08e3ae6/input-files/76f9743b-d839-4e64-bf55-01f86107bec0/output-files/eb7a511c-8258-440c-bd81-e4cd38472cd7
 #http://localhost:5000/analysis/runs/76728771-9de8-42bd-a71e-f4d3c08e3ae6/input-files/76f9743b-d839-4e64-bf55-01f86107bec0/output-files/76f9743b-d839-4e64-bf55-01f86107bec0
 @analysis_api.route("/runs/<run_id>/input-files/<original_file_node_id>/output-files/<audio_file_node_id>")
-def audio_file(run_id, original_file_node_id, audio_file_node_id):
+def stream_audio_file(run_id, original_file_node_id, audio_file_node_id):
   audio_file = analysis_service.find_audio_file(run_id, audio_file_node_id)
   if audio_file != None:
     return send_file(audio_file.path, mimetype='audio/x-wav')
@@ -39,6 +42,7 @@ def get_audio_file_samples(run_id, original_file_node_id, audio_file_node_id):
   channel = request.args.get("channel", type=int, default=0)
   offset = request.args.get("offset", type=int, default=0)
   num_samples = request.args.get("num_samples", type=int, default=1000)
+  
   samples = analysis_service.get_audio_file_samples(run_id, audio_file_node_id, channel, offset, num_samples)
   if samples != None:
     return json.dumps(samples.data, default=samples.to_json()), status.HTTP_200_OK
@@ -54,6 +58,7 @@ def get_metric_samples(run_id, original_file_node_id, audio_file_node_id, metric
   offset = request.args.get("offset", type=int, default=0)
   num_samples = request.args.get("num_samples", type=int, default=1000)
   unit_of_meas = request.args.get("unit_of_meas", type=str, default="samples")
+  
   metric = analysis_service.get_metric_samples(run_id=run_id,
                                                original_file_node_id=original_file_node_id,
                                                metric_node_id=metric_id,

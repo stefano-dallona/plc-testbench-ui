@@ -2,3 +2,4 @@ librosa==0.9.2 # should come from ecctestbench
 Flask
 Flask-Cors
 Flask-API
+waitress

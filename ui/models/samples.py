@@ -13,12 +13,12 @@ class LostInterval(Serializable):
         self.start_sample = start_sample
         self.num_samples = num_samples
         self.x = float(self.start_sample / self.__sample_rate__)
-        self.w = float(self.num_samples / self.__sample_rate__)
+        self.width = float(self.num_samples / self.__sample_rate__)
 
 class LostSamples(Serializable):
 
-    def __init__(self, num_intervals, lost_intervals: List[LostInterval]):
-        self.num_intervals = num_intervals
+    def __init__(self, duration, lost_intervals: List[LostInterval]):
+        self.duration = duration
         self.lost_intervals = lost_intervals
 
 class AudioFileSamples(Serializable):

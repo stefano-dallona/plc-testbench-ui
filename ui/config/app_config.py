@@ -1,7 +1,9 @@
 
+import os
 
 class Config():
   def __init__(self, data_dir):
     self.data_dir = data_dir
 
-config = Config(data_dir="C:\\Data\\personale\\Università\\2022-2023\\original_tracks")
+root_folder = os.environ.get("DATA_FOLDER") if "DATA_FOLDER" in os.environ else "/plc-testbench-ui/original_tracks"
+config = Config(data_dir=root_folder)

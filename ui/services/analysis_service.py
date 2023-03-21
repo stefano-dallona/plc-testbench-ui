@@ -21,13 +21,13 @@ class AnalysisService:
     def find_audio_file(self,
                         run_id: str,
                         audio_file_node_id: str) -> AudioFile:
-        ecctestbench = self.ecctestbench_service.loadRun(run_id)
-        if ecctestbench == None:
+        run = self.ecctestbench_service.load_run(run_id)
+        if run == None:
             return None
         
         self._logger.info(f"Loaded ecctestbench for {run_id} ...")
         
-        for file_tree in ecctestbench.data_manager.get_data_trees():
+        for file_tree in run.__ecctestbench__.data_manager.get_data_trees():
             audio_file = self.__find_audio_file_by_node_id__(file_tree, audio_file_node_id)
             if audio_file != None:
                 audio_file.load()
@@ -40,12 +40,12 @@ class AnalysisService:
                           original_file_node_id: str,
                           loss_simulation_node_id: str,
                           unit_of_meas: str = "samples") -> LostSamples:
-        ecctestbench = self.ecctestbench_service.loadRun(run_id)
-        if ecctestbench == None:
+        run = self.ecctestbench_service.load_run(run_id)
+        if run == None:
             return None
         self._logger.info(f"Loaded ecctestbench for {run_id} ...")
         
-        file_tree = self.__find_file_tree_by_node_id__(ecctestbench, original_file_node_id)
+        file_tree = self.__find_file_tree_by_node_id__(run.__ecctestbench__, original_file_node_id)
         original_audio_file = file_tree.file
         self._logger.info(f"file_tree:  {file_tree} ...")
         
@@ -55,7 +55,7 @@ class AnalysisService:
         lost_samples_file.load()
         
         sample_rate = 1 if unit_of_meas == "samples" else original_audio_file.samplerate
-        lost_samples = self.__convertToLossIntervals__(lost_samples_file.file.data, sample_rate)
+        lost_samples = self.__convertToLossIntervals__(len(original_audio_file.data), lost_samples_file.file.data, sample_rate)
         return lost_samples
 
     def get_audio_file_samples(self,
@@ -80,12 +80,12 @@ class AnalysisService:
                         offset = None,
                         num_samples = None,
                         unit_of_meas = "samples"):
-        ecctestbench = self.ecctestbench_service.loadRun(run_id)
-        if ecctestbench == None:
+        run = self.ecctestbench_service.load_run(run_id)
+        if run == None:
             return None
         self._logger.info(f"Loaded ecctestbench for {run_id} ...")
         
-        audio_file = self.__find_file_tree_by_node_id__(ecctestbench, original_file_node_id)
+        audio_file = self.__find_file_tree_by_node_id__(run.__ecctestbench__, original_file_node_id)
         if audio_file == None:
             return None
         audio_file.load()
@@ -133,10 +133,11 @@ class AnalysisService:
         return AnalysisService.__get_first__(AnalysisService.__find_nodes_in_file_tree__(file_tree, search))
     
     @staticmethod
-    def __convertToLossIntervals__(self, lost_samples, sample_rate) -> LostSamples:
+    def __convertToLossIntervals__(num_samples, lost_samples, sample_rate) -> LostSamples:
         deltalist = [(e, i - e) for i, e in enumerate(lost_samples)]
         key_func = lambda x: x[1]
         groupedlist = [list(g) for _, g in itertools.groupby(deltalist, key_func)]
         counterlist = [(l[0][0], len(l)) for l in groupedlist]
-        data = [LostInterval(float(x), float(w), sample_rate) for x, w in counterlist]
-        return LostSamples(len(counterlist), data)
+        data = [LostInterval(int(x), int(w), sample_rate) for x, w in counterlist]
+        duration = float(num_samples / sample_rate)
+        return LostSamples(duration, data)

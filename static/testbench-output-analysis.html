@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Segment Layer</title>
+
+  <link rel="stylesheet" type="text/css" href="./assets/common.css" />
+  <link rel="stylesheet" type="text/css" href="./assets/prism.css" />
+  <style>
+    body {
+      background-color: #929099;
+    }
+
+    .node {
+      cursor: pointer;
+    }
+
+    .node circle {
+      fill: #fff;
+      stroke: steelblue;
+      stroke-width: 1.5px;
+    }
+
+    .node text {
+      font: 10px sans-serif;
+      color: red;
+    }
+
+    .link {
+      fill: none;
+      stroke: #5623e2;
+      stroke-width: 3px;
+    }
+
+    .hierarchy {
+      --background-color: #555458;
+    }
+
+    .track {
+      margin-bottom: 10px;
+    }
+
+    .line-1 {
+      fill: none;
+      stroke: #00b7d4;
+      stroke-width: 2px;
+    }
+
+    .line-2 {
+      fill: none;
+      stroke: #f57738;
+      stroke-width: 2px;
+    }
+
+    .axis path,
+    .nav-axis path,
+    .axis line,
+    .nav-axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+
+    .axis text,
+    .nav-axis text {
+      font: 10px sans-serif;
+    }
+
+    .axis.x path,
+    .nav-axis.x path {
+      display: none;
+    }
+
+    .navigator .data {
+      fill: #d1ddef;
+      stroke-width: 0px;
+    }
+
+    .nav-viewport {
+      stroke: #b2b1b6;
+      stroke-width: 0.5px;
+      fill: #5daee0;
+      fill-opacity: 0.3;
+    }
+
+    /* style for  tooltip customization */
+    div.tooltip {
+      position: absolute;
+      text-align: center;
+      padding: 10px;
+      font: 12px sans-serif;
+      border-radius: 8px;
+      pointer-events: none;
+    }
+
+    #spectrogram-waveform {
+      visibility: hidden;
+      height: 0;
+    }
+    
+  </style>
+
+  <script src="./waves-ui/js/waves-ui.umd.js"></script>
+  <script src="./d3/v3/js/d3.v3.min.js"></script>
+  <script src="./wavesurfer/js/wavesurfer.js"></script>
+  <script src="./wavesurfer/js/wavesurfer.spectrogram.min.js"></script>
+  <script src="./colormaps/js/colormaps.umd.min.js"></script>
+  <script src="./assets/prism.js"></script>
+  <script src="./assets/insert-code.js"></script>
+  
+  <script src="./js/audio/bufferloader.js"></script>
+  <script src="./js/services/testbench-analysis-service.js"></script>
+  <script src="./js/views/run.analysis.view.js"></script>
+  <script src="./js/controllers/run.analysis.controller.js"></script>
+  <script src="./js/services/testbench-configuration-service.js"></script>
+  <script src="./js/models/run.analysis.model.js"></script>
+  <script src="./js/configuration/config.js"></script>
+
+</head>
+
+<body>
+  <select id="selectedInputFile">
+    <!--
+    <option value="Blues_Bass.wav">Blues_Bass.wav</option>
+    <option value="Blues_Guitar.wav">Blues_Guitar.wav</option>
+    <option value="Musica è-nug3sH6WsnY-256k-1654312580456.wav">Musica è-nug3sH6WsnY-256k-1654312580456.wav</option>
+    -->
+  </select>
+
+  <!-- SIMPLE USAGE -->
+  <h2 id="simple-use">Lost packets</h2>
+
+  <div id="tree-1"></div>
+  <div class="track" id="track-1"></div>
+  <div class="track" id="spectrogram-waveform"></div>
+  <div class="track" id="spectrogram"></div>
+  <div class="track" id="track-2"></div>
+  <div class="track" id="track-3"></div>
+  <button id="Left">&lt;</button>
+  <button id="Right">&gt;</button>
+  <button id="LeftLoss">&lt; (loss)</button>
+  <button id="RightLoss">&gt; (loss)</button>
+  <button id="PlayZoomed">Play zoomed</button>
+  <button id="Start">Start</button>
+  <button id="Pause">Pause</button>
+  <script>
+
+    const config = appConfig({})
+    const model = new RunAnalysisModel({
+      input_path: config.rootFolder,
+      run_id: config.run_id
+    })
+
+    const plctestbenchService = new PlcTestbenchService(config.backendBaseUrl)
+    const runService = new RunService(config.backendBaseUrl)
+    const controller = new RunAnalysisController(model, plctestbenchService, runService)
+    const view = new RunAnalysisView(controller)
+
+    controller.init()
+
+  </script>
+</body>
+
+</html>

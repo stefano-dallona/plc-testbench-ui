@@ -1,7 +1,10 @@
-from ecctestbench.ecc_testbench import ECCTestbench
 import os
 import pickle
 import logging
+
+from ecctestbench.ecc_testbench import ECCTestbench
+
+from ..models.run import Run
 
 class RunRepository:
     '''
@@ -12,13 +15,13 @@ class RunRepository:
         self.logger = logging.getLogger(__name__)
         self.root_folder = root_folder
     
-    def add(self, run: ECCTestbench):
-        file = self.__generate_filename__(self.root_folder, run.uuid)
-        self.logger.info("Saving run %s to file %s", run.uuid, file)
+    def add(self, run: Run):
+        file = self.__generate_filename__(self.root_folder, run.run_id)
+        self.logger.info("Saving run %s to file %s", run.run_id, file)
         with open(file, 'wb') as handle:
             pickle.dump(run, handle)
     
-    def get(self, reference):
+    def get(self, reference) -> Run:
         file = self.__generate_filename__(self.root_folder, reference)
         self.logger.info("Loading run %s from file %s", reference, file)
         if os.path.exists(file):
@@ -32,5 +35,6 @@ class RunRepository:
     
     ### Private methods ###
     def __generate_filename__(self, root_folder, reference):
-        filename = os.path.join(root_folder, 'ecctestbench-' + reference + '.pickle')
+        run_root_folder = os.path.join(root_folder, reference)
+        filename = os.path.join(run_root_folder, 'ecctestbench.pickle')
         return filename
