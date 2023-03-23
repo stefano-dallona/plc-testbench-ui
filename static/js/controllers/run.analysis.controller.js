@@ -209,7 +209,8 @@ class RunAnalysisController {
   }
 
   playSound(delay, offset, duration) {
-    this.view.updateCursor()()
+    this.model.startTime = this.audioContext.currentTime
+    this.model.startOffset = 0
     if (!this.model.playing) {
       this.audioContext.resume()
       this.audioSource = this.audioContext.createBufferSource();
@@ -221,15 +222,15 @@ class RunAnalysisController {
     } else {
       console.log("Already playing ...")
     }
+    this.view.updateCursor()()
   }
 
   pauseSound() {
-    this.view.updateCursor()()
     if (this.model.playing) {
       this.audioSource.stop()
       this.audioSource.disconnect(this.audioContext.destination)
       this.audioContext.suspend()
-      this.model.startOffset = this.audioContext.currentTime - this.model.startTime
+      this.model.startOffset = this.audioContext.currentTime
       this.model.playing = false
     } else {
       this.audioContext.resume()
@@ -239,6 +240,7 @@ class RunAnalysisController {
       this.audioSource.start(0, this.model.startOffset);
       this.model.playing = true
     }
+    this.view.updateCursor()()
   }
 
   playInterval(start, duration) {
