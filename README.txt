@@ -21,7 +21,7 @@ python -m pip install -r requirements.txt
 docker build --tag plc-testbench-ui .
 
 # running the image
-docker run --rm -it -p 5000:5000 [-d (detached mode)] [--entrypoint sh (to override the entrypoint)] plc-testbench-ui
+docker run -e DATA_FOLDER="/plc-testbench-ui/original_tracks" --rm -it --memory="16g" -p 5000:5000 [-d (detached mode)] [--entrypoint sh (to override the entrypoint)] plc-testbench-ui
 
 # connect to a running image in a shell
 docker exec <container-id> -it sh
@@ -37,6 +37,9 @@ docker rm <container-id>  # after stop or docker rm --force <container-id> # wit
 
 # deleting the image
 docker image rm --force plc-testbench-ui
+
+# monitor container resources usage
+docker stats <container-id>
 
 # free space in docker machine
 docker system prune --all --force --volumes
@@ -59,3 +62,8 @@ python setup.py sdist
 python -m pip install waitress
 # switch app.run instruction with serve
 python app.py
+
+# App URLs:
+#myIP: 10.223.35.25
+http://<local-machine-ip>:5000/testbench-configuration.html
+http://<local-machine-ip>:5000/testbench-output-analysis.html?run_id=<run_id>

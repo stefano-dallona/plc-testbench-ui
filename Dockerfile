@@ -11,7 +11,7 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 COPY requirements.txt .
 
 RUN apt-get update
-RUN apt-get install libsndfile1-dev --yes --allow
+RUN apt-get install libsndfile1-dev --yes --force-yes
 RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install -r requirements.txt
 

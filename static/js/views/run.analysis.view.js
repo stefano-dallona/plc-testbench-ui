@@ -60,6 +60,18 @@ class RunAnalysisView {
     })
   }
 
+  populatePlayableFiles(playableFiles) {
+    let mySelect = document.getElementById('aufiofileToBePlayed');
+    mySelect.innerHTML = ""
+    playableFiles.forEach((it, index) => {
+      let myOption = document.createElement("option");
+      myOption.text = it.name + (it.parent ? " - " + it.parent.name : "")
+      myOption.value = index;
+      mySelect.appendChild(myOption);
+    })
+  }
+
+
   updateRunHierarchy(source) {
 
     // Compute the new tree layout.

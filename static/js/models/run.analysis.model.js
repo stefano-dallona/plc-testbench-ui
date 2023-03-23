@@ -13,5 +13,6 @@ class RunAnalysisModel {
         this.lossFiles = options && options.lossFiles || []
         this.filename = options && options.filename || undefined
         this.run_id = options && options.run_id || undefined
+        this.selectedTrackToPlay = options && options.selectedTrackToPlay || 0
     }
 }

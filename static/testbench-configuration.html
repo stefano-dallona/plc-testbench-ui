@@ -12,6 +12,7 @@
     <script src="./js/controllers/run.configuration.controller.js"></script>
     <script src="./js/models/run.configuration.model.js"></script>
     <script src="./js/views/run.configuration.view.js"></script>
+    <script src="./js/routes/routes.js"></script>
     <script src="./js/configuration/config.js"></script>
 </head>
 <style>
@@ -180,7 +181,7 @@
 
     const runConfigurationModel = new RunConfigurationModel(runUuid, null)
     const runService = new RunService(config.backendBaseUrl)
-    const runConfigurationController = new RunConfigurationController(runConfigurationModel, runService)
+    const runConfigurationController = new RunConfigurationController(runConfigurationModel, runService, routes)
     const runConfigurationView = new RunConfigurationView(runConfigurationController)
 
     runConfigurationController.init(config.rootFolder)

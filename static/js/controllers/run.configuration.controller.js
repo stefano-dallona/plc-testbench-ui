@@ -1,10 +1,13 @@
+
+
 class RunConfigurationController {
 
-    constructor(model, runService) {
+    constructor(model, runService, routes) {
         this.model = model
         this.runService = runService
         this.view = null
         this.sseListener = null
+        this.routes = routes
     }
 
     init(inputFilePath) {
@@ -63,6 +66,7 @@ class RunConfigurationController {
             if (message.nodetype == "RunExecution" && message.nodeid == _this.model.run_id) {
                 _this.view.resetProgressBars(100)
                 _this.runService.stopListeningForExecutionEvents();
+                routes.navigateTo("/analysis", { "run_id": _this.model.run_id })
             }
             if (message.nodetype == "ECCTestbench") {
                 let runExecutionProgressBarId = progressBarIdPrefix + _this.model.run_id

@@ -20,6 +20,9 @@ class RunAnalysisController {
     audioSelect.addEventListener('change', (e) => this.changeTrack(e.target));
     audioSelect.value = this.model.filename
 
+    const playableFileSelect = document.querySelector("#aufiofileToBePlayed");
+    playableFileSelect.addEventListener('change', (e) => this.model.selectedTrackToPlay = e.target.value);
+
     const startButton = document.querySelector("#Start");
     const pauseButton = document.querySelector("#Pause");
     startButton.onclick = () => {
@@ -79,6 +82,14 @@ class RunAnalysisController {
     return lossFiles
   }
 
+  findParent(rootNode, childNode) {
+    const isParentOfNode = (x) => {
+      return x.children && x.children.find(c => c.uuid = childNode.uuid)
+    }
+    const result = this.mapTreeToList(rootNode, isParentOfNode, x => x)
+    return result instanceof Array && result.length > 0 ? result[0] : null
+  }
+
   mapTreeToList(root, predicate = (x) => true, mapper = (x) => x, stopRecursion = (x) => false) {
     function _treeToList(root) {
       let accumulator = []
@@ -102,6 +113,11 @@ class RunAnalysisController {
     document.querySelector('#track-3').innerHTML = "";
   }
 
+  populatePlayableFiles() {
+    //let playableFiles = this.model.audioFiles.map((x) => { return { "name": x.name + "(" + this.findParent(this.model.root, x) + ")", "uuid": x.uuid }})
+    this.view.populatePlayableFiles(this.model.audioFiles)
+  }
+
   async loadTree(tracktitle) {
     this.model.filename = tracktitle
     let hierarchy = await this.runService.getRunHierarchy(this.model.run_id, this.model.filename)
@@ -114,6 +130,7 @@ class RunAnalysisController {
     this.clearTracks()
     this.model.audioFiles = this.findAudioFiles(this.model.root)
     this.model.lossFiles = this.findLossFiles(this.model.root)
+    this.populatePlayableFiles()
     this.loadBuffer(this.model.audioFiles.map((x) =>  `${this.baseUrl}/analysis/runs/${this.model.run_id}/input-files/${x.uuid}/output-files/${x.uuid}`))
   }
 
@@ -196,7 +213,7 @@ class RunAnalysisController {
     if (!this.model.playing) {
       this.audioContext.resume()
       this.audioSource = this.audioContext.createBufferSource();
-      this.audioSource.buffer = this.bufferLoader.bufferList[0];
+      this.audioSource.buffer = this.bufferLoader.bufferList[this.model.selectedTrackToPlay];
       this.audioSource.connect(this.audioContext.destination);
       this.audioSource.start(delay ? delay : 0, offset ? offset : 0, duration ? duration : this.audioSource.buffer.duration);
       this.model.playing = true
@@ -217,7 +234,7 @@ class RunAnalysisController {
     } else {
       this.audioContext.resume()
       this.audioSource = this.audioContext.createBufferSource();
-      this.audioSource.buffer = this.bufferLoader.bufferList[0];
+      this.audioSource.buffer = this.bufferLoader.bufferList[this.model.selectedTrackToPlay];
       this.audioSource.connect(this.audioContext.destination);
       this.audioSource.start(0, this.model.startOffset);
       this.model.playing = true
@@ -227,7 +244,7 @@ class RunAnalysisController {
   playInterval(start, duration) {
     this.audioContext.resume()
     this.audioSource = this.audioContext.createBufferSource();
-    this.audioSource.buffer = this.bufferLoader.bufferList[0];
+    this.audioSource.buffer = this.bufferLoader.bufferList[this.model.selectedTrackToPlay];
     this.audioSource.connect(this.audioContext.destination);
     this.audioSource.start(0, start, duration);
     this.model.playing = true
