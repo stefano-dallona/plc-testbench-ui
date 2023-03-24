@@ -189,6 +189,38 @@ class RunAnalysisView {
     waveformTrack.update()
   }
 
+  segmentLayerListener() {
+    const _view = this
+    return function (e) {
+      var eventType = e.type;
+
+      let segmentLayers = Array.from(_view.layersMap).filter(([name, value]) => value instanceof wavesUI.helpers.SegmentLayer).map(([name, value]) => value)
+      for (let l of segmentLayers) {
+        if (l.getItemFromDOMElement(e.target)) {
+          _view.segmentLayerOnWaveform = l
+          _view.segment = _view.segmentLayerOnWaveform.getItemFromDOMElement(e.target)
+        }
+      }
+
+      if (!_view.segment) return;
+
+      var datum = _view.segmentLayerOnWaveform.getDatumFromItem(_view.segment);
+      console.log("datum: (x:" + datum.lossstart + ", width:" + datum.losswidth + ")")
+
+      if (eventType == 'mouseover' || eventType == 'mouseout') {
+        datum.opacity = eventType === 'mouseover' ? 1 : 0.8;
+        _view.segmentLayerOnWaveform.updateShapes();
+      }
+      if (eventType == 'click') {
+        _view.segmentLayerOnWaveform.updateShapes();
+        if (_view.controller.model.selectedLoss) _view.controller.model.selectedLoss.color = undefined
+        _view.controller.model.selectedLoss = datum
+        _view.controller.model.selectedLoss.color = "red"
+        _view.controller.selectSamples(datum.start_sample, datum.num_samples)
+      }
+    }
+  }
+
   async displayLostPacketsOnWaveForm(original_audio_node, loss_simulation_node) {
     if (!loss_simulation_node) return;
     if (this.layersMap.get(loss_simulation_node)) return;
@@ -209,30 +241,7 @@ class RunAnalysisView {
     this.timelineWaveform.tracks.update(this.segmentLayerOnWaveform);
 
     // add an hover effect on the segments
-    const _view = this
-    this.timelineWaveform.on('event', function (e) {
-      var segment;
-      var eventType = e.type;
-
-      _view.segment = _view.segmentLayerOnWaveform.getItemFromDOMElement(e.target);
-      if (!_view.segment) return;
-
-      var datum = _view.segmentLayerOnWaveform.getDatumFromItem(_view.segment);
-      console.log("datum: (x:" + datum.lossstart + ", width:" + datum.losswidth + ")")
-
-      if (eventType == 'mouseover' || eventType == 'mouseout') {
-        datum.opacity = eventType === 'mouseover' ? 1 : 0.8;
-        _view.segmentLayerOnWaveform.updateShapes();
-      }
-      if (eventType == 'click') {
-        _view.segmentLayerOnWaveform.updateShapes();
-        if (_view.controller.model.selectedLoss) _view.controller.model.selectedLoss.color = undefined
-        _view.controller.model.selectedLoss = datum
-        _view.controller.model.selectedLoss.color = "red"
-        _view.controller.selectSamples(datum.start_sample, datum.num_samples)
-      }
-    });
-
+    this.timelineWaveform.on('event', this.segmentLayerListener());
   }
 
   updateCursor() {
