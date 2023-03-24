@@ -11,11 +11,17 @@ from ..models.run import *
 
 
 execution_api = Blueprint("execution", __name__, url_prefix="")
-ecctestbench_service = EccTestbenchService(run_repository=RunRepository(config.data_dir))
-execution_service = ExecutionService(ecctestbench_service)
+run_repository = RunRepository(config.data_dir)
+ecctestbench_service = EccTestbenchService(run_repository=run_repository)
+execution_service = ExecutionService(ecctestbench_service, run_repository)
+
+@execution_api.route('/runs', methods=['GET'])
+def get_runs():
+    runs = execution_service.get_runs()
+    return json.dumps(runs), 200
 
 @execution_api.route('/runs', methods=['POST'])
-def runs():
+def create_run():
     run_id = str(uuid.uuid4())
     run = ecctestbench_service.create_run(request.json, run_id)
     ecctestbench_service.save_run(run)

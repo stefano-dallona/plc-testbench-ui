@@ -42,6 +42,11 @@ class RunConfigurationController {
             }
         });
 
+        let runListButton = document.getElementById("btn_run_list");
+        runListButton.addEventListener("click", async function (event) {
+            _this.routes.navigateTo("/runs-list", {})
+        });
+
         this.view.renderSettingsForm()
         this.loadLossSimulators('lossSimulator-0')
         this.loadLossModels('lossModel-0')
@@ -66,6 +71,7 @@ class RunConfigurationController {
             if (message.nodetype == "RunExecution" && message.nodeid == _this.model.run_id) {
                 _this.view.resetProgressBars(100)
                 _this.runService.stopListeningForExecutionEvents();
+                _this.view.notifyRunCompletion(_this.model.run_id)
                 routes.navigateTo("/analysis", { "run_id": _this.model.run_id })
             }
             if (message.nodetype == "ECCTestbench") {

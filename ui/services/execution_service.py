@@ -8,14 +8,16 @@ from ecctestbench.node import *
 
 from .ecctestbench_service import EccTestbenchService, announcer
 from ..models.run import *
+from ..repositories.run_repository import *
 
 
 class ExecutionService:
     
     _logger = logging.getLogger(__name__)
     
-    def __init__(self, ecctestbench_service: EccTestbenchService):
+    def __init__(self, ecctestbench_service: EccTestbenchService, run_repository: RunRepository):
         self.ecctestbench_service = ecctestbench_service
+        self.run_repository = run_repository
         
     def get_execution_hierarchy(self, run_id, execution_id) -> List[Node]:
         run = self.ecctestbench_service.load_run(run_id)
@@ -26,6 +28,9 @@ class ExecutionService:
         for file_tree in run.__ecctestbench__.data_manager.get_data_trees():
             execution.hierarchy.append(self.__build_output_hierarchy__(file_tree))
         return execution.hierarchy
+    
+    def get_runs(self) -> List[Run]:
+        return self.run_repository.list()
     
     def get_execution_events(self, run_id, execution_id):
         messages = announcer.listen()  # returns a queue.Queue

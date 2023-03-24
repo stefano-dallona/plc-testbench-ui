@@ -21,4 +21,5 @@ class PlcTestbenchService {
         const metricsJson = await metricsResponse.json();
         return metricsJson;
     }
+    
 }

@@ -10,6 +10,10 @@ class RunConfigurationView {
         this.pbsMap = {}
     }
 
+    notifyRunCompletion(run_id) {
+        alert("Elaboration of run '" + run_id + "' completed successfully!")
+    }
+
     getRunConfigurationData() {
         const form = document.getElementById("run-configuration-form");
         return new FormData(form);

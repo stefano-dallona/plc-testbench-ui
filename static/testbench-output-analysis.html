@@ -116,6 +116,7 @@
   <script src="./js/services/testbench-configuration-service.js"></script>
   <script src="./js/models/run.analysis.model.js"></script>
   <script src="./js/configuration/config.js"></script>
+  <script src="./js/routes/routes.js"></script>
 
 </head>
 
@@ -127,6 +128,8 @@
     <option value="Musica è-nug3sH6WsnY-256k-1654312580456.wav">Musica è-nug3sH6WsnY-256k-1654312580456.wav</option>
     -->
   </select>
+  <button id="RunsList">Runs List</button>
+  <button id="RunConfiguration">Run Configuration</button>
 
   <!-- SIMPLE USAGE -->
   <h2 id="simple-use">Lost packets</h2>
@@ -155,7 +158,7 @@
 
     const plctestbenchService = new PlcTestbenchService(config.backendBaseUrl)
     const runService = new RunService(config.backendBaseUrl)
-    const controller = new RunAnalysisController(model, plctestbenchService, runService)
+    const controller = new RunAnalysisController(model, plctestbenchService, runService, routes)
     const view = new RunAnalysisView(controller)
 
     controller.init()

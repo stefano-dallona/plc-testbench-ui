@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <title>Segment Layer</title>
+
+  <script src="./js/configuration/config.js"></script>
+  <script src="./js/controllers/runs.list.controller.js"></script>
+  <script src="./js/models/runs.list.model.js"></script>
+  <script src="./js/services/testbench-configuration-service.js"></script>
+  <script src="./js/views/runs.list.view.js"></script>
+  <script src="./js/routes/routes.js"></script>
+
+</head>
+
+<body>
+  <select id="runs">
+
+  </select>
+
+  <!-- SIMPLE USAGE -->
+  <h2 id="simple-use">Runs</h2>
+
+  <button id="Analyse">Analyse</button>
+  <script>
+
+    const config = appConfig({})
+    const model = new RunsListModel({
+      runs: [],
+      input_path: config.rootFolder
+    })
+
+    const runService = new RunService(config.backendBaseUrl)
+    const controller = new RunsListController(model, runService, routes)
+    const view = new RunsListView(controller)
+
+    controller.init()
+
+  </script>
+</body>
+
+</html>

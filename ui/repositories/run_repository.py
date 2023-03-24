@@ -2,6 +2,8 @@ import os
 import pickle
 import logging
 
+from typing import List
+
 from ecctestbench.ecc_testbench import ECCTestbench
 
 from ..models.run import Run
@@ -30,8 +32,9 @@ class RunRepository:
         else:
             return None
     
-    def list(self, predicate):
-        pass
+    def list(self, predicate = lambda x : True) -> List[Run]:
+        runs = [d for d in os.listdir(self.root_folder) if os.path.isdir(os.path.join(self.root_folder, d))]
+        return list(map(lambda r: { "run_id" : self.get(r).run_id }, filter(predicate, runs)))
     
     ### Private methods ###
     def __generate_filename__(self, root_folder, reference):

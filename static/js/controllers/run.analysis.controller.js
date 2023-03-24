@@ -5,11 +5,12 @@ class RunAnalysisController {
   audioSource
   baseUrl
 
-  constructor(model, plctestbenchService, runService) {
+  constructor(model, plctestbenchService, runService, routes) {
     this.model = model
     this.plctestbenchService = plctestbenchService
     this.baseUrl = plctestbenchService.baseUrl
     this.runService = runService
+    this.routes = routes
   }
 
   init() {
@@ -32,19 +33,32 @@ class RunAnalysisController {
       this.pauseSound();
     }
 
+    const runListButton = document.querySelector("#RunsList");
+    const runConfigurationButton = document.querySelector("#RunConfiguration");
     const leftButton = document.querySelector("#Left");
     const rightButton = document.querySelector("#Right");
     const prevousLossButton = document.querySelector("#LeftLoss");
     const nextLossButton = document.querySelector("#RightLoss");
     const playZoomedButton = document.querySelector("#PlayZoomed");
 
+    runListButton.onclick = () => {
+      this.routes.navigateTo("/runs-list", {})
+    }
+
+    runConfigurationButton.onclick = () => {
+      this.routes.navigateTo("/configuration", {})
+    }
+
     leftButton.onclick = () => {
-      const startat = Math.max(0, startat - numsamples)
-      this.selectSamples(startat, numsamples)
+      const startat = Math.max(0, this.model.offset - this.model.num_samples)
+      this.model.offset = startat
+      this.selectSamples(this.model.offset, this.model.num_samples)
     }
     rightButton.onclick = () => {
-      const startat = Math.min(startat + numsamples, totalSamples - numsamples);
-      this.selectSamples(startat, numsamples)
+      if (!this.model.totalSamples) return
+      const startat = Math.min(this.model.offset + this.model.num_samples, this.model.totalSamples - this.model.num_samples);
+      this.model.offset = startat
+      this.selectSamples(this.model.offset, this.model.num_samples)
     }
     prevousLossButton.onclick = () => {
       var currentlySelectedSegmentIndex = this.view.segmentLayerOnWaveform.data.findIndex(element => element === this.model.selectedLoss);
@@ -276,8 +290,11 @@ class RunAnalysisController {
     //const samplesJson = await this.plctestbenchService.fetchSamplesFromFile(start, samples, this.model.filename, time_interval);
     let channel = 0;
     let unit_of_meas = "samples"
+    this.model.offset = offset
+    this.model.num_samples = num_samples
 
     const samplesData = await this.loadSamples(offset, num_samples, channel, unit_of_meas)
+    this.model.totalSamples = samplesData[0].length
     this.view.renderSamples(samplesData)
   }
 

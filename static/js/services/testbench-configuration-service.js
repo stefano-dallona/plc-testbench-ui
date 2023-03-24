@@ -14,6 +14,13 @@ class RunService {
         this.baseUrl = baseUrl
     }
 
+    async findAllRuns() {
+        let requestUrl = `${this.baseUrl}/runs`
+        let response = await fetch(requestUrl)
+        let runs = await response.json()
+        return runs
+    }
+
     async saveRunConfiguration(configuration) {
         const request = {
             method: 'POST',
