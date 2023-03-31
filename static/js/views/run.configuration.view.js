@@ -170,7 +170,7 @@ class RunConfigurationView {
         })
     }
 
-    renderRunHierarachy(data) {
+    renderRunHierarchy(data) {
         d3.select("#hierarchy").html(null)
 
         // Set the dimensions and margins of the diagram
@@ -181,30 +181,34 @@ class RunConfigurationView {
         // append the svg object to the body of the page
         // appends a 'group' element to 'svg'
         // moves the 'group' element to the top left margin
-        let svg = d3.select("#hierarchy").append("svg")
+        this.svg = d3.select("#hierarchy").append("svg")
             .attr("width", width + margin.right + margin.left)
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
             .attr("transform", "translate("
                 + margin.left + "," + margin.top + ")");
 
-        let i = 0,
-            duration = 750,
-            root;
-
         // declares a tree layout and assigns the size
-        let treemap = d3.tree().size([height, width]);
+        this.tree = d3.tree().size([height, width]);
 
         // Assigns parent, children, height, depth
-        root = d3.hierarchy(data, function (d) {
+        let root = d3.hierarchy(data, function (d) {
             d.id = d.uuid
             return d.children
         });
         root.x0 = height / 2;
         root.y0 = 0;
 
+        this.controller.model.root = root
+    }
+
+    updateRunHierarchy(source) {
+    
+        let duration = 0;
+
         // Assigns the x and y position for the nodes
-        let treeData = treemap(root);
+        let treeData = this.tree(this.controller.model.root);
+        //let source = this.controller.model.root
 
         // Compute the new tree layout.
         let nodes = treeData.descendants(),
@@ -216,7 +220,7 @@ class RunConfigurationView {
         // ****************** Nodes section ***************************
 
         // Update the nodes...
-        let node = svg.selectAll('g.node')
+        let node = this.svg.selectAll('g.node')
             .data(nodes, function (d) {
                 return d.id || (d.id = d.data.uuid);
             });
@@ -225,7 +229,7 @@ class RunConfigurationView {
         let nodeEnter = node.enter().append('g')
             .attr('class', 'node')
             .attr("transform", function (d) {
-                return "translate(" + root.y0 + "," + root.x0 + ")";
+                return "translate(" + source.y0 + "," + source.x0 + ")";
             })
             .on('click', click);
 
@@ -270,7 +274,7 @@ class RunConfigurationView {
         let nodeExit = node.exit().transition()
             .duration(duration)
             .attr("transform", function (d) {
-                return "translate(" + root.y + "," + root.x + ")";
+                return "translate(" + source.y + "," + source.x + ")";
             })
             .remove();
 
@@ -285,14 +289,14 @@ class RunConfigurationView {
         // ****************** links section ***************************
 
         // Update the links...
-        let link = svg.selectAll('path.link')
+        let link = this.svg.selectAll('path.link')
             .data(links, function (d) { return d.id; });
 
         // Enter any new links at the parent's previous position.
         let linkEnter = link.enter().insert('path', "g")
             .attr("class", "link")
             .attr('d', function (d) {
-                var o = { x: root.x0, y: root.y0 }
+                var o = { x: source.x0, y: source.y0 }
                 return diagonal(o, o)
             });
 
@@ -341,22 +345,33 @@ class RunConfigurationView {
                 d.children = d._children;
                 d._children = null;
             }
-            update(d);
+            _this.updateRunHierarchy(d);
+            _this.clearAllProgressBars()
+            _this.createProgressBars();
         }
 
         function expandAll() {
             expand(root);
-            update(root);
+            _this.updateRunHierarchy(d);
+            _this.clearAllProgressBars()
+            _this.createProgressBars();
         }
     
         function collapseAll() {
             root.children.forEach(collapse);
             collapse(root);
-            update(root);
+            _this.updateRunHierarchy(d);
+            _this.clearAllProgressBars()
+            _this.createProgressBars();
         }
 
+    }
+
+    createProgressBars() {
+        let _this = this
+
         function createElaborationProgressBar(svg, run_id) {
-            let group = svg.append("g")
+            let group = _this.svg.append("g")
                 .attr("class", "elaboration")
                 .attr("id", "pb-" + run_id)
     
@@ -384,34 +399,40 @@ class RunConfigurationView {
             const thickness = size.height / 5;
             let value = 0;
     
+            let group = parent.append("g")
+                .attr("id", "pbg-" + selector.replaceAll("#pb-", ""));
+
             const mainArc = d3.arc()
                 .startAngle(0)
                 .endAngle(Math.PI * 2)
                 .innerRadius(outerRadius - thickness)
                 .outerRadius(outerRadius)
     
-            parent.append("path")
+            group.append("path")
                 .attr('class', 'progress-bar-bg')
                 .attr('transform', `translate(${size.x},${size.y})`)
                 .attr('d', mainArc())
     
-            const mainArcPath = parent.append("path")
+            const mainArcPath = group.append("path")
                 .attr('class', 'progress-bar')
                 .attr('transform', `translate(${size.x},${size.y})`)
     
-            let percentLabel = parent.append("text")
+            let percentLabel = group.append("text")
                 .attr('class', 'progress-label')
                 .attr('transform', `translate(${size.x},${size.y})`)
                 .text('0')
+            
+            let id = selector
     
             return {
                 update: function (progressPercent) {
+                    const lid = id
                     const startValue = value
                     const startAngle = Math.PI * startValue / 50
                     const angleDiff = Math.PI * progressPercent / 50 - startAngle;
                     const startAngleDeg = startAngle / Math.PI * 180
                     const angleDiffDeg = angleDiff / Math.PI * 180
-                    const transitionDuration = 1500
+                    const transitionDuration = 0
     
                     mainArcPath.transition().duration(transitionDuration).attrTween('d', function () {
                         return function (t) {
@@ -433,11 +454,13 @@ class RunConfigurationView {
 
         this.nodeIds = []
         this.pbsMap = {}
-
-        let elaborationPb = createElaborationProgressBar(svg, this.controller.model.run_id);
+        
         let elaborationPbId = "pb-" + this.controller.model.run_id
         this.nodeIds.push(elaborationPbId)
-        this.pbsMap[elaborationPbId] = elaborationPb
+        let pb = d3.select('#' + elaborationPbId).node()
+        if (!pb) {
+            createElaborationProgressBar(this.svg, this.controller.model.run_id);
+        }
 
         d3.selectAll('g.node').each(function (d, i) {
             const node = d3.select(this).node()
@@ -450,14 +473,12 @@ class RunConfigurationView {
         let progressBars = this.nodeIds.map((id) => {
             let progressBar = null
             let pb = d3.select('#' + id).select('.progress-bar').node()
-            if (!pb) {
+            //if (!pb) {
                 progressBar = radialProgress(`#${id}`)
                 this.pbsMap[id] = progressBar
                 let savedPercentage = localStorage.getItem(id)
-                if (savedPercentage) {
-                    _this.updateProgressBar(id, parseInt(savedPercentage))
-                }
-            }
+                _this.updateProgressBar(id, savedPercentage ? parseInt(savedPercentage) : 0)
+            //}
             return progressBar
         })
 
@@ -473,11 +494,22 @@ class RunConfigurationView {
         }
     }
 
-    resetProgressBars(progressPercent = 0, includeOverallProgressbar = true, run_id = "") {
+    clearAllProgressBars() {
+        this.nodeIds.forEach((id) => {
+            let pb = document.getElementById(id.replaceAll("pb-", "pbg-"))
+            if (pb) {
+                pb.outerHTML = ""
+            }
+        })
+    }
+
+    resetProgressBars(progressPercent = 0, includeOverallProgressbar = true) {
         let _this = this
         this.nodeIds.forEach((id) => {
-            if (!includeOverallProgressbar || id != run_id) {
+            let executionProgressBarId = "pb-" + _this.controller.model.run_id
+            if (includeOverallProgressbar || id != executionProgressBarId) {
                 _this.updateProgressBar(id, progressPercent)
+                localStorage.setItem(id, progressPercent)
             }
         })
     }
@@ -486,7 +518,6 @@ class RunConfigurationView {
         let progressBar = this.pbsMap[id]
         if (progressBar) {
             progressBar.update(progressPercent)
-            localStorage.setItem(id, progressPercent)
         }
     }
 }

@@ -1,7 +1,7 @@
 const routes = {
-    "/analysis": "/static/testbench-output-analysis.html",
-    "/configuration": "/static/testbench-configuration.html",
-    "/runs-list": "/static/testbench-runs-list.html",
+    "/analysis": "./testbench-output-analysis.html",
+    "/configuration": "./testbench-configuration.html",
+    "/runs-list": "./testbench-runs-list.html",
 
     navigateTo: (page, params) => {
         function paramsToString(params) {

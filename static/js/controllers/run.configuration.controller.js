@@ -22,19 +22,27 @@ class RunConfigurationController {
 
         let saveButton = document.getElementById("btn_save");
         saveButton.addEventListener("click", async function (event) {
+            _this.clearLocallyStoredData();
             _this.model.settings = _this.buildModelFromView()
             await _this.saveRunConfiguration()
             _this.model.current_file_index = 0
             _this.model.run_hierarchy = await _this.getRunHierarchy()
-            _this.view.renderRunHierarachy(_this.model.run_hierarchy)
+            _this.view.renderRunHierarchy(_this.model.run_hierarchy)
+            _this.view.updateRunHierarchy(_this.model.root)
+            _this.view.clearAllProgressBars()
+            _this.view.createProgressBars()
             _this.view.resetProgressBars(0)
         });
 
         let executeRunButton = document.getElementById("btn_run");
         executeRunButton.addEventListener("click", async function (event) {
+            _this.clearLocallyStoredData();
             _this.model.current_file_index = 0
             _this.model.run_hierarchy = await _this.getRunHierarchy()
-            _this.view.renderRunHierarachy(_this.model.run_hierarchy)
+            _this.view.renderRunHierarchy(_this.model.run_hierarchy)
+            _this.view.updateRunHierarchy(_this.model.root)
+            _this.view.clearAllProgressBars()
+            _this.view.createProgressBars()
             _this.view.resetProgressBars(0)
             if (_this.model.run_id) {
                 await _this.launchRunExecution(_this.model.run_id)
@@ -67,6 +75,7 @@ class RunConfigurationController {
             let progressBar = _this.view.pbsMap[progressBarIdPrefix + message.nodeid]
             if (progressBar) {
                 progressBar.update(message.currentPercentage)
+                localStorage.setItem(progressBarIdPrefix + message.nodeid, message.currentPercentage)
             }
             if (message.nodetype == "RunExecution" && message.nodeid == _this.model.run_id) {
                 _this.view.resetProgressBars(100)
@@ -77,12 +86,16 @@ class RunConfigurationController {
             if (message.nodetype == "ECCTestbench") {
                 let runExecutionProgressBarId = progressBarIdPrefix + _this.model.run_id
                 let input_files = _this.getSelectedFiles()
+                localStorage.setItem(runExecutionProgressBarId, message.currentPercentage)
                 let new_file_index = Math.min(input_files.length - 1, Math.ceil(input_files.length * (message.currentPercentage / 100.0)))
                 if (new_file_index == _this.model.current_file_index) return
                 _this.model.current_file_index = new_file_index
                 _this.model.run_hierarchy = await _this.getRunHierarchy()
-                _this.view.renderRunHierarachy(_this.model.run_hierarchy)
-                _this.view.resetProgressBars(0)
+                _this.view.renderRunHierarchy(_this.model.run_hierarchy)
+                _this.view.updateRunHierarchy(_this.model.root)
+                _this.view.clearAllProgressBars()
+                _this.view.createProgressBars();
+                //_this.view.resetProgressBars(0, false)
                 _this.view.updateProgressBar(runExecutionProgressBarId, message.currentPercentage)
             }
         }
@@ -134,6 +147,14 @@ class RunConfigurationController {
         })
         console.log("run settings: " + runSettings)
         return runSettings
+    }
+
+    clearLocallyStoredData() {
+        for (const key in localStorage) {
+           if (key.startsWith("pb-")) {
+                localStorage.removeItem(key)
+           }
+        }
     }
 
     async addLossSimulatorControls() {

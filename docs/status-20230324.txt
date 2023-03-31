@@ -1,0 +1,19 @@
+Nuovi sviluppi - 2023/03/24
+
+- separazione progetto UI da ecctestbench e aggiunta come dependency
+- commit sorgenti su github
+- dockerizzazione dell'applicazione
+- refactoring codice
+- aggiunta navigazione tra pagine fondamentali
+- selezione traccia da riprodurre
+- aggiunta lista run
+- generalizzazione codice per gestire un numero arbitrario di tracciati
+- selezione libreria e tecnologia finali per UI (react + primereact)
+- primi test sulle tecnologie (abbozzo di applicazione)
+- test performance su file lunghi (11 min)
+
+Domande
+- posso scriverla e discuterla in inglese ?
+
+Segnalazioni
+- l'elaborazione fallisce con alcune parametrizzazioni a causa di errori in ecctestbench
