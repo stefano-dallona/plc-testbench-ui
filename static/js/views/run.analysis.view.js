@@ -85,7 +85,6 @@ class RunAnalysisView {
     })
   }
 
-
   updateRunHierarchy(source) {
 
     // Compute the new tree layout.
@@ -221,29 +220,6 @@ class RunAnalysisView {
     }
   }
 
-  async displayLostPacketsOnWaveForm(original_audio_node, loss_simulation_node) {
-    if (!loss_simulation_node) return;
-    if (this.layersMap.get(loss_simulation_node)) return;
-    const lostPacketsJson = await this.controller.fetchLostSamples(original_audio_node, loss_simulation_node)
-
-    // create the layer
-    this.segmentLayerOnWaveform = new wavesUI.helpers.SegmentLayer(lostPacketsJson.lost_intervals, {
-      height: 200,
-      displayHandlers: false,
-    });
-
-    this.layersMap.set(loss_simulation_node, this.segmentLayerOnWaveform)
-
-    // insert the layer inside the 'main' track
-    this.timelineWaveform.addLayer(this.segmentLayerOnWaveform, 'waveform');
-
-    this.timelineWaveform.tracks.render(this.segmentLayerOnWaveform);
-    this.timelineWaveform.tracks.update(this.segmentLayerOnWaveform);
-
-    // add an hover effect on the segments
-    this.timelineWaveform.on('event', this.segmentLayerListener());
-  }
-
   updateCursor() {
     const _view = this
     // listen for time passing...
@@ -278,7 +254,7 @@ class RunAnalysisView {
       _this.waveformTrack = _this.timeline.createTrack($track, height, 'waveform');
 
 
-      const colors = ["blue", "red", "green", "red", "green"]
+      //const colors = ["blue", "red", "green", "red", "green"]
 
       // create the layer
       bufferList.map((buffer, index) => {
@@ -316,6 +292,29 @@ class RunAnalysisView {
       })
       this.renderSpectrogrom("#spectrogram-waveform", "#spectrogram", audioFileURLs[0])
     }
+  }
+
+  async displayLostPacketsOnWaveForm(original_audio_node, loss_simulation_node) {
+    if (!loss_simulation_node) return;
+    if (this.layersMap.get(loss_simulation_node)) return;
+    const lostPacketsJson = await this.controller.fetchLostSamples(original_audio_node, loss_simulation_node)
+
+    // create the layer
+    this.segmentLayerOnWaveform = new wavesUI.helpers.SegmentLayer(lostPacketsJson.lost_intervals, {
+      height: 200,
+      displayHandlers: false,
+    });
+
+    this.layersMap.set(loss_simulation_node, this.segmentLayerOnWaveform)
+
+    // insert the layer inside the 'main' track
+    this.timelineWaveform.addLayer(this.segmentLayerOnWaveform, 'waveform');
+
+    this.timelineWaveform.tracks.render(this.segmentLayerOnWaveform);
+    this.timelineWaveform.tracks.update(this.segmentLayerOnWaveform);
+
+    // add an hover effect on the segments
+    this.timelineWaveform.on('event', this.segmentLayerListener());
   }
 
   renderRunHierarchy() {
