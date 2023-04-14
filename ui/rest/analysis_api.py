@@ -9,7 +9,7 @@ from ..services.ecctestbench_service import EccTestbenchService
 from ..models.base_model import *
 
 run_repository = RunRepository(config.data_dir)
-ecctestbench_service = EccTestbenchService(run_repository=run_repository)
+ecctestbench_service = EccTestbenchService(config.data_dir, run_repository=run_repository)
 analysis_api = Blueprint("analysis", __name__, url_prefix="/analysis")
 analysis_service = AnalysisService(ecctestbench_service=ecctestbench_service)
 

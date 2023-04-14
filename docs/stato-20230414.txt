@@ -1,0 +1,9 @@
+Punti mancanti nella nuova interfaccia
+- innesco elaborazione
+- aggancio progress bar al backend
+- aggiornamento spettrogramma su cambio file audio
+- ottimizzazione selezione tracce in base alla scelta della simualzione PLS
+- merge delle mie modifiche su nuova versione PLC testbench
+- adattamento PLC testbench UI backend alle nuove modifiche di PLC testbench
+- merge del progetto (react test) in quello principale (branch)
+- test su docker
