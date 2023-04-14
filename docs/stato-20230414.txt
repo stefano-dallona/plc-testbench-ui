@@ -1,6 +1,6 @@
 Punti mancanti nella nuova interfaccia
-- innesco elaborazione
-- aggancio progress bar al backend
+- aggancio progress bar elaborazione al backend
+- aggancio riproduzione audio
 - aggiornamento spettrogramma su cambio file audio
 - ottimizzazione selezione tracce in base alla scelta della simualzione PLS
 - merge delle mie modifiche su nuova versione PLC testbench
