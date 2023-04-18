@@ -33,8 +33,10 @@ class RunRepository:
             return None
     
     def list(self, predicate = lambda x : True) -> List[Run]:
-        runs = [d for d in os.listdir(self.root_folder) if os.path.isdir(os.path.join(self.root_folder, d))]
-        return list(map(lambda r: { "run_id" : self.get(r).run_id }, filter(predicate, runs)))
+        run_ids = [d for d in os.listdir(self.root_folder) if os.path.isdir(os.path.join(self.root_folder, d))]
+        runs = list(map(lambda r: self.get(r), filter(predicate, run_ids)))
+        runs.sort(key=lambda r: os.path.getmtime(os.path.join(self.root_folder, r.run_id)), reverse=True)
+        return list(map(lambda r: dict(filter(lambda elem: not elem[0].startswith("_"), r.__dict__.items())), runs))
     
     ### Private methods ###
     def __generate_filename__(self, root_folder, reference):
