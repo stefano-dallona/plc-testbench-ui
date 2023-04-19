@@ -225,18 +225,8 @@ def __async_func__(self):
 def external_callback(caller, *args, **kwargs):
     caller_class_name = caller.__class__.__name__
     print("caller_class_name=%s, args=%s, kwargs=%s" % (caller_class_name, args, kwargs))
-    isTestbench = isinstance(caller, ECCTestbench)
-    isOriginalTrack = isinstance(caller, OriginalTrackWorker)
-    isLossSimulator = isinstance(caller, PacketLossSimulator)
-    isEccAlgorithm = isinstance(caller, ECCAlgorithm)
-    isOutputAnalyzer = isinstance(caller, OutputAnalyser)
-    nodeid = caller.uuid if isTestbench else \
-             caller.uuid if isOriginalTrack else \
-             caller.uuid if isLossSimulator else \
-             caller.uuid if isEccAlgorithm else \
-             caller.uuid if isOutputAnalyzer else \
-             ""
-    print("isTestbench=%s, isOriginalTrack=%s, isLossSimulator=%s, isEccAlgorithm=%s, isOutputAnalyzer=%s, nodeid=%s" % (isTestbench, isOriginalTrack, isLossSimulator, isEccAlgorithm, isOutputAnalyzer, nodeid))
+    nodeid = caller.uuid if hasattr(caller, "uuid") else ""
+    print("nodeid=%s" % (nodeid))
     currentPercentage = math.floor(kwargs["n"] / kwargs["total"] * 100)
     eta = math.ceil((kwargs["total"] - kwargs["elapsed"]) * (1 / kwargs["rate"]))
     msg = __format_sse__(data=json.dumps({ "total": kwargs["total"], "nodeid" : nodeid, "nodetype" : caller_class_name, "elapsed" : kwargs["elapsed"], "currentPercentage": currentPercentage, "eta": eta, "timestamp": str(datetime.now()) }, indent = 4).replace('\n', ' '), event="run_execution")
