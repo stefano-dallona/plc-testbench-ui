@@ -7,8 +7,8 @@ import pickle
 from ..models.samples import *
 from ..services.ecctestbench_service import EccTestbenchService
 
-from ecctestbench.node import *
-from ecctestbench.ecc_testbench import *
+from plctestbench.node import *
+from plctestbench.plc_testbench import *
 from anytree import *
 
 class AnalysisService:
@@ -112,7 +112,7 @@ class AnalysisService:
         return nodes
     
     @staticmethod
-    def __find_file_tree_by_node_id__(ecctestbench: ECCTestbench, node_id: str) -> Node:
+    def __find_file_tree_by_node_id__(ecctestbench: PLCTestbench, node_id: str) -> Node:
         search = lambda x : isinstance(x, OriginalTrackNode) and x.uuid == node_id
         files_trees = list(filter(search, ecctestbench.data_manager.get_data_trees()))
         return AnalysisService.__get_first__(files_trees)
@@ -124,7 +124,7 @@ class AnalysisService:
     
     @staticmethod
     def __find_audio_file_by_node_id__(file_tree: Node, node_id: str) -> Node:
-        search = lambda x: any(isinstance(x, n) for n in [OriginalTrackNode, ECCTrackNode]) and x.uuid == node_id
+        search = lambda x: any(isinstance(x, n) for n in [OriginalTrackNode, ReconstructedTrackNode]) and x.uuid == node_id
         return AnalysisService.__get_first__(AnalysisService.__find_nodes_in_file_tree__(file_tree, search))
     
     @staticmethod

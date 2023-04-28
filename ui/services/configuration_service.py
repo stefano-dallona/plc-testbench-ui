@@ -3,11 +3,11 @@ from werkzeug.utils import secure_filename
 import logging
 import os
 
-from ecctestbench.loss_simulator import *
-from ecctestbench.ecc_algorithm import *
-from ecctestbench.output_analyser import *
-from ecctestbench.path_manager import *
-from ecctestbench.node import *
+from plctestbench.loss_simulator import *
+from plctestbench.plc_algorithm import *
+from plctestbench.output_analyser import *
+from plctestbench.path_manager import *
+from plctestbench.node import *
 
 class ConfigurationService:
     
@@ -19,19 +19,19 @@ class ConfigurationService:
     @staticmethod
     def find_loss_simulators():
         ConfigurationService._logger.info("Retrieving loss simulators ...")
-        result = [cls.__name__ for cls in LossSimulator.__subclasses__()]
+        result = [cls.__name__ for cls in PacketLossSimulator.__subclasses__()]
         return result
-
+    '''
     @staticmethod
     def find_loss_models():
         ConfigurationService._logger.info("Retrieving loss models ...")
         result = [cls.__name__ for cls in LossModel.__subclasses__()]
         return result
-    
+    '''
     @staticmethod
     def find_ecc_algorithms():
         ConfigurationService._logger.info("Retrieving ecc algorithms ...")
-        result = [cls.__name__ for cls in ECCAlgorithm.__subclasses__()]
+        result = [cls.__name__ for cls in PLCAlgorithm.__subclasses__()]
         return result
     
     @staticmethod

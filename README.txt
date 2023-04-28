@@ -52,11 +52,18 @@ docker system prune --all --force --volumes
 
 # compile eccworkbench
 cd <eccworkbench-src-directory>
+cd <plc-workbench-src-directory>
 python setup.py sdist
 
+# uninstall eccworkbench from local archive
+# after activating plc-testbench-ui virtualenv from plc-testbench-ui project dir
+(env) python -m pip uninstall ecc_testbench
+(env) python -m pip uninstall plc-testbench
+
 # install eccworkbench from local archive
-# after activating plc-testbench-ui virtualenv
+# after activating plc-testbench-ui virtualenv, copying the archive from plc-testbench into plc-testbench-ui project, executing from plc-testbench-ui project dir
 (env) python -m pip install -f dist ecc_testbench
+(env) python -m pip install <path-to-plc-testbench-*.tar.gz>
 
 # running with waitress (WSGI server)
 python -m pip install waitress

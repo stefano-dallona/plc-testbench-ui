@@ -1,13 +1,13 @@
 from ui.repositories.run_repository import *
-from ecctestbench.ecc_testbench import *
-from ecctestbench.settings import *
-from ecctestbench.loss_simulator import *
-from ecctestbench.ecc_algorithm import *
-from ecctestbench.output_analyser import *
-from ecctestbench.data_manager import *
-from ecctestbench.path_manager import *
-from ecctestbench.node import *
-from ecctestbench.file_wrapper import *
+from plctestbench.plc_testbench import *
+from plctestbench.settings import *
+from plctestbench.loss_simulator import *
+from plctestbench.plc_algorithm import *
+from plctestbench.output_analyser import *
+from plctestbench.data_manager import *
+from plctestbench.path_manager import *
+from plctestbench.node import *
+from plctestbench.file_wrapper import *
 
 import logging
 from flask import json
@@ -54,7 +54,9 @@ class MessageAnnouncer:
                 del self.listeners[i]
 
 announcer = MessageAnnouncer()
-
+                
+class InputFileSelection:
+    pass
 
 class EccTestbenchService:
     
@@ -71,10 +73,10 @@ class EccTestbenchService:
         self.logger.info("Loading run %s", run_id)
         return self.run_repository.get(run_id)
     
-    def launch_run_execution(self, run_id) -> ECCTestbench:
+    def launch_run_execution(self, run_id) -> PLCTestbench:
         self.logger.info("Executing run %s", run_id)
         run = self.load_run(run_id)
-        run.__ecctestbench__.settings.__progress_monitor__ = __async_func__
+        run.__ecctestbench__.global_settings_list[0].__progress_monitor__ = __async_func__
        
         thread_0 = Thread(target=execute_elaboration,args=[run.__ecctestbench__, __notifyRunCompletion__])
         thread_0.daemon = True
@@ -93,123 +95,62 @@ class EccTestbenchService:
             target_file_path = os.path.join(run_root_folder, file_basename)
             shutil.copyfile(src=source_file_path, dst=target_file_path)
     
-    def create_run(self, json_dict, run_id) -> ECCTestbench:
-        settings = Settings()
-        selected_input_files = []
-        loss_simulators = []
-        ecc_algorithms = []
-        output_analysers = []
+    def create_run(self, json_dict, run_id) -> PLCTestbench:
+
+        configuration_map = {
+            InputFileSelection: None,
+            GlobalSettings: [],
+            PacketLossSimulator: [],
+            PLCAlgorithm: [],
+            OutputAnalyser: []
+        }
+        
+        def copy_attributes(settings, json_dict):
+            for setting in json_dict["settings"]:
+                try:
+                    conversion_function = globals()['__builtins__'][setting["type"]]
+                    if (conversion_function != None):
+                        setattr(settings, setting["property"], conversion_function(setting["value"]))
+                except:
+                    self.logger.info("Could not set property %s of type %s on Settings", setting["property"], setting["type"])
+        
+        def parse_configuration(configuration_map, json_dict) -> dict: 
+            worker_name = json_dict["name"].replace(" ", "")
+            worker_constructor =  globals()[worker_name] if worker_name in globals() else None
+            worker_settings_name = worker_name + "Settings" if not worker_name.endswith("Settings") else worker_name
+            worker_settings_constructor = globals()[worker_settings_name] if worker_settings_name in globals() else None
+            worker_settings = worker_settings_constructor() if worker_settings_constructor != None else json_dict["settings"]
+            worker_base = worker_constructor.__base__ if worker_constructor != None \
+                                                         and worker_constructor.__base__ != object \
+                                                         and worker_constructor.__base__ != Settings \
+                                                      else None
+            worker_key = worker_base if worker_base != None else worker_constructor
             
-        '''
-        def extract_settings(settings):
-            worker_settings = settings["name"](settings["settings"])
-            return worker_settings
-        '''
-        def extract_settings(accumulator, json_dict):
-            settings, selected_input_files, loss_simulators, ecc_algorithms, output_analysers = accumulator
-            if json_dict["name"] == "Input File Selection":
-                settings = Settings()
-                selected_input_files.extend(json_dict["settings"])
-            if json_dict["name"] == "BinomialPLS":
-                simulator = json_dict["settings"][0]["value"]
-                loss_simulator_constructor = globals()[simulator]
-                loss_model_constructor = BinomialLossModel
-                loss_simulation = loss_simulator_constructor(loss_model_constructor(settings), settings)
-                loss_simulators.append([loss_simulator_constructor, loss_model_constructor])
-            if json_dict["name"] == "GilbertElliotPLS":
-                simulator = json_dict["settings"][0]["value"]
-                loss_simulator_constructor = globals()[simulator]
-                loss_model_constructor = GilbertElliotLossModel
-                loss_simulation = loss_simulator_constructor(loss_model_constructor(settings), settings)
-                loss_simulators.append([loss_simulator_constructor, loss_model_constructor])
-            if json_dict["name"] == "ZeroPLC":
-                ecc_algorithm = ZerosEcc(settings)
-                ecc_algorithm_constructor = ZerosEcc
-                ecc_algorithms.append(ecc_algorithm_constructor)
-            if json_dict["name"] == "LastPacketPLC":
-                ecc_algorithm = LastPacketEcc(settings)
-                ecc_algorithm_constructor = LastPacketEcc
-                ecc_algorithms.append(ecc_algorithm_constructor)
-            if json_dict["name"] == "LowCostPLC":
-                ecc_algorithm = LowCostEcc(settings)
-                ecc_algorithm_constructor = LowCostEcc
-                ecc_algorithms.append(ecc_algorithm_constructor)
-            if json_dict["name"] == "MSECalculator":
-                output_analyser = MSECalculator(settings)
-                output_analyser_constructor = MSECalculator
-                output_analysers.append(output_analyser_constructor)
-            if json_dict["name"] == "PEAQCalculator":
-                output_analyser = PEAQCalculator(settings)
-                output_analyser_constructor = PEAQCalculator
-                output_analysers.append(output_analyser_constructor)
-                
-            if json_dict["name"] != "Input File Selection":
-                for setting in json_dict["settings"]:
-                    try:
-                        conversion_function = globals()['__builtins__'][setting["type"]]
-                        if (conversion_function != None):
-                            setattr(settings, setting["property"], conversion_function(setting["value"]))
-                    except:
-                        self.logger.info("Could not set property %s of type %s on Settings", setting["property"], setting["type"])
-            return settings, selected_input_files, loss_simulators, ecc_algorithms, output_analysers
+            if worker_settings_constructor != None:
+                copy_attributes(worker_settings, json_dict)
+            if isinstance(configuration_map[worker_key], list):
+                configuration_map[worker_key].extend([(worker_constructor, worker_settings) if worker_settings_constructor != None and worker_constructor != worker_settings.__class__ else worker_settings])
+            else:
+                configuration_map[worker_key] = worker_settings
+            return configuration_map
         
-        result = [settings, selected_input_files, loss_simulators, ecc_algorithms, output_analysers]
-        settings, selected_input_files, loss_simulators, ecc_algorithms, output_analysers = functools.reduce(extract_settings, json_dict, result)
+        configuration_map = functools.reduce(parse_configuration, json_dict, configuration_map)
         
-        settings.__progress_monitor__ = __async_func__
+        for global_settings in configuration_map[GlobalSettings]:
+            global_settings.__progress_monitor__ = __async_func__
         
         run_root_folder = os.path.join(self.root_folder, run_id)
-        self.prepare_run_directory(selected_input_files, self.root_folder, run_root_folder)
+        self.prepare_run_directory(configuration_map[InputFileSelection], self.root_folder, run_root_folder)
         
-        print("run_id: %s, settings:%s, loss_simulators:%s, ecc_algorithms:%s, output_analysers:%s" % (run_id, settings, loss_simulators, ecc_algorithms, output_analysers))
         path_manager = PathManager(run_root_folder)
         data_manager = DataManager(path_manager)
 
-        testbench = ECCTestbench(loss_simulators, ecc_algorithms, output_analysers, settings, data_manager, path_manager, run_id)
-        return Run(testbench, selected_input_files)
-    '''
-    def create_run(self, json_dict, run_id) -> ECCTestbench:
-        settings = Settings()
-        loss_simulators = []
-        ecc_algorithms = []
-        output_analysers = []
-        for k, v in json_dict.items():
-            print("k:%s, v:%s" % (k, v))
-            if hasattr(settings, k):
-                attr_type = type(getattr(settings, k)).__name__
-                attr_val = str(list(map(lambda x: "'" + x +  "'", v.split(",")))) if attr_type == "tuple" else "'" + v + "'"
-                eval_str = "eval(\"" + attr_type + "(" + str(attr_val) + ")" + "\")"
-                print("%s" % (eval_str))
-                setattr(settings, k, eval(eval_str))
-            if k == "eccAlgorithms":
-                ecc_algorithms = [globals()[a] for a in v] if isinstance(v, list) else [globals()[v]]
-            if k == "outputAnalysers":
-                output_analysers = [globals()[a] for a in v] if isinstance(v, list) else [globals()[v]]
-            if k.startswith("lossModel-"):
-                prefix, index = k.split("lossModel-")
-                lossModel = v
-                lossSimulator = json_dict["lossSimulator-" + index]
-                print("lossModel:%s, index:%s, lossSimulator:%s" % (lossModel, index, lossSimulator))
-                loss_simulators += [(globals()[lossSimulator], globals()[lossModel])]
+        testbench = PLCTestbench(configuration_map[PacketLossSimulator],
+                                 configuration_map[PLCAlgorithm],
+                                 configuration_map[OutputAnalyser],
+                                 configuration_map[GlobalSettings], data_manager, path_manager, run_id)
         
-        #loss_simulators = [(PacketLossSimulator, GilbertElliotLossModel), (PacketLossSimulator, BinomialLossModel)]
-        #ecc_algorithms = [LowCostEcc, ZerosEcc]
-        #output_analysers = [MSECalculator]
-        settings.__progress_monitor__ = __async_func__
-        
-        root_folder = json_dict["inputFilesPath"]
-        run_root_folder = os.path.join(root_folder, run_id)
-        selected_input_files = json_dict["selectedInputFiles"]
-        selected_input_files = [ selected_input_files ] if isinstance(selected_input_files, str) else selected_input_files
-        self.prepare_run_directory(selected_input_files, root_folder, run_root_folder)
-        
-        print("run_id: %s, settings:%s, loss_simulators:%s, ecc_algorithms:%s, output_analysers:%s" % (run_id, settings, loss_simulators, ecc_algorithms, output_analysers))
-        path_manager = PathManager(run_root_folder)
-        data_manager = DataManager(path_manager)
-
-        testbench = ECCTestbench(loss_simulators, ecc_algorithms, output_analysers, settings, data_manager, path_manager, run_id)
-        return Run(testbench, selected_input_files)
-    '''
+        return Run(testbench, configuration_map[InputFileSelection])
 
 def __notifyRunCompletion__(run_id):
     #sleep(1)

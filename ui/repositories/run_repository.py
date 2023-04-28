@@ -4,7 +4,7 @@ import logging
 
 from typing import List
 
-from ecctestbench.ecc_testbench import ECCTestbench
+from plctestbench.plc_testbench import PLCTestbench
 
 from ..models.run import Run
 
@@ -41,5 +41,5 @@ class RunRepository:
     ### Private methods ###
     def __generate_filename__(self, root_folder, reference):
         run_root_folder = os.path.join(root_folder, reference)
-        filename = os.path.join(run_root_folder, 'ecctestbench.pickle')
+        filename = os.path.join(run_root_folder, 'plctestbench.pickle')
         return filename

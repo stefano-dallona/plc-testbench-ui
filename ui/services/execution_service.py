@@ -4,7 +4,7 @@ from anytree import *
 import os
 import logging
 
-from ecctestbench.node import *
+from plctestbench.node import *
 
 from .ecctestbench_service import EccTestbenchService, announcer
 from ..models.run import *
@@ -48,9 +48,9 @@ class ExecutionService:
             name = os.path.basename(file) if file != "" else name
             file += ".wav"
         elif isinstance(node, LostSamplesMaskNode):
-            name = node.worker.loss_model.__class__.__name__
+            name = node.worker.__class__.__name__
             file += ".npy"
-        elif isinstance(node, ECCTrackNode):
+        elif isinstance(node, ReconstructedTrackNode):
             name = node.worker.__class__.__name__
             file += ".wav"
         elif isinstance(node, OutputAnalysisNode):

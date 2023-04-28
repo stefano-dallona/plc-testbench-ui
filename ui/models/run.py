@@ -3,7 +3,7 @@ from datetime import datetime, date
 from anytree import *
 from typing import List
 
-from ecctestbench.ecc_testbench import ECCTestbench
+from plctestbench.plc_testbench import PLCTestbench
 
 from .base_model import *
 
@@ -20,17 +20,16 @@ class RunExecution(Serializable):
 
 class Run(Serializable):
     def __init__(self,
-                 ecctestbench: ECCTestbench,
+                 plc_testbench: PLCTestbench,
                  selected_input_files: list,
                  description: str = "",
                  status: str = "",
                  creator: str = "anonymous",
                  created_on: str = ""):
-        self.__ecctestbench__ = ecctestbench
-        self.run_id = ecctestbench.uuid
+        self.__ecctestbench__ = plc_testbench
+        self.run_id = plc_testbench.uuid
         self.selected_input_files = selected_input_files
         self.description = description
-        self.seed = ecctestbench.settings.seed
         self.created_on = created_on if created_on != "" else str(datetime.now())
         self.creator = creator if creator != None else "anonymous"
         self.status = status
