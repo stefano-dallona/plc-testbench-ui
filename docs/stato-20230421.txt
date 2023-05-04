@@ -11,3 +11,5 @@ Punti mancanti nella nuova interfaccia                                          
 - merge del progetto (react test) in quello principale (branch)                         |   (Low)
 - test su docker                                                                        |   (Low)
 - URL localhost cablato in docker mode ?                                                |   (Low)
+- Comment code                                                                          |   (Low)
+- Improve logging                                                                       |   (Low)

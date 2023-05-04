@@ -48,6 +48,30 @@ def get_audio_file_samples(run_id, original_file_node_id, audio_file_node_id):
     return json.dumps(samples.data, default=samples.to_json()), status.HTTP_200_OK
   else:
     return {}, status.HTTP_404_NOT_FOUND
+  
+#http://localhost:5000/analysis/runs/76728771-9de8-42bd-a71e-f4d3c08e3ae6/input-files/76f9743b-d839-4e64-bf55-01f86107bec0/output-files/76f9743b-d839-4e64-bf55-01f86107bec0/waveform?channel=0&offset=1000000&num_samples=200000&max_slices=3000
+@analysis_api.route('/runs/<run_id>/input-files/<original_file_node_id>/output-files/<audio_file_node_id>/waveform', methods=['GET'])
+def get_audio_file_waveform(run_id, original_file_node_id, audio_file_node_id):
+  channel = request.args.get("channel", type=int, default=0)
+  offset = request.args.get("offset", type=int, default=0)
+  num_samples = request.args.get("num_samples", type=int, default=1000)
+  max_slices = request.args.get("max_slices", type=int, default=3000)
+  
+  offset = None if offset == None or offset < 0 else offset
+  num_samples = None if num_samples == None or num_samples < 0 else num_samples
+  
+  waveform = analysis_service.get_audio_file_waveform(run_id, audio_file_node_id, max_slices)
+  waveform.load(channel, offset, num_samples)
+  if waveform != None:
+    return json.dumps({
+                        "numSamples": waveform.num_samples,
+                        "duration": waveform.duration,
+                        "sampleRate": waveform.sample_rate,
+                        #"data": list(map(lambda x: str(x), waveform.data))
+                        "data": waveform.data
+                      }), status.HTTP_200_OK
+  else:
+    return {}, status.HTTP_404_NOT_FOUND
 
 #http://localhost:5000/analysis/runs/76728771-9de8-42bd-a71e-f4d3c08e3ae6/input-files/76f9743b-d839-4e64-bf55-01f86107bec0/output-files/eb7a511c-8258-440c-bd81-e4cd38472cd7/metrics/37642fbf-2fa5-45d2-8afe-dcfb78b85cbe
 #http://localhost:5000/analysis/runs/76728771-9de8-42bd-a71e-f4d3c08e3ae6/input-files/76f9743b-d839-4e64-bf55-01f86107bec0/output-files/eb7a511c-8258-440c-bd81-e4cd38472cd7/metrics/37642fbf-2fa5-45d2-8afe-dcfb78b85cbe?offset=100&num_samples=1000

@@ -3,6 +3,7 @@ import logging
 import os
 import itertools
 import pickle
+import math
 
 from ..models.samples import *
 from ..services.ecctestbench_service import EccTestbenchService
@@ -64,13 +65,22 @@ class AnalysisService:
                         channel: int = 0,
                         offset = None,
                         num_samples = None,
-                        unit_of_meas="samples"):
+                        unit_of_meas = "samples"):
         audio_file = self.find_audio_file(run_id, audio_file_node_id)
         self._logger.info(f"Loaded audio file with path {audio_file.path} ...")
         samples = AudioFileSamples(node_id=audio_file_node_id, channel=channel, samples=audio_file.get_data(),
                                    offset=offset, num_samples=num_samples,
                                    sample_rate=1 if unit_of_meas=="samples" else audio_file.samplerate)
         return samples
+    
+    def get_audio_file_waveform(self,
+                            run_id: str,
+                            audio_file_node_id: str,
+                            max_slices: int):
+            audio_file = self.find_audio_file(run_id, audio_file_node_id)
+            self._logger.info(f"Loaded audio file with path {audio_file.path} ...")
+            waveform = DownsampledAudioFile(audio_file, max_slices)
+            return waveform
     
     def get_metric_samples(self,
                         run_id: str,

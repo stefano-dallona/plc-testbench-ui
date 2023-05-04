@@ -3,6 +3,9 @@ from flask import json
 from typing import List
 
 import numpy as np
+import math
+
+from plctestbench.file_wrapper import AudioFile
 
 from .base_model import *
 
@@ -44,6 +47,48 @@ class AudioFileSamples(Serializable):
         normalized_samples = [{"cx": position(start_sample + i), "cy":y} for i,y in enumerate(normalized_channel_samples[start_sample:end_sample])]
         return normalized_samples
 
+class DownsampledAudioFile:
+    
+    def __init__(self, input_file: AudioFile, max_slices: int):
+        self.input_file = input_file
+        self.num_samples = len(input_file.data)
+        self.duration = self.num_samples * 1.0 / input_file.samplerate
+        self.sample_rate = input_file.samplerate
+        self.max_slices = max_slices
+
+    '''    
+    def load(self, channel, offset: int = None, n_samples: int = None):
+        num_samples = len(self.input_file.get_data()) if n_samples == None else n_samples
+        start_sample = 0 if offset == None else offset
+        self.sample_rate = math.ceil(1.0 * len(self.input_file.get_data()) / self.duration)
+        self.data = { str(start_sample + index) : str(value) for index, value in enumerate(self.input_file.get_data()[start_sample : start_sample + num_samples, channel]) }
+        return
+    '''
+    '''  '''
+    def load(self, channel, offset: int = None, n_samples: int = None):
+        num_samples = np.shape(self.input_file.get_data())[0] if n_samples == None else n_samples
+        start_sample = 0 if offset == None else offset
+        
+        data = self.input_file.get_data()[start_sample : start_sample + num_samples]
+        
+        samples_per_slice = num_samples / self.max_slices
+
+        if len(data) <= self.max_slices:
+            self.data = { str(start_sample + index) : str(value) for index, value in enumerate(data[:, channel]) }
+            return
+        
+        slices_data = map(lambda i: data[math.floor(i * samples_per_slice) : math.floor((i + 1) * samples_per_slice)], range(0, self.max_slices))        
+
+        result = {}
+        for index, slice in enumerate(slices_data):
+            slice_min = min(slice[:, channel])
+            slice_max = max(slice[:, channel])
+            result[str(start_sample + math.floor(index * samples_per_slice))] = slice_min
+            result[str(start_sample + math.floor(index * samples_per_slice) + 1)] = slice_max
+        
+        self.data = result
+    
+
 class MetricSamples(Serializable):
 
     def __init__(self, node_id: int, samples, total_original_file_samples: int, 
@@ -65,5 +110,3 @@ class MetricSamples(Serializable):
         end_sample = end_sample if end_sample >= start_sample else start_sample
         filtered_samples = [{"sample": position(start_sample + i), "values": y.tolist()} for i,y in enumerate(samples[start_sample:end_sample])]
         return filtered_samples
-
-        
