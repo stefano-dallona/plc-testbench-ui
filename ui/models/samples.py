@@ -4,10 +4,13 @@ from typing import List
 
 import numpy as np
 import math
+import sys
 
 from plctestbench.file_wrapper import AudioFile
 
 from .base_model import *
+
+minFloat = np.float32("1.0e-10")
 
 class LostInterval(Serializable):
     
@@ -54,37 +57,34 @@ class DownsampledAudioFile:
         self.num_samples = len(input_file.data)
         self.duration = self.num_samples * 1.0 / input_file.samplerate
         self.sample_rate = input_file.samplerate
-        self.max_slices = max_slices
+        self.max_slices = max_slices if max_slices > 0 else self.num_samples
 
-    '''    
     def load(self, channel, offset: int = None, n_samples: int = None):
+        start_sample = 0 if offset == None else offset
         num_samples = len(self.input_file.get_data()) if n_samples == None else n_samples
-        start_sample = 0 if offset == None else offset
-        self.sample_rate = math.ceil(1.0 * len(self.input_file.get_data()) / self.duration)
-        self.data = { str(start_sample + index) : str(value) for index, value in enumerate(self.input_file.get_data()[start_sample : start_sample + num_samples, channel]) }
-        return
-    '''
-    '''  '''
-    def load(self, channel, offset: int = None, n_samples: int = None):
-        num_samples = np.shape(self.input_file.get_data())[0] if n_samples == None else n_samples
-        start_sample = 0 if offset == None else offset
-        
-        data = self.input_file.get_data()[start_sample : start_sample + num_samples]
+        '''
+        if self.max_slices == self.num_samples:
+            start_sample = 0
+            num_samples = self.num_samples
+        '''
+        base_data = self.input_file.get_data()[start_sample : start_sample + num_samples]
+        channel_data = base_data[:, channel]
+        data = list(map(lambda x : minFloat if x == 0.0 else x, channel_data))
         
         samples_per_slice = num_samples / self.max_slices
 
         if len(data) <= self.max_slices:
-            self.data = { str(start_sample + index) : str(value) for index, value in enumerate(data[:, channel]) }
+            self.data = { str(start_sample + index) : str(value) for index, value in enumerate(data) }
             return
         
         slices_data = map(lambda i: data[math.floor(i * samples_per_slice) : math.floor((i + 1) * samples_per_slice)], range(0, self.max_slices))        
 
         result = {}
         for index, slice in enumerate(slices_data):
-            slice_min = min(slice[:, channel])
-            slice_max = max(slice[:, channel])
-            result[str(start_sample + math.floor(index * samples_per_slice))] = slice_min
-            result[str(start_sample + math.floor(index * samples_per_slice) + 1)] = slice_max
+            slice_min = min(slice[:])
+            slice_max = max(slice[:])
+            result[str(start_sample + math.floor(index * samples_per_slice))] = str(slice_min)
+            result[str(start_sample + math.floor(index * samples_per_slice) + 1)] = str(slice_max)
         
         self.data = result
     

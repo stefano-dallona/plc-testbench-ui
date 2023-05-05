@@ -64,6 +64,7 @@ def get_audio_file_waveform(run_id, original_file_node_id, audio_file_node_id):
   waveform.load(channel, offset, num_samples)
   if waveform != None:
     return json.dumps({
+                        "uuid": audio_file_node_id,
                         "numSamples": waveform.num_samples,
                         "duration": waveform.duration,
                         "sampleRate": waveform.sample_rate,
