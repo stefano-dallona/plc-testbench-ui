@@ -1,0 +1,13 @@
+Punti mancanti nella nuova interfaccia                                                  |   Priorità
+=======================================================================================================
+- merge delle mie modifiche su nuova versione PLC testbench                             |   (Urgent)
+- adattamento PLC testbench UI backend alle nuove modifiche di PLC testbench            |   (Urgent)
+- performance (streaming ? efficientamento caricamenti  ?)                              |   (Urgent)
+- visualizzazione metriche per tipo (time series, scalari)                              |   (Medium)
+- visualizzazione parametri run esistente                                               |   (Medium)
+- ottimizzazione selezione tracce in base alla scelta della simualzione PLS             |   (Medium)
+- run status                                                                            |   (Medium)
+- standardizzazione user experience su AudioPlayer                                      |   (Medium)
+- merge del progetto (react test) in quello principale (branch)                         |   (Low)
+- test su docker                                                                        |   (Low)
+- URL localhost cablato in docker mode ?                                                |   (Low)

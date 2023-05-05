@@ -1,0 +1,17 @@
+Punti mancanti nella nuova interfaccia                                                  |   Priorità
+=======================================================================================================
+- aggancio progress bar elaborazione al backend                                 ok      |   (Urgent)
+- aggiornamento spettrogramma su cambio file audio                              ok      |   (Medium)
+- zoom gerarchia e progress bar complessiva                                     ok      |   (Urgent)
+- visualizzazione metriche per tipo (time series, scalari)                              |   (Urgent)
+- ottimizzazione selezione tracce in base alla scelta della simualzione PLS             |   (Medium)
+- merge delle mie modifiche su nuova versione PLC testbench                             |   (Low)
+- adattamento PLC testbench UI backend alle nuove modifiche di PLC testbench            |   (Low)
+- merge del progetto (react test) in quello principale (branch)                         |   (Low)
+- test su docker                                                                        |   (Low)
+- URL localhost cablato in docker mode ?
+- configuration visualization
+- run status
+
+
+Data evento ?   Mercoledì 19/04, Giovedì 20/04 orario: 9.00 - 18.00

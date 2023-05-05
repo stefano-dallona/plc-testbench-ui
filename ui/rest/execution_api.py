@@ -12,7 +12,7 @@ from ..models.run import *
 
 execution_api = Blueprint("execution", __name__, url_prefix="")
 run_repository = RunRepository(config.data_dir)
-ecctestbench_service = EccTestbenchService(run_repository=run_repository)
+ecctestbench_service = EccTestbenchService(config.data_dir, run_repository=run_repository)
 execution_service = ExecutionService(ecctestbench_service, run_repository)
 
 @execution_api.route('/runs', methods=['GET'])

@@ -17,6 +17,7 @@ from functools import partial
 import math
 import queue
 import shutil
+import functools
 import itertools
 from tqdm.auto import tqdm as std_tqdm
 from threading import Thread
@@ -57,8 +58,9 @@ announcer = MessageAnnouncer()
 
 class EccTestbenchService:
     
-    def __init__(self, run_repository: RunRepository):
+    def __init__(self, root_folder: str, run_repository: RunRepository):
         self.logger = logging.getLogger(__name__)
+        self.root_folder = root_folder
         self.run_repository = run_repository
     
     def save_run(self, run: Run):
@@ -91,6 +93,81 @@ class EccTestbenchService:
             target_file_path = os.path.join(run_root_folder, file_basename)
             shutil.copyfile(src=source_file_path, dst=target_file_path)
     
+    def create_run(self, json_dict, run_id) -> ECCTestbench:
+        settings = Settings()
+        selected_input_files = []
+        loss_simulators = []
+        ecc_algorithms = []
+        output_analysers = []
+            
+        '''
+        def extract_settings(settings):
+            worker_settings = settings["name"](settings["settings"])
+            return worker_settings
+        '''
+        def extract_settings(accumulator, json_dict):
+            settings, selected_input_files, loss_simulators, ecc_algorithms, output_analysers = accumulator
+            if json_dict["name"] == "Input File Selection":
+                settings = Settings()
+                selected_input_files.extend(json_dict["settings"])
+            if json_dict["name"] == "BinomialPLS":
+                simulator = json_dict["settings"][0]["value"]
+                loss_simulator_constructor = globals()[simulator]
+                loss_model_constructor = BinomialLossModel
+                loss_simulation = loss_simulator_constructor(loss_model_constructor(settings), settings)
+                loss_simulators.append([loss_simulator_constructor, loss_model_constructor])
+            if json_dict["name"] == "GilbertElliotPLS":
+                simulator = json_dict["settings"][0]["value"]
+                loss_simulator_constructor = globals()[simulator]
+                loss_model_constructor = GilbertElliotLossModel
+                loss_simulation = loss_simulator_constructor(loss_model_constructor(settings), settings)
+                loss_simulators.append([loss_simulator_constructor, loss_model_constructor])
+            if json_dict["name"] == "ZeroPLC":
+                ecc_algorithm = ZerosEcc(settings)
+                ecc_algorithm_constructor = ZerosEcc
+                ecc_algorithms.append(ecc_algorithm_constructor)
+            if json_dict["name"] == "LastPacketPLC":
+                ecc_algorithm = LastPacketEcc(settings)
+                ecc_algorithm_constructor = LastPacketEcc
+                ecc_algorithms.append(ecc_algorithm_constructor)
+            if json_dict["name"] == "LowCostPLC":
+                ecc_algorithm = LowCostEcc(settings)
+                ecc_algorithm_constructor = LowCostEcc
+                ecc_algorithms.append(ecc_algorithm_constructor)
+            if json_dict["name"] == "MSECalculator":
+                output_analyser = MSECalculator(settings)
+                output_analyser_constructor = MSECalculator
+                output_analysers.append(output_analyser_constructor)
+            if json_dict["name"] == "PEAQCalculator":
+                output_analyser = PEAQCalculator(settings)
+                output_analyser_constructor = PEAQCalculator
+                output_analysers.append(output_analyser_constructor)
+                
+            if json_dict["name"] != "Input File Selection":
+                for setting in json_dict["settings"]:
+                    try:
+                        conversion_function = globals()['__builtins__'][setting["type"]]
+                        if (conversion_function != None):
+                            setattr(settings, setting["property"], conversion_function(setting["value"]))
+                    except:
+                        self.logger.info("Could not set property %s of type %s on Settings", setting["property"], setting["type"])
+            return settings, selected_input_files, loss_simulators, ecc_algorithms, output_analysers
+        
+        result = [settings, selected_input_files, loss_simulators, ecc_algorithms, output_analysers]
+        settings, selected_input_files, loss_simulators, ecc_algorithms, output_analysers = functools.reduce(extract_settings, json_dict, result)
+        
+        settings.__progress_monitor__ = __async_func__
+        
+        run_root_folder = os.path.join(self.root_folder, run_id)
+        self.prepare_run_directory(selected_input_files, self.root_folder, run_root_folder)
+        
+        print("run_id: %s, settings:%s, loss_simulators:%s, ecc_algorithms:%s, output_analysers:%s" % (run_id, settings, loss_simulators, ecc_algorithms, output_analysers))
+        path_manager = PathManager(run_root_folder)
+        data_manager = DataManager(path_manager)
+
+        testbench = ECCTestbench(loss_simulators, ecc_algorithms, output_analysers, settings, data_manager, path_manager, run_id)
+        return Run(testbench, selected_input_files)
+    '''
     def create_run(self, json_dict, run_id) -> ECCTestbench:
         settings = Settings()
         loss_simulators = []
@@ -132,6 +209,7 @@ class EccTestbenchService:
 
         testbench = ECCTestbench(loss_simulators, ecc_algorithms, output_analysers, settings, data_manager, path_manager, run_id)
         return Run(testbench, selected_input_files)
+    '''
 
 def __notifyRunCompletion__(run_id):
     #sleep(1)
@@ -147,18 +225,8 @@ def __async_func__(self):
 def external_callback(caller, *args, **kwargs):
     caller_class_name = caller.__class__.__name__
     print("caller_class_name=%s, args=%s, kwargs=%s" % (caller_class_name, args, kwargs))
-    isTestbench = isinstance(caller, ECCTestbench)
-    isOriginalTrack = isinstance(caller, OriginalTrackWorker)
-    isLossSimulator = isinstance(caller, PacketLossSimulator)
-    isEccAlgorithm = isinstance(caller, ECCAlgorithm)
-    isOutputAnalyzer = isinstance(caller, OutputAnalyser)
-    nodeid = caller.uuid if isTestbench else \
-             caller.uuid if isOriginalTrack else \
-             caller.uuid if isLossSimulator else \
-             caller.uuid if isEccAlgorithm else \
-             caller.uuid if isOutputAnalyzer else \
-             ""
-    print("isTestbench=%s, isOriginalTrack=%s, isLossSimulator=%s, isEccAlgorithm=%s, isOutputAnalyzer=%s, nodeid=%s" % (isTestbench, isOriginalTrack, isLossSimulator, isEccAlgorithm, isOutputAnalyzer, nodeid))
+    nodeid = caller.uuid if hasattr(caller, "uuid") else ""
+    print("nodeid=%s" % (nodeid))
     currentPercentage = math.floor(kwargs["n"] / kwargs["total"] * 100)
     eta = math.ceil((kwargs["total"] - kwargs["elapsed"]) * (1 / kwargs["rate"]))
     msg = __format_sse__(data=json.dumps({ "total": kwargs["total"], "nodeid" : nodeid, "nodetype" : caller_class_name, "elapsed" : kwargs["elapsed"], "currentPercentage": currentPercentage, "eta": eta, "timestamp": str(datetime.now()) }, indent = 4).replace('\n', ' '), event="run_execution")
