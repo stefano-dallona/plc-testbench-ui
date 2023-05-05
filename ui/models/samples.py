@@ -69,7 +69,7 @@ class DownsampledAudioFile:
         '''
         base_data = self.input_file.get_data()[start_sample : start_sample + num_samples]
         channel_data = base_data[:, channel]
-        data = list(map(lambda x : minFloat if x == 0.0 else x, channel_data))
+        data = np.where(channel_data == 0.0, minFloat, channel_data)
         
         samples_per_slice = num_samples / self.max_slices
 
