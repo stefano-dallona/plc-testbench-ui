@@ -57,6 +57,6 @@ class ExecutionService:
             name = node.worker.__class__.__name__
             file += ".pickle"
         print("level:%d, name:%s, type:%s, file:%s, uuid:%s" % (node.depth, name, type, file, node.uuid))
-        transformed_node = Node(name, parent = parent, type=type, file=file, uuid=node.uuid)
+        transformed_node = Node(name, parent=parent, parent_id=parent.uuid if parent != None else None, type=type, file=file, uuid=node.uuid)
         transformed_node.children = [ExecutionService.__build_output_hierarchy__(child, transformed_node) for child in node.children]
         return transformed_node
