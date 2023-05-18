@@ -3,3 +3,8 @@ Flask
 Flask-Cors
 Flask-API
 waitress
+flask-socketio
+#gevent
+#gevent-websocket
+#websocket-client
+eventlet

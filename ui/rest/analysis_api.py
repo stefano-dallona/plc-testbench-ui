@@ -8,10 +8,13 @@ from ..services.analysis_service import AnalysisService
 from ..services.ecctestbench_service import EccTestbenchService
 from ..models.base_model import *
 
+from .streaming_api import stream_audio_file as stream_file
+
 run_repository = RunRepository(config.data_dir)
 ecctestbench_service = EccTestbenchService(config.data_dir, run_repository=run_repository)
 analysis_api = Blueprint("analysis", __name__, url_prefix="/analysis")
 analysis_service = AnalysisService(ecctestbench_service=ecctestbench_service)
+
 
 #http://localhost:5000/analysis/runs/76728771-9de8-42bd-a71e-f4d3c08e3ae6/input-files/76f9743b-d839-4e64-bf55-01f86107bec0/loss-simulations/0b06e77f-2228-4b54-b78b-955602e32dc5
 @analysis_api.route('/runs/<run_id>/input-files/<original_file_node_id>/loss-simulations/<loss_simulation_node_id>', methods=['GET'])
