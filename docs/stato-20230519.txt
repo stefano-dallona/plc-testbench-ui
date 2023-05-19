@@ -9,6 +9,7 @@ Punti mancanti nella nuova interfaccia                                          
 - ottimizzazione selezione tracce in base alla scelta della simualzione PLS             |   (Medium)   |  Done   |
 - run status                                                                            |   (Medium)   |         |
 - standardizzazione user experience su AudioPlayer                                      |   (Medium)   |         |
+- merge dei branch UI e Luca                                                            |   (Urgent)   |         |
 - merge del progetto (react test) in quello principale (branch)                         |   (Low)      |         |
 - test su docker                                                                        |   (Low)      |         |
 - URL localhost cablato in docker mode ?                                                |   (Low)      |         |
