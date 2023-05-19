@@ -74,3 +74,6 @@ python app.py
 #myIP: 10.223.35.25
 http://<local-machine-ip>:5000/testbench-configuration.html
 http://<local-machine-ip>:5000/testbench-output-analysis.html?run_id=<run_id>
+
+# copy the file .vscode/launch.json in your .vscode directory in order to simplify launching
+# replace output dir with your own path
