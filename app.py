@@ -47,19 +47,19 @@ def create_app():
     from ui.rest.analysis_api import analysis_api
     from ui.rest.streaming_api import streaming_api
     
-    socketio.init_app(app)
-
     CORS(app)
     CORS(configuration_api)
     CORS(execution_api)
     CORS(analysis_api)
     CORS(streaming_api)
-
+    
     app.register_blueprint(configuration_api)
     app.register_blueprint(execution_api)
     app.register_blueprint(analysis_api)
     app.register_blueprint(streaming_api)
-       
+    
+    socketio.init_app(app)
+           
     return app
 
 app = create_app()

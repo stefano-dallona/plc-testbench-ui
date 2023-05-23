@@ -32,6 +32,9 @@ def create_run():
 def launch_run_execution(run_id):
     execution = RunExecution(run_id=run_id)
     execution.execution_id = ecctestbench_service.launch_run_execution(run_id)
+    run = ecctestbench_service.load_run(run_id)
+    run.status = RunStatus.RUNNING
+    ecctestbench_service.save_run(run)
     return json.dumps({"execution_id": execution.execution_id}), status.HTTP_201_CREATED
   
 @execution_api.route('/runs/<run_id>', methods=['GET'])

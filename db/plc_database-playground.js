@@ -98,6 +98,7 @@ db.getCollection("OriginalTrack-3").find(
     { "_id": 1 }
 )
 
+// Query by OriginalTrackNode's and LostSamplesMaskNode's attributes
 db.getCollection("OriginalTrack-3").find(
     {
         $and: [
@@ -112,6 +113,32 @@ db.getCollection("OriginalTrack-3").find(
     { "_id": 1 }
 )
 
+// Query by OriginalTrackNode's and ReconstructedTrackNode's attributes
+db.getCollection("OriginalTrack-3").find(
+    {
+        $and: [
+            { "filename": /.*Musica.*/,
+            "lostSamplesMasks.reconstructedTracks": {
+                    $elemMatch: {
+                        "filename": /.*ZerosPLC.*/
+                    }
+                }
+            } ]
+    },
+    { "_id": 1 }
+)
 
-  
-
+// Query by OriginalTrackNode's and OutputAnaliysisNode's attributes
+db.getCollection("OriginalTrack-3").find(
+    {
+        $and: [
+            { "filename": /.*Musica.*/,
+            "lostSamplesMasks.reconstructedTracks.outputAnalysis": {
+                    $elemMatch: {
+                        "filename": /.*MSECalculator.*/
+                    }
+                }
+            } ]
+    },
+    { "_id": 1 }
+)

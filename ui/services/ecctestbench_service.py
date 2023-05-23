@@ -23,6 +23,7 @@ from tqdm.auto import tqdm as std_tqdm
 from threading import Thread
 
 from ..config.app_config import Config
+from ..models.run import *
 
 class TqdmExt(std_tqdm):
     
@@ -78,13 +79,20 @@ class EccTestbenchService:
         run = self.load_run(run_id)
         run.__ecctestbench__.global_settings_list[0].__progress_monitor__ = __async_func__
        
-        thread_0 = Thread(target=execute_elaboration,args=[run.__ecctestbench__, __notifyRunCompletion__])
+        thread_0 = Thread(target=execute_elaboration,
+                          args=[run.__ecctestbench__, self.on_run_completed])
         thread_0.daemon = True
         thread_0.start()
         
         execution_id = run_id
         self.logger.info("Run %s: execution %s launched", run_id, execution_id)
         return execution_id
+    
+    def on_run_completed(self, run_id):
+        run = self.load_run(run_id)
+        run.status = RunStatus.COMPLETED
+        self.save_run(run)
+        __notifyRunCompletion__(run_id)
     
     def prepare_run_directory(self, selected_audio_files: list, root_folder: str, run_root_folder: str):
         if not os.path.exists(run_root_folder):
