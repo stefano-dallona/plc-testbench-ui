@@ -2,10 +2,13 @@ import uuid
 from datetime import datetime, date
 from anytree import *
 from typing import List
+from enum import Enum
 
 from plctestbench.plc_testbench import PLCTestbench
 
 from .base_model import *
+
+RunStatus = Enum('RunStatus', ['CREATED', 'RUNNING', 'COMPLETED', 'FAILED'], start=1)
 
 class RunExecution(Serializable):
     def __init__(self,
@@ -23,7 +26,7 @@ class Run(Serializable):
                  plc_testbench: PLCTestbench,
                  selected_input_files: list,
                  description: str = "",
-                 status: str = "",
+                 status: RunStatus = RunStatus.CREATED,
                  creator: str = "anonymous",
                  created_on: str = ""):
         self.__ecctestbench__ = plc_testbench
