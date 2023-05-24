@@ -1,20 +1,18 @@
+#from gevent import monkey
+#monkey.patch_all()
+import eventlet
+eventlet.monkey_patch()
 from flask import Flask, send_from_directory, request
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
 from waitress import serve
 from eventlet import wsgi
 
-import eventlet
-import soundfile as sf
-import wave
-import base64
-import math
-from time import sleep
-
+import tqdm
 import logging
 from logging.config import dictConfig
 
-from ui.rest.streaming_api import socketio
+from ui.rest.streaming_api import *
 
 dictConfig({
     'version': 1,
@@ -38,7 +36,7 @@ def create_app():
     
     app = Flask(__name__,
                 static_url_path='', 
-                static_folder='static'
+                static_folder='static',
     #            static_folder='build'
     )
     
@@ -58,7 +56,7 @@ def create_app():
     app.register_blueprint(analysis_api)
     app.register_blueprint(streaming_api)
     
-    socketio.init_app(app)
+    get_socketio().init_app(app)
            
     return app
 
@@ -71,6 +69,6 @@ def welcome():
 
 if __name__ == '__main__':
     #https://github.com/miguelgrinberg/python-socketio/discussions/860
-    socketio.run(app, host='0.0.0.0')
+    get_socketio().run(app, host='0.0.0.0', use_reloader=False)
     #serve(app, host="0.0.0.0", port=5000, threads=10)
     #eventlet.wsgi.server(eventlet.listen(("127.0.0.1", 5000)), app, debug=True)

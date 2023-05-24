@@ -8,15 +8,40 @@ from ..config.app_config import *
 from ..services.ecctestbench_service import *
 from ..services.execution_service import *
 from ..models.run import *
+from ..rest.streaming_api import get_socketio
+from redbird.repos import MongoRepo
+from pymongo import MongoClient
+from pydantic import BaseModel
+
+class MyItem(BaseModel):
+    _id: str
+
+client=MongoClient(config.db_conn_string)
+run_repository_mongodb = MongoRepo(uri=config.db_conn_string, database=config.db_name, collection="OriginalTrack-3", model=dict)
 
 
 execution_api = Blueprint("execution", __name__, url_prefix="")
 run_repository = RunRepository(config.data_dir)
-ecctestbench_service = EccTestbenchService(config.data_dir, run_repository=run_repository)
+ecctestbench_service = EccTestbenchService(config.data_dir, run_repository=run_repository, socketio=get_socketio())
 execution_service = ExecutionService(ecctestbench_service, run_repository)
 
 @execution_api.route('/runs', methods=['GET'])
 def get_runs():
+    query_string = request.args.get('query_string')
+    projection_string = request.args.get('projection_string')
+    page = int(request.args.get('page'))
+    page_size = int(request.args.get('page_size'))
+    
+    query = json.loads(query_string)
+    projection = json.loads(projection_string)
+    cursor = client.get_database("plc_database").get_collection("OriginalTrack-3")  \
+      .find(query, projection=projection) \
+      .skip(page * page_size) \
+      .limit(page_size)
+    for document in cursor:
+      print(document)
+    
+    
     runs = execution_service.get_runs()
     return json.dumps(runs), 200
 

@@ -12,8 +12,12 @@
             "console": "integratedTerminal",
             "env": {
                 "FLASK_APP": "app.py",
-                "FLASK_DEBUG": "1",
-                "DATA_FOLDER": "C:\\Data\\personale\\Università\\2022-2023\\original_tracks"
+                "FLASK_DEBUG": "0",
+                "DATA_FOLDER": "C:\\Data\\personale\\Università\\2022-2023\\original_tracks",
+                "DB_CONN_STRING": "mongodb://itwn9370.biz.electrolux.com:27017",
+                "DB_USERNAME": "root",
+                "DB_PASSWORD": "Marmolada3343",
+                "GEVENT_SUPPORT": "True"
             },
             "justMyCode": false
         },
@@ -26,7 +30,11 @@
             "env": {
                 "FLASK_APP": "app.py",
                 "FLASK_DEBUG": "1",
-                "DATA_FOLDER": "C:\\Data\\personale\\Università\\2022-2023\\original_tracks"
+                "DATA_FOLDER": "C:\\Data\\personale\\Università\\2022-2023\\original_tracks",
+                "DB_CONN_STRING": "mongodb://itwn9370.biz.electrolux.com:27017",
+                "DB_USERNAME": "root",
+                "DB_PASSWORD": "Marmolada3343",
+                "GEVENT_SUPPORT": "True"
             },
             "justMyCode": false
         },
@@ -38,7 +46,11 @@
             "env": {
                 "FLASK_APP": "app.py",
                 "FLASK_DEBUG": "1",
-                "DATA_FOLDER": "C:\\Data\\personale\\Università\\2022-2023\\original_tracks"
+                "DATA_FOLDER": "C:\\Data\\personale\\Università\\2022-2023\\original_tracks",
+                "DB_CONN_STRING": "mongodb://itwn9370.biz.electrolux.com:27017",
+                "DB_USERNAME": "root",
+                "DB_PASSWORD": "Marmolada3343",
+                "GEVENT_SUPPORT": "True"
             },
             "args": [
                 "run",

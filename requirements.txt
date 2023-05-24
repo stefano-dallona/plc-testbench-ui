@@ -4,8 +4,11 @@ Flask-Cors
 Flask-API
 waitress
 flask-socketio
+flask-rest-api
 #gevent
 #gevent-websocket
 #websocket-client
 eventlet
 pymongo
+redbird
+pydantic

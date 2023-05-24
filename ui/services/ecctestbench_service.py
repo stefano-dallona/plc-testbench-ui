@@ -1,4 +1,3 @@
-from ui.repositories.run_repository import *
 from plctestbench.plc_testbench import *
 from plctestbench.settings import *
 from plctestbench.loss_simulator import *
@@ -11,6 +10,7 @@ from plctestbench.file_wrapper import *
 
 import logging
 from flask import json
+from flask_socketio import SocketIO
 from datetime import datetime
 import uuid
 from functools import partial
@@ -21,7 +21,9 @@ import functools
 import itertools
 from tqdm.auto import tqdm as std_tqdm
 from threading import Thread
+from eventlet import sleep
 
+from ..repositories.run_repository import *
 from ..config.app_config import Config
 from ..models.run import *
 
@@ -33,6 +35,7 @@ class TqdmExt(std_tqdm):
         
     def update(self, n=1):
         displayed = super(TqdmExt, self).update(n)
+        sleep()
         if displayed:
             external_callback(self.caller, **self.format_dict)
         return displayed
@@ -61,10 +64,11 @@ class InputFileSelection:
 
 class EccTestbenchService:
     
-    def __init__(self, root_folder: str, run_repository: RunRepository):
+    def __init__(self, root_folder: str, run_repository: RunRepository, socketio: SocketIO = None):
         self.logger = logging.getLogger(__name__)
         self.root_folder = root_folder
         self.run_repository = run_repository
+        self.socketio = socketio
     
     def save_run(self, run: Run):
         self.logger.info("Saving run %s", run.run_id)
@@ -78,12 +82,14 @@ class EccTestbenchService:
         self.logger.info("Executing run %s", run_id)
         run = self.load_run(run_id)
         run.__ecctestbench__.global_settings_list[0].__progress_monitor__ = __async_func__
-       
+        
+        task = self.socketio.start_background_task(execute_elaboration, run.__ecctestbench__, self.on_run_completed)
+        '''
         thread_0 = Thread(target=execute_elaboration,
                           args=[run.__ecctestbench__, self.on_run_completed])
         thread_0.daemon = True
         thread_0.start()
-        
+        '''
         execution_id = run_id
         self.logger.info("Run %s: execution %s launched", run_id, execution_id)
         return execution_id

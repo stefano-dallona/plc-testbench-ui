@@ -26,6 +26,8 @@ ping_interval = 1
 ping_timeout = 10 * ping_interval
 
 socketio = SocketIO(cors_allowed_origins='*',
+            #async_mode="threading", # apparently mutually exclusive with websocket mode
+            async_mode="eventlet", # apparently mutually exclusive with websocket mode
             logger=True,
             engineio_logger=True,
             ping_timeout=ping_timeout,
@@ -39,7 +41,10 @@ track_acks = dict()
 active_streamings = dict()
 max_nack_chunks = 0
 
-def genHeader(sampleRate, bitsPerSample, channels, samples):
+def get_socketio() -> SocketIO:
+    return socketio
+
+def gen_header(sampleRate, bitsPerSample, channels, samples):
     datasize = samples * channels * bitsPerSample // 8
     o = bytes("RIFF",'ascii')                                               # (4byte) Marks file as RIFF
     o += (datasize + 36).to_bytes(4,'little')                               # (4byte) File size in bytes excluding this and RIFF marker
