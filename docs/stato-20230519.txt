@@ -7,10 +7,10 @@ Punti mancanti nella nuova interfaccia                                          
 - refinitura interfaccia                                                                |   (Medium)   |         |
 - visualizzazione parametri run esistente                                               |   (Medium)   |         |
 - ottimizzazione selezione tracce in base alla scelta della simualzione PLS             |   (Medium)   |  Done   |
-- run status                                                                            |   (Medium)   |  Done       |
+- run status                                                                            |   (Medium)   |  Done   |
 - standardizzazione user experience su AudioPlayer                                      |   (Medium)   |         |
-- gestione login tramite social                                                         |   (Medium)   |
-- docker-compose per db                                                                 |   (Medium)   |
+- gestione login tramite social                                                         |   (Medium)   |         |
+- docker-compose per db                                                                 |   (Medium)   |         |
 - merge dei branch UI e Luca                                                            |   (Urgent)   |         |
 - merge del progetto (react test) in quello principale (branch)                         |   (Low)      |         |
 - test su docker                                                                        |   (Low)      |         |

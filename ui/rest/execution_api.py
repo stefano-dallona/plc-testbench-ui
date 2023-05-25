@@ -27,22 +27,27 @@ execution_service = ExecutionService(ecctestbench_service, run_repository)
 
 @execution_api.route('/runs', methods=['GET'])
 def get_runs():
-    query_string = request.args.get('query_string')
-    projection_string = request.args.get('projection_string')
-    page = int(request.args.get('page'))
-    page_size = int(request.args.get('page_size'))
-    
-    query = json.loads(query_string)
-    projection = json.loads(projection_string)
+    page = int(request.args.get('page')) if request.args.get('page') != None else 0
+    page_size = int(request.args.get('page_size')) if request.args.get('page_size') != None else -1
+    runs = execution_service.get_runs()
+    start = max(0, page - 1) * page_size
+    end = min(len(runs), (page + 1) * page_size)
+    end = end if end >= 0 else len(runs)
+    return json.dumps(runs[start:end]), 200
+  
+@execution_api.route('/runs/searches', methods=['POST'])
+def search_runs():
+    search = request.json
+    query = search["queryString"]
+    projection = search["projectionString"]
+    pagination = search["pagination"]
     cursor = client.get_database("plc_database").get_collection("OriginalTrack-3")  \
       .find(query, projection=projection) \
-      .skip(page * page_size) \
-      .limit(page_size)
-    for document in cursor:
-      print(document)
-    
-    
-    runs = execution_service.get_runs()
+      .skip(pagination["page"] * pagination["pageSize"]) \
+      .limit(pagination["pageSize"])
+    runs = list(cursor)
+    for run in runs:
+      print(run)
     return json.dumps(runs), 200
 
 @execution_api.route('/runs', methods=['POST'])

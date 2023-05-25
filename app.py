@@ -69,6 +69,6 @@ def welcome():
 
 if __name__ == '__main__':
     #https://github.com/miguelgrinberg/python-socketio/discussions/860
-    get_socketio().run(app, host='0.0.0.0', use_reloader=False)
+    get_socketio().run(app, host='localhost', use_reloader=False)
     #serve(app, host="0.0.0.0", port=5000, threads=10)
     #eventlet.wsgi.server(eventlet.listen(("127.0.0.1", 5000)), app, debug=True)
