@@ -82,3 +82,9 @@ http://<local-machine-ip>:5000/testbench-output-analysis.html?run_id=<run_id>
 docker-machine start default2
 cd <project-root>
 docker-compose up
+
+#generate SSL cert and key
+# run openssl in gitbash
+openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem
+openssl x509 -inform der -in zscaler-root-ca.cer -out zscaler-root-ca.pem
+# application URL: https://127.0.0.1:5000/

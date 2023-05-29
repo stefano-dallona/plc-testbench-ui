@@ -1,40 +1,55 @@
 from flask import Blueprint, json, request, make_response
 from flask_api import status
+from flask_login import login_required
 
 
 from ..config.app_config import config
 from ..services.configuration_service import ConfigurationService, UploadException
-
+from ..services.auth_service import token_required
 
 
 configuration_api = Blueprint("configuration", __name__, url_prefix="")
 configuration_service = ConfigurationService(config.data_dir)
 
 @configuration_api.route('/ecc_algorithms', methods=['GET'])
+#@login_required
+@token_required
 def ecc_algorithms():
   return json.dumps(configuration_service.find_ecc_algorithms()), status.HTTP_200_OK
 
 @configuration_api.route('/loss_simulators', methods=['GET'])
+#@login_required
+@token_required
 def loss_simulators():
   return json.dumps(configuration_service.find_loss_simulators()), status.HTTP_200_OK
 
 @configuration_api.route('/loss_models', methods=['GET'])
+#@login_required
+@token_required
 def loss_models():
   return json.dumps(configuration_service.find_loss_models()), status.HTTP_200_OK
 
 @configuration_api.route('/output_analysers', methods=['GET'])
+#@login_required
+@token_required
 def output_analysers():
   return json.dumps(configuration_service.find_output_analysers()), status.HTTP_200_OK
 
 @configuration_api.route('/settings_metadata', methods=['GET'])
+#@login_required
+@token_required
 def settings_metadata():
     return json.dumps(configuration_service.find_settings_metadata()), status.HTTP_200_OK
 
 @configuration_api.route('/input_files', methods=['GET'])
+#@login_required
+@token_required
 def input_files():
   return json.dumps(configuration_service.find_input_files()), status.HTTP_200_OK
 
 @configuration_api.route('/upload', methods=['POST'])
+#@login_required
+@token_required
 def upload():
     file = request.files['file']
     total_file_size = int(request.form['dztotalfilesize'])
