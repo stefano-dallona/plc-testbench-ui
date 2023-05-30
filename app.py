@@ -17,7 +17,7 @@ import logging
 from logging.config import dictConfig
 
 from ui.rest.streaming_api import *
-from ui.services.auth_service import token_required
+from ui.services.authentication_service import token_required
 
 dictConfig({
     'version': 1,
@@ -79,11 +79,9 @@ def load_user(user_id):
     return User.get(user_id)
 
 @app.route('/')
+@token_required
 def index():
-    if current_user.is_authenticated:
-        return '<h1>PLC TestBench UI up and running</h1>'        
-    else:
-        return redirect("/login", code=302)
+    return '<h1>PLC TestBench UI up and running</h1>'        
     
 @app.route('/home')
 #@login_required

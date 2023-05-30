@@ -10,7 +10,7 @@ from ..services.ecctestbench_service import EccTestbenchService
 from ..models.base_model import *
 
 from .streaming_api import stream_audio_file as stream_file
-from ..services.auth_service import token_required
+from ..services.authentication_service import token_required
 
 run_repository = RunRepository(config.data_dir)
 ecctestbench_service = EccTestbenchService(config.data_dir, run_repository=run_repository)

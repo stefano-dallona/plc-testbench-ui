@@ -1,14 +1,21 @@
 from functools import wraps
-import jwt
 from flask import request, abort
-from flask import current_app
+from google.auth import jwt
+import requests
+import os
+
 from ..models.user import User
+
+
+def get_google_certs():
+    headers = {'Accept': 'application/json'}
+    r = requests.get(os.environ.get("GOOGLE_OAUTH_CERTS"), headers=headers)
+    certs = r.json()
+    return certs
 
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        return f(*args, **kwargs)
-    
         token = None
         if "Authorization" in request.headers:
             token = request.headers["Authorization"]
@@ -19,8 +26,8 @@ def token_required(f):
                 "error": "Unauthorized"
             }, 401
         try:
-            data = { "user_id": 1 } #jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["RS256"], verify=False)
-            current_user = User.get(data["user_id"])
+            data = jwt.decode(token, get_google_certs())
+            current_user = User.get(data["email"])
             if current_user is None:
                 return {
                 "message": "Invalid Authentication token!",

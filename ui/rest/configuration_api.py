@@ -5,7 +5,7 @@ from flask_login import login_required
 
 from ..config.app_config import config
 from ..services.configuration_service import ConfigurationService, UploadException
-from ..services.auth_service import token_required
+from ..services.authentication_service import token_required
 
 
 configuration_api = Blueprint("configuration", __name__, url_prefix="")

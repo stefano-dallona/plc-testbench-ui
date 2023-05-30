@@ -4,19 +4,32 @@ Punti mancanti nella nuova interfaccia                                          
 - adattamento PLC testbench UI backend alle nuove modifiche di PLC testbench            |   (Urgent)   |  Done   |
 - performance (streaming ? efficientamento caricamenti  ?)                              |   (Urgent)   |  Done   |
 - visualizzazione metriche per tipo (time series, scalari)                              |   (Medium)   |  Doing  |
-- refinitura interfaccia                                                                |   (Medium)   |         |
+- refinitura interfaccia                                                                |   (Medium)   |  Doing  |
 - visualizzazione parametri run esistente                                               |   (Medium)   |         |
 - ottimizzazione selezione tracce in base alla scelta della simualzione PLS             |   (Medium)   |  Done   |
 - run status                                                                            |   (Medium)   |  Done   |
-- standardizzazione user experience su AudioPlayer                                      |   (Medium)   |         |
-- gestione login tramite social                                                         |   (Medium)   |         |
-- docker-compose per db                                                                 |   (Medium)   |         |
+- standardizzazione user experience su AudioPlayer                                      |   (Medium)   |  Doing  |
+- docker-compose per db                                                                 |   (Medium)   |  Done   |
+- https e authenticazione social                                                        |   (Medium)   |  Done   |
+- ricerca run con query builder                                                         |   (Urgent)   |  Doing  |
 - merge dei branch UI e Luca                                                            |   (Urgent)   |         |
+- passaggio utente a testbench, memorizzazione su db e segregazione dati per utente     |   (Urgent)   |         |
+- eliminazione run (su lista run) o nodo con cascade (su gerarchia)                     |   (Urgent)   |         |
+- eliminazione dati per utente                                                          |   (Urgent)   |         |
 - merge del progetto (react test) in quello principale (branch)                         |   (Low)      |         |
 - test su docker                                                                        |   (Low)      |         |
 - URL localhost cablato in docker mode ?                                                |   (Low)      |         |
 - Comment code                                                                          |   (Low)      |         |
 - Improve logging                                                                       |   (Low)      |         |
+- Cambiare icona per execute
+- Rimuovere il cursore
 
 Ottimizzazione caricamento waveform completata (piccoli bug da risolvere sullo zoom)
 Sistemazione funzioni stop, pause, play zoomed per adattarle allo streaming
+
+- Manca livello di aggregazione su DB corrispondente al Run, per il momento l'ho
+  creato con le viste
+- Quando saranno disponibili le modifiche definiteve al db ?
+- Per creare/leggere le viste posso arricchiere il DB e leggerlo autonomamente (no modifiche) ?
+- Per salvare le info utente (userid, preferenze, filtri, ecc.) posso usare lo stesso DB ?
+- UUID sui nodi ?

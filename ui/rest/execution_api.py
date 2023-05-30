@@ -14,7 +14,7 @@ from ..services.ecctestbench_service import *
 from ..services.execution_service import *
 from ..models.run import *
 from ..rest.streaming_api import get_socketio
-from ..services.auth_service import token_required
+from ..services.authentication_service import token_required
 
 
 class MyItem(BaseModel):
@@ -70,7 +70,7 @@ def create_run():
 
 @execution_api.route('/runs/<run_id>/executions', methods=['POST'])
 #@login_required
-@token_required
+#@token_required
 def launch_run_execution(run_id):
     execution = RunExecution(run_id=run_id)
     execution.execution_id = ecctestbench_service.launch_run_execution(run_id)
@@ -104,7 +104,7 @@ def get_execution_hierarchy(run_id: str, execution_id: str):
 #http://localhost:5000/runs/76728771-9de8-42bd-a71e-f4d3c08e3ae6/executions/76728771-9de8-42bd-a71e-f4d3c08e3ae6/events
 @execution_api.route('/runs/<run_id>/executions/<execution_id>/events', methods=['GET'])
 #@login_required
-@token_required
+#@token_required
 def get_execution_events(run_id: str, execution_id: str):
   events = execution_service.get_execution_events(run_id=run_id, execution_id=execution_id)
   return Response(events, mimetype='text/event-stream')
