@@ -94,11 +94,16 @@ class MetricSamples(Serializable):
     def __init__(self, node_id: int, samples, total_original_file_samples: int, 
                  offset: int, num_samples: int, scale_position: bool = False, category: str = "linear"):
         self.node_id = node_id
-        self.total_samples = len(samples)
+        self.category = category
+        self.total_samples = 1
+        if category == "linear":
+            self.total_samples = len(samples)
         self.total_original_file_samples = total_original_file_samples if scale_position and total_original_file_samples != None else self.total_samples
         self.offset = offset
         self.num_samples = num_samples
-        self.data = self.__filter_data__(list(samples), offset, num_samples, float(self.total_original_file_samples / self.total_samples))
+        self.data = samples
+        if category == "linear":
+            self.data = self.__filter_data__(list(samples), offset, num_samples, float(self.total_original_file_samples / self.total_samples))
     
     @staticmethod
     def __filter_data__(samples, offset: int, num_samples: int, sample_rate: int):

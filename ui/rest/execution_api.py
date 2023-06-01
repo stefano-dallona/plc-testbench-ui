@@ -63,7 +63,8 @@ def search_runs():
 @token_required
 def create_run():
     run_id = str(uuid.uuid4())
-    run = ecctestbench_service.create_run(request.json, run_id)
+    payload = json.loads(request.json["body"])
+    run = ecctestbench_service.create_run(payload, run_id)
     ecctestbench_service.save_run(run)
     run = ecctestbench_service.load_run(run.run_id)
     return json.dumps({"run_id": run.run_id}), 200

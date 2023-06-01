@@ -110,13 +110,18 @@ class AnalysisService:
         
         metric_samples = metric_file.get_data()
         category = "linear" if hasattr(metric_file.get_data(), '__iter__') else "scalar"
+        metric_samples_num = num_samples
+        if category == "scalar":
+            metric_samples_num = 1
+        elif num_samples == None:
+            metric_samples_num = len(metric_samples)
         
         scale_position = unit_of_meas != "samples"
         samples = MetricSamples(node_id=metric_node_id,
                                 samples=metric_samples,
                                 total_original_file_samples=total_audio_file_samples,
                                 offset=offset,
-                                num_samples=num_samples if num_samples != None else len(metric_samples),
+                                num_samples=metric_samples_num,
                                 scale_position=scale_position,
                                 category=category)
         return samples

@@ -109,6 +109,6 @@ def get_metric_samples(run_id, original_file_node_id, audio_file_node_id, metric
                                                unit_of_meas = unit_of_meas,
                                                category=category)
   if metric != None:
-    return json.dumps(metric.data), status.HTTP_200_OK
+    return json.dumps(metric.data, default=metric.to_json()), status.HTTP_200_OK
   else:
     return {}, status.HTTP_404_NOT_FOUND
