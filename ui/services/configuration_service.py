@@ -40,9 +40,23 @@ class ConfigurationService:
         return result
     
     @staticmethod
-    def find_output_analysers():
+    def get_output_analyser_category(analyser_type: type) -> bool:
+        if analyser_type.run == None:
+            return False
+        
+        return_type_hint = analyser_type.run.__annotations__["return"] \
+            if 'return' in analyser_type.run.__annotations__.keys() \
+            else None
+        
+        # Return type of run method is iterable => the analyser is linear
+        return "linear" if return_type_hint == None or hasattr(return_type_hint, "__iter__") else "scalar"
+    
+    @staticmethod
+    def find_output_analysers(category: str = None):
         ConfigurationService._logger.info("Retrieving output analysers ...")
-        result = [cls.__name__ for cls in OutputAnalyser.__subclasses__()]
+        result = [cls.__name__ for cls in OutputAnalyser.__subclasses__()
+                  if category == None or
+                    category == ConfigurationService.get_output_analyser_category(cls)]
         return result
     
     @staticmethod

@@ -33,7 +33,8 @@ def loss_models():
 #@login_required
 @token_required
 def output_analysers():
-  return json.dumps(configuration_service.find_output_analysers()), status.HTTP_200_OK
+  category = request.args.get("category", type=str, default=None)
+  return json.dumps(configuration_service.find_output_analysers(category)), status.HTTP_200_OK
 
 @configuration_api.route('/settings_metadata', methods=['GET'])
 #@login_required

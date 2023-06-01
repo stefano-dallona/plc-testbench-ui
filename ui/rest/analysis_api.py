@@ -90,22 +90,24 @@ def get_audio_file_waveform(run_id, original_file_node_id, audio_file_node_id):
 #http://localhost:5000/analysis/runs/76728771-9de8-42bd-a71e-f4d3c08e3ae6/input-files/76f9743b-d839-4e64-bf55-01f86107bec0/output-files/eb7a511c-8258-440c-bd81-e4cd38472cd7/metrics/37642fbf-2fa5-45d2-8afe-dcfb78b85cbe
 #http://localhost:5000/analysis/runs/76728771-9de8-42bd-a71e-f4d3c08e3ae6/input-files/76f9743b-d839-4e64-bf55-01f86107bec0/output-files/eb7a511c-8258-440c-bd81-e4cd38472cd7/metrics/37642fbf-2fa5-45d2-8afe-dcfb78b85cbe?offset=100&num_samples=1000
 #http://localhost:5000/analysis/runs/76728771-9de8-42bd-a71e-f4d3c08e3ae6/input-files/76f9743b-d839-4e64-bf55-01f86107bec0/output-files/eb7a511c-8258-440c-bd81-e4cd38472cd7/metrics/37642fbf-2fa5-45d2-8afe-dcfb78b85cbe?offset=100&num_samples=1000&unit_of_meas=seconds
-@analysis_api.route('/runs/<run_id>/input-files/<original_file_node_id>/output-files/<audio_file_node_id>/metrics/<metric_id>', methods=['GET'])
+@analysis_api.route('/runs/<run_id>/input-files/<original_file_node_id>/output-files/<audio_file_node_id>/metrics/<metric_node_id>', methods=['GET'])
 #@login_required
 @token_required
-def get_metric_samples(run_id, original_file_node_id, audio_file_node_id, metric_id):
+def get_metric_samples(run_id, original_file_node_id, audio_file_node_id, metric_node_id):
   channel = request.args.get("channel", type=int, default=0)
   offset = request.args.get("offset", type=int, default=0)
-  num_samples = request.args.get("num_samples", type=int, default=1000)
+  num_samples = request.args.get("num_samples", type=int) #, default=1000)
   unit_of_meas = request.args.get("unit_of_meas", type=str, default="samples")
+  category = request.args.get("category", type=str)
   
-  metric = analysis_service.get_metric_samples(run_id=run_id,
-                                               original_file_node_id=original_file_node_id,
-                                               metric_node_id=metric_id,
-                                               channel=channel,
-                                               offset=offset,
-                                               num_samples=num_samples,
-                                               unit_of_meas=unit_of_meas)
+  metric = analysis_service.get_metric_samples(run_id = run_id,
+                                               audio_file_node_id=audio_file_node_id,
+                                               metric_node_id = metric_node_id,
+                                               channel = channel,
+                                               offset = offset,
+                                               num_samples = num_samples,
+                                               unit_of_meas = unit_of_meas,
+                                               category=category)
   if metric != None:
     return json.dumps(metric.data), status.HTTP_200_OK
   else:

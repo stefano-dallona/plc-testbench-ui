@@ -9,6 +9,7 @@ from plctestbench.node import *
 from .ecctestbench_service import EccTestbenchService, announcer
 from ..models.run import *
 from ..repositories.run_repository import *
+from ..services.configuration_service import ConfigurationService
 
 
 class ExecutionService:
@@ -47,16 +48,20 @@ class ExecutionService:
         if isinstance(node, OriginalTrackNode):
             name = os.path.basename(file) if file != "" else name
             file += ".wav"
+            category = ""
         elif isinstance(node, LostSamplesMaskNode):
             name = node.worker.__class__.__name__
             file += ".npy"
+            category = ""
         elif isinstance(node, ReconstructedTrackNode):
             name = node.worker.__class__.__name__
             file += ".wav"
+            category = ""
         elif isinstance(node, OutputAnalysisNode):
             name = node.worker.__class__.__name__
             file += ".pickle"
+            category = ConfigurationService.get_output_analyser_category(node.worker.__class__)
         print("level:%d, name:%s, type:%s, file:%s, uuid:%s" % (node.depth, name, type, file, node.uuid))
-        transformed_node = Node(name, parent=parent, parent_id=parent.uuid if parent != None else None, type=type, file=file, uuid=node.uuid)
+        transformed_node = Node(name, parent=parent, parent_id=parent.uuid if parent != None else None, type=type, file=file, uuid=node.uuid, category=category)
         transformed_node.children = [ExecutionService.__build_output_hierarchy__(child, transformed_node) for child in node.children]
         return transformed_node

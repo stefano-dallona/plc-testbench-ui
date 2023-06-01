@@ -92,7 +92,7 @@ class DownsampledAudioFile:
 class MetricSamples(Serializable):
 
     def __init__(self, node_id: int, samples, total_original_file_samples: int, 
-                 offset: int, num_samples: int, scale_position: bool = False):
+                 offset: int, num_samples: int, scale_position: bool = False, category: str = "linear"):
         self.node_id = node_id
         self.total_samples = len(samples)
         self.total_original_file_samples = total_original_file_samples if scale_position and total_original_file_samples != None else self.total_samples
