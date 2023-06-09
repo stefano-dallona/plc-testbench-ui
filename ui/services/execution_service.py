@@ -8,7 +8,7 @@ from plctestbench.node import *
 
 from .ecctestbench_service import EccTestbenchService, announcer
 from ..models.run import *
-from ..repositories.run_repository import *
+from ..repositories.pickle.run_repository import RunRepository
 from ..services.configuration_service import ConfigurationService
 
 
@@ -30,8 +30,8 @@ class ExecutionService:
             execution.hierarchy.append(self.__build_output_hierarchy__(file_tree))
         return execution.hierarchy
     
-    def get_runs(self) -> List[Run]:
-        return self.run_repository.list()
+    def get_runs(self, pagination) -> List[Run]:
+        return self.run_repository.find_by_predicate(pagination=pagination)
     
     def get_execution_events(self, run_id, execution_id):
         messages = announcer.listen()  # returns a queue.Queue

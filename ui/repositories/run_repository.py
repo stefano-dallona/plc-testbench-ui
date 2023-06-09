@@ -12,34 +12,34 @@ class RunRepository:
     '''
         Handles persistence of EccTestbench objects to support run concept
     '''
+    __default_pagination__ = { 'page': 0, 'pageSize': 10 }
     
-    def __init__(self, root_folder):
+    def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.root_folder = root_folder
     
-    def add(self, run: Run):
-        file = self.__generate_filename__(self.root_folder, run.run_id)
-        self.logger.info("Saving run %s to file %s", run.run_id, file)
-        with open(file, 'wb') as handle:
-            pickle.dump(run, handle)
+    def add(self, item: Run):
+        pass
+     
+    def update(self, item):
+        pass
     
-    def get(self, reference) -> Run:
-        file = self.__generate_filename__(self.root_folder, reference)
-        self.logger.info("Loading run %s from file %s", reference, file)
-        if os.path.exists(file):
-            with open(file, 'rb') as handle:
-                return pickle.load(handle)
-        else:
-            return None
+    def delete(self, id):
+        pass
     
-    def list(self, predicate = lambda x : True) -> List[Run]:
-        run_ids = [d for d in os.listdir(self.root_folder) if os.path.isdir(os.path.join(self.root_folder, d))]
-        runs = list(map(lambda r: self.get(r), filter(predicate, run_ids)))
-        runs.sort(key=lambda r: os.path.getmtime(os.path.join(self.root_folder, r.run_id)), reverse=True)
-        return list(map(lambda r: dict(filter(lambda elem: not elem[0].startswith("_"), r.__dict__.items())), runs))
+    def find_by_id(self,
+                   id,
+                   projection = None) -> Run:
+        pass
     
-    ### Private methods ###
-    def __generate_filename__(self, root_folder, reference):
-        run_root_folder = os.path.join(root_folder, reference)
-        filename = os.path.join(run_root_folder, 'plctestbench.pickle')
-        return filename
+    def find_by_predicate(self,
+                          predicate,
+                          projection = None,
+                          pagination = __default_pagination__) -> List[Run]:
+        pass
+    
+    def find_by_query(self,
+                      query,
+                      projection,
+                      pagination = __default_pagination__) -> List[Run]:
+        pass
+

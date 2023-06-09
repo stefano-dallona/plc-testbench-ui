@@ -8,7 +8,8 @@ from redbird.repos import MongoRepo
 from pymongo import MongoClient
 from pydantic import BaseModel
 
-from ..repositories.run_repository import *
+from ..repositories.pickle.run_repository import RunRepository
+from ..repositories.mongodb.run_repository import RunRepository as MongoRunRepository
 from ..config.app_config import *
 from ..services.ecctestbench_service import *
 from ..services.execution_service import *
@@ -22,6 +23,7 @@ class MyItem(BaseModel):
 
 client=MongoClient(config.db_conn_string)
 run_repository_mongodb = MongoRepo(uri=config.db_conn_string, database=config.db_name, collection="OriginalTrack-3", model=dict)
+run_repository_mongodb2 = MongoRunRepository(client)
 
 
 execution_api = Blueprint("execution", __name__, url_prefix="")
@@ -35,27 +37,21 @@ execution_service = ExecutionService(ecctestbench_service, run_repository)
 def get_runs():
     page = int(request.args.get('page')) if request.args.get('page') != None else 0
     page_size = int(request.args.get('page_size')) if request.args.get('page_size') != None else -1
-    runs = execution_service.get_runs()
-    start = max(0, page - 1) * page_size
-    end = min(len(runs), (page + 1) * page_size)
-    end = end if end >= 0 else len(runs)
-    return json.dumps(runs[start:end]), 200
+    pagination = { 'page': page, 'pageSize': page_size }
+    runs = execution_service.get_runs(pagination)
+    return json.dumps({ 'data': runs['data'], 'totalRecords': runs['totalRecords'] }), 200
   
 @execution_api.route('/runs/searches', methods=['POST'])
 #@login_required
 @token_required
 def search_runs():
-    search = request.json
+    search = json.loads(request.json['body'])
     query = search["queryString"]
     projection = search["projectionString"]
-    pagination = search["pagination"]
-    cursor = client.get_database("plc_database").get_collection("OriginalTrack-3")  \
-      .find(query, projection=projection) \
-      .skip(pagination["page"] * pagination["pageSize"]) \
-      .limit(pagination["pageSize"])
-    runs = list(cursor)
-    for run in runs:
-      print(run)
+    pagination = search["pagination"]      
+    runs = run_repository_mongodb2.find_by_query(query=query,
+                                          projection=projection,
+                                          pagination=pagination)
     return json.dumps(runs), 200
 
 @execution_api.route('/runs', methods=['POST'])

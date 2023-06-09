@@ -23,7 +23,7 @@ from tqdm.auto import tqdm as std_tqdm
 from threading import Thread
 from eventlet import sleep
 
-from ..repositories.run_repository import *
+from ..repositories.pickle.run_repository import RunRepository
 from ..config.app_config import Config
 from ..models.run import *
 
@@ -76,7 +76,7 @@ class EccTestbenchService:
         
     def load_run(self, run_id) -> Run:
         self.logger.info("Loading run %s", run_id)
-        return self.run_repository.get(run_id)
+        return self.run_repository.find_by_id(run_id)
     
     def launch_run_execution(self, run_id) -> PLCTestbench:
         self.logger.info("Executing run %s", run_id)
@@ -184,7 +184,14 @@ def external_callback(caller, *args, **kwargs):
     print("nodeid=%s" % (nodeid))
     currentPercentage = math.floor(kwargs["n"] / kwargs["total"] * 100)
     eta = math.ceil((kwargs["total"] - kwargs["elapsed"]) * (1 / kwargs["rate"]))
-    msg = __format_sse__(data=json.dumps({ "total": kwargs["total"], "nodeid" : nodeid, "nodetype" : caller_class_name, "elapsed" : kwargs["elapsed"], "currentPercentage": currentPercentage, "eta": eta, "timestamp": str(datetime.now()) }, indent = 4).replace('\n', ' '), event="run_execution")
+    msg = __format_sse__(data=json.dumps({
+            "total": kwargs["total"],
+            "nodeid" : nodeid,
+            "nodetype" : caller_class_name,
+            "elapsed" : kwargs["elapsed"],
+            "currentPercentage": currentPercentage,
+            "eta": eta, "timestamp": str(datetime.now())
+        }, indent = 4).replace('\n', ' '), event="run_execution")
     print("msg:%s" % (msg))
     announcer.announce(msg=msg)
 

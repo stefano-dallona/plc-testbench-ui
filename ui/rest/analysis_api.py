@@ -4,7 +4,7 @@ from flask_api import status
 from flask_login import login_required
 
 from ..config.app_config import config
-from ..repositories.run_repository import RunRepository
+from ..repositories.pickle.run_repository import RunRepository
 from ..services.analysis_service import AnalysisService
 from ..services.ecctestbench_service import EccTestbenchService
 from ..models.base_model import *

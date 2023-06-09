@@ -13,7 +13,7 @@ import uuid
 from ..config.app_config import config
 from ..services.analysis_service import AnalysisService
 from ..services.ecctestbench_service import EccTestbenchService
-from ..repositories.run_repository import RunRepository
+from ..repositories.pickle.run_repository import RunRepository
 
 logging.getLogger('engineio').setLevel(level=logging.DEBUG)
 
