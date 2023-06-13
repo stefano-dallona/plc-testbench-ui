@@ -37,8 +37,18 @@ class TqdmExt(std_tqdm):
         displayed = super(TqdmExt, self).update(n)
         sleep()
         if displayed:
-            external_callback(self.caller, **self.format_dict)
+            try:
+                external_callback(self.caller, **self.format_dict)
+            finally:
+                pass
         return displayed
+    
+    def close(self):
+        cleanup = super(TqdmExt, self).close
+        try:
+            external_callback(self.caller, **self.format_dict)
+        finally:
+            cleanup()
 
 class MessageAnnouncer:
 
@@ -183,7 +193,7 @@ def external_callback(caller, *args, **kwargs):
     nodeid = caller.uuid if hasattr(caller, "uuid") else ""
     print("nodeid=%s" % (nodeid))
     currentPercentage = math.floor(kwargs["n"] / kwargs["total"] * 100)
-    eta = math.ceil((kwargs["total"] - kwargs["elapsed"]) * (1 / kwargs["rate"]))
+    eta = math.ceil((kwargs["total"] - kwargs["elapsed"]) * (1 / (kwargs["rate"] if kwargs["rate"] != None else float('inf'))))
     msg = __format_sse__(data=json.dumps({
             "total": kwargs["total"],
             "nodeid" : nodeid,
