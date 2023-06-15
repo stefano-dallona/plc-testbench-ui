@@ -21,9 +21,7 @@ from ..services.authentication_service import token_required
 class MyItem(BaseModel):
     _id: str
 
-client=MongoClient(config.db_conn_string)
-run_repository_mongodb = MongoRepo(uri=config.db_conn_string, database=config.db_name, collection="OriginalTrack-3", model=dict)
-run_repository_mongodb2 = MongoRunRepository(client)
+run_repository_mongodb2 = MongoRunRepository()
 
 
 execution_api = Blueprint("execution", __name__, url_prefix="")
@@ -103,5 +101,13 @@ def get_execution_hierarchy(run_id: str, execution_id: str):
 #@login_required
 #@token_required
 def get_execution_events(run_id: str, execution_id: str):
-  events = execution_service.get_execution_events(run_id=run_id, execution_id=execution_id)
-  return Response(events, mimetype='text/event-stream')
+  sessionID = request.cookies.get("sessionID")
+  last_event_id = request.headers.get("Last-Event-ID")
+  sessionID = sessionID if sessionID != None else str(Uuid.uuid4())
+  events = execution_service.get_execution_events(session_id=sessionID,
+    run_id=run_id,
+    execution_id=execution_id,
+    last_event_id=last_event_id)
+  response = Response(events, mimetype='text/event-stream')
+  response.set_cookie("sessionID", sessionID)
+  return response

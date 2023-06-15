@@ -3,14 +3,18 @@ from anytree import *
 
 import os
 import logging
+import json
 
 from plctestbench.node import *
 
 from .ecctestbench_service import EccTestbenchService, announcer
 from ..models.run import *
+from ..models.event import Event
 from ..repositories.pickle.run_repository import RunRepository
+from ..repositories.mongodb.event_repository import EventRepository
 from ..services.configuration_service import ConfigurationService
 
+event_repository = EventRepository()
 
 class ExecutionService:
     
@@ -33,11 +37,51 @@ class ExecutionService:
     def get_runs(self, pagination) -> List[Run]:
         return self.run_repository.find_by_predicate(pagination=pagination)
     
-    def get_execution_events(self, run_id, execution_id):
-        messages = announcer.listen()  # returns a queue.Queue
-        while True:
-            msg = messages.get()  # blocks until a new message arrives
-            yield msg
+    def get_execution_events(self, session_id, run_id, execution_id, last_event_id = None):
+        try:
+            if (last_event_id != None):
+                last_event = self.find_last_run_event(run_id, last_event_id)
+                unseen_events = self.find_events_after_last(run_id, last_event_id)
+                for unseen_event in unseen_events["data"]:
+                    yield str(unseen_event)
+
+            messages = announcer.listen(session_id)  # returns a queue.Queue
+            sequence = 1
+            while True:
+                try:
+                    msg = messages.get()  # blocks until a new message arrives
+                    msg_entries = map(lambda x: (x[0].strip(), x[1].strip()), map(lambda x: x.split(":", 1), filter(lambda x: len(x.strip()) > 0, msg.split("\n"))))
+                    message = dict(msg_entries)
+                    data = json.loads(message["data"])
+                    data["run_id"] = run_id
+                    data["execution_id"] = execution_id
+                    event = Event(type=message["event"],
+                        source_id=data["nodeid"],
+                        sequence=sequence,
+                        data=data)
+                    event_repository.add(event)
+                    messages.task_done()
+                    yield str(event)
+                    sequence += 1
+                except Exception as e:
+                    self._logger.info(f"An exception occurred: {str(e)}")
+        except GeneratorExit as e:
+            #announcer.disconnect(run_id)
+            pass
+        except Exception as e:
+            self._logger.info(f"An exception occurred: {str(e)}")
+        finally:
+            pass
+        
+    def find_last_run_event(self, run_id, last_event_id):
+        query = { '_id': last_event_id }
+        last_event = event_repository.find_by_query(query)
+        return last_event
+    
+    def find_events_after_last(self, run_id, last_event_id):
+        query = { '_id': last_event_id, 'data.run_id': run_id }
+        events = event_repository.find_by_query(query)
+        return events
 
     @staticmethod
     def __build_output_hierarchy__(node: Node, parent: Node = None) -> Node:

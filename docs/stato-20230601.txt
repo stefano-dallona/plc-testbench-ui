@@ -11,7 +11,7 @@ Punti mancanti nella nuova interfaccia                                          
 - standardizzazione user experience su AudioPlayer                                      |   (Medium)   |  Doing  |
 - docker-compose per db                                                                 |   (Medium)   |  Done   |
 - https e authenticazione social                                                        |   (Medium)   |  Done   |
-- ricerca run con query builder                                                         |   (Urgent)   |  Doing  |
+- ricerca run con query builder                                                         |   (Urgent)   |  Done  |
 - merge dei branch UI e Luca                                                            |   (Urgent)   |         |
 - passaggio utente a testbench, memorizzazione su db e segregazione dati per utente     |   (Urgent)   |         |
 - eliminazione run (su lista run) o nodo con cascade (su gerarchia)                     |   (Urgent)   |         |

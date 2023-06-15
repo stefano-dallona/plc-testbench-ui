@@ -7,7 +7,7 @@ from typing import List
 from plctestbench.plc_testbench import PLCTestbench
 
 from ...models.run import Run
-from ..run_repository import RunRepository as BaseRunRepository
+from ..mongodb.base_repository import BaseMongoRepository as BaseRunRepository
 
 class RunRepository(BaseRunRepository):
     '''

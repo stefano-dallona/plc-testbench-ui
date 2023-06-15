@@ -53,19 +53,27 @@ class TqdmExt(std_tqdm):
 class MessageAnnouncer:
 
     def __init__(self):
-        self.listeners = []
+        self.listeners = dict()
 
-    def listen(self):
-        q = queue.Queue(maxsize=5)
-        self.listeners.append(q)
-        return q
+    def listen(self, session_id):
+        if session_id not in self.listeners.keys():
+            q = queue.Queue(maxsize=50000)
+            self.listeners[session_id] = q
+        return self.listeners[session_id]
+    
+    def disconnect(self, session_id):
+        if session_id in self.listeners.keys():
+            while not self.listeners[session_id].empty():
+                msg = self.listeners[session_id].get()
+                msg.task_done()
+            del self.listeners[session_id]
 
     def announce(self, msg):
-        for i in reversed(range(len(self.listeners))):
-            try:
-                self.listeners[i].put_nowait(msg)
-            except queue.Full:
-                del self.listeners[i]
+        for session_id in self.listeners.keys():
+            #try:
+                self.listeners[session_id].put_nowait(msg)
+            #except queue.Full:
+            #    del self.listeners[run_id]
 
 announcer = MessageAnnouncer()
                 
@@ -79,36 +87,6 @@ class EccTestbenchService:
         self.root_folder = root_folder
         self.run_repository = run_repository
         self.socketio = socketio
-    
-    def save_run(self, run: Run):
-        self.logger.info("Saving run %s", run.run_id)
-        self.run_repository.add(run)
-        
-    def load_run(self, run_id) -> Run:
-        self.logger.info("Loading run %s", run_id)
-        return self.run_repository.find_by_id(run_id)
-    
-    def launch_run_execution(self, run_id) -> PLCTestbench:
-        self.logger.info("Executing run %s", run_id)
-        run = self.load_run(run_id)
-        run.__ecctestbench__.global_settings_list[0].__progress_monitor__ = __async_func__
-        
-        task = self.socketio.start_background_task(execute_elaboration, run.__ecctestbench__, self.on_run_completed)
-        '''
-        thread_0 = Thread(target=execute_elaboration,
-                          args=[run.__ecctestbench__, self.on_run_completed])
-        thread_0.daemon = True
-        thread_0.start()
-        '''
-        execution_id = run_id
-        self.logger.info("Run %s: execution %s launched", run_id, execution_id)
-        return execution_id
-    
-    def on_run_completed(self, run_id):
-        run = self.load_run(run_id)
-        run.status = RunStatus.COMPLETED
-        self.save_run(run)
-        __notifyRunCompletion__(run_id)
     
     def prepare_run_directory(self, selected_audio_files: list, root_folder: str, run_root_folder: str):
         if not os.path.exists(run_root_folder):
@@ -175,10 +153,48 @@ class EccTestbenchService:
                                  configuration_map[GlobalSettings], data_manager, path_manager, run_id)
         
         return Run(testbench, configuration_map[InputFileSelection])
+    
+    def save_run(self, run: Run):
+        self.logger.info("Saving run %s", run.run_id)
+        self.run_repository.add(run)
+        
+    def load_run(self, run_id) -> Run:
+        self.logger.info("Loading run %s", run_id)
+        return self.run_repository.find_by_id(run_id)
+    
+    def launch_run_execution(self, run_id) -> PLCTestbench:
+        self.logger.info("Executing run %s", run_id)
+        run = self.load_run(run_id)
+        run.__ecctestbench__.global_settings_list[0].__progress_monitor__ = __async_func__
+        
+        task = self.socketio.start_background_task(execute_elaboration, run.__ecctestbench__, self.on_run_completed)
+        '''
+        thread_0 = Thread(target=execute_elaboration,
+                          args=[run.__ecctestbench__, self.on_run_completed])
+        thread_0.daemon = True
+        thread_0.start()
+        '''
+        execution_id = run_id
+        self.logger.info("Run %s: execution %s launched", run_id, execution_id)
+        return execution_id
+    
+    def on_run_completed(self, run_id):
+        run = self.load_run(run_id)
+        run.status = RunStatus.COMPLETED
+        self.save_run(run)
+        __notifyRunCompletion__(run_id)
 
 def __notifyRunCompletion__(run_id):
-    #sleep(1)
-    msg = __format_sse__(data=json.dumps({ "total": 100, "nodeid" : run_id, "nodetype" : "RunExecution", "elapsed" : "", "currentPercentage": 100, "eta": 0, "timestamp": str(datetime.now()) }, indent = 4).replace('\n', ' '), event="run_execution")
+    msg = __format_sse__(data=json.dumps({
+                            "total": 100,
+                            "nodeid" : run_id,
+                            "nodetype" : "RunExecution",
+                            "elapsed" : 0,
+                            "currentPercentage": 100,
+                            "eta": 0,
+                            "timestamp": str(datetime.now())
+                        }, indent = 4).replace('\n', ' '),
+                        event="run_execution")
     print("msg:%s" % (msg))
     announcer.announce(msg=msg)
     
@@ -194,14 +210,17 @@ def external_callback(caller, *args, **kwargs):
     print("nodeid=%s" % (nodeid))
     currentPercentage = math.floor(kwargs["n"] / kwargs["total"] * 100)
     eta = math.ceil((kwargs["total"] - kwargs["elapsed"]) * (1 / (kwargs["rate"] if kwargs["rate"] != None else float('inf'))))
-    msg = __format_sse__(data=json.dumps({
-            "total": kwargs["total"],
-            "nodeid" : nodeid,
-            "nodetype" : caller_class_name,
-            "elapsed" : kwargs["elapsed"],
-            "currentPercentage": currentPercentage,
-            "eta": eta, "timestamp": str(datetime.now())
-        }, indent = 4).replace('\n', ' '), event="run_execution")
+    data = json.dumps({
+        "total": kwargs["total"],
+        "nodeid" : nodeid,
+        "nodetype" : caller_class_name,
+        "elapsed" : kwargs["elapsed"],
+        "currentPercentage": currentPercentage,
+        "eta": eta,
+        "timestamp": str(datetime.now())
+    }, indent=4).replace('\n', ' ')
+    msg = __format_sse__(data=data,
+        event="run_execution")
     print("msg:%s" % (msg))
     announcer.announce(msg=msg)
 

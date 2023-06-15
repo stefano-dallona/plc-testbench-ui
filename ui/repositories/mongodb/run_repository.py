@@ -1,10 +1,8 @@
-import logging
-from pymongo import MongoClient
 from typing import List
 
 from ...config.app_config import *
 from ...models.run import Run
-from ..run_repository import RunRepository as BaseRunRepository
+from .base_repository import BaseMongoRepository
 
 views = [
     {
@@ -51,12 +49,13 @@ views = [
     }    
 ]
 
-class RunRepository(BaseRunRepository):
+class RunRepository(BaseMongoRepository):
     
-    def __init__(self, client):
+    def __init__(self):
         super().__init__()
-        self.logger = logging.getLogger(__name__)
-        self.db = MongoClient(config.db_conn_string).get_database(config.db_name)
+        
+        self.collection_metadata = { 'name' : 'OriginalTrack-3' }
+
         for view in views:
             self.__create_view__(view)
     
@@ -82,7 +81,7 @@ class RunRepository(BaseRunRepository):
                       query,
                       projection,
                       pagination) -> List[Run]:
-        collection = self.db.get_collection("OriginalTrack-3")
+        collection = self.db.get_collection(self.collection_metadata)
         totalRecords = collection.count_documents(query)
         query = collection  \
             .find(query, projection=projection)
