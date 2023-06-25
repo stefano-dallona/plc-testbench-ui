@@ -3,3 +3,21 @@ Flask
 Flask-Cors
 Flask-API
 waitress
+# following packages are needed for websockets
+flask-socketio
+flask-rest-api
+#gevent
+#gevent-websocket
+#websocket-client
+eventlet
+# following packages are needed for mongodb
+pymongo
+redbird
+pydantic
+# following packages are needed for social login
+requests
+oauthlib
+pyOpenSSL==23.1.1
+Flask-Login==0.6.2
+flask_jwt_extended
+pyjwt[crypto]

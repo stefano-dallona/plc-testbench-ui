@@ -52,11 +52,18 @@ docker system prune --all --force --volumes
 
 # compile eccworkbench
 cd <eccworkbench-src-directory>
+cd <plc-workbench-src-directory>
 python setup.py sdist
 
+# uninstall eccworkbench from local archive
+# after activating plc-testbench-ui virtualenv from plc-testbench-ui project dir
+(env) python -m pip uninstall ecc_testbench
+(env) python -m pip uninstall plc-testbench
+
 # install eccworkbench from local archive
-# after activating plc-testbench-ui virtualenv
+# after activating plc-testbench-ui virtualenv, copying the archive from plc-testbench into plc-testbench-ui project, executing from plc-testbench-ui project dir
 (env) python -m pip install -f dist ecc_testbench
+(env) python -m pip install <path-to-plc-testbench-*.tar.gz>
 
 # running with waitress (WSGI server)
 python -m pip install waitress
@@ -67,3 +74,20 @@ python app.py
 #myIP: 10.223.35.25
 http://<local-machine-ip>:5000/testbench-configuration.html
 http://<local-machine-ip>:5000/testbench-output-analysis.html?run_id=<run_id>
+
+# copy the file .vscode/launch.json in your .vscode directory in order to simplify launching
+# replace output dir with your own path
+
+# Staring up mongodb
+docker-machine start default2
+cd <project-root>
+docker-compose up
+
+# Start mongodb with custom env variables from file
+docker compose --env-file <path-to-env-file> up
+
+#generate SSL cert and key
+# run openssl in gitbash
+openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem
+openssl x509 -inform der -in zscaler-root-ca.cer -out zscaler-root-ca.pem
+# application URL: https://127.0.0.1:5000/

@@ -1,0 +1,13 @@
+{ 
+    "name": "creator",
+    "label": "Creator",
+    "placeholder": "Enter first name",
+    "valueEditorType": "radio|checkbox|select|multiselect|textarea",
+    "inputType": "text|number|date|datetime-local|time",
+    "values": [
+        { "name": "", "label": "" }
+    ],
+    "defaultValue": "",
+    "operators": [""],
+    "defaultOperator": "beginsWith"
+}

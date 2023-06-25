@@ -2,12 +2,17 @@ from werkzeug.utils import secure_filename
 
 import logging
 import os
+import uuid as Uuid
+from operator import itemgetter
+from itertools import groupby
 
-from ecctestbench.loss_simulator import *
-from ecctestbench.ecc_algorithm import *
-from ecctestbench.output_analyser import *
-from ecctestbench.path_manager import *
-from ecctestbench.node import *
+from plctestbench.loss_simulator import *
+from plctestbench.plc_algorithm import *
+from plctestbench.output_analyser import *
+from plctestbench.path_manager import *
+from plctestbench.node import *
+from plctestbench.settings import *
+
 
 class ConfigurationService:
     
@@ -19,33 +24,80 @@ class ConfigurationService:
     @staticmethod
     def find_loss_simulators():
         ConfigurationService._logger.info("Retrieving loss simulators ...")
-        result = [cls.__name__ for cls in LossSimulator.__subclasses__()]
+        result = [cls.__name__ for cls in PacketLossSimulator.__subclasses__()]
         return result
-
+    '''
     @staticmethod
     def find_loss_models():
         ConfigurationService._logger.info("Retrieving loss models ...")
         result = [cls.__name__ for cls in LossModel.__subclasses__()]
         return result
-    
+    '''
     @staticmethod
     def find_ecc_algorithms():
         ConfigurationService._logger.info("Retrieving ecc algorithms ...")
-        result = [cls.__name__ for cls in ECCAlgorithm.__subclasses__()]
+        result = [cls.__name__ for cls in PLCAlgorithm.__subclasses__()]
         return result
     
     @staticmethod
-    def find_output_analysers():
+    def get_output_analyser_category(analyser_type: type) -> bool:
+        if analyser_type.run == None:
+            return False
+        
+        return_type_hint = analyser_type.run.__annotations__["return"] \
+            if 'return' in analyser_type.run.__annotations__.keys() \
+            else None
+        
+        # Return type of run method is iterable => the analyser is linear
+        return "linear" if return_type_hint == None or hasattr(return_type_hint, "__iter__") else "scalar"
+    
+    @staticmethod
+    def find_output_analysers(category: str = None):
         ConfigurationService._logger.info("Retrieving output analysers ...")
-        result = [cls.__name__ for cls in OutputAnalyser.__subclasses__()]
+        result = [cls.__name__ for cls in OutputAnalyser.__subclasses__()
+                  if category == None or
+                    category == ConfigurationService.get_output_analyser_category(cls)]
         return result
     
     @staticmethod
     def find_settings_metadata():
+        
+        def get_worker_class(settings_class):
+            worker_name = settings_class.__name__.replace("Settings", "")
+            worker_constructor = globals()[worker_name] if worker_name in globals() else None
+            worker_constructor = worker_constructor if worker_constructor != None else settings_class
+            return worker_constructor
+        
+        def get_worker_base_class(settings_class):
+            worker_name = settings_class.__name__.replace("Settings", "")
+            worker_constructor = globals()[worker_name] if worker_name in globals() else None
+            worker_base = worker_constructor.__base__ if worker_constructor != None and worker_constructor not in [object, Settings] else worker_constructor
+            worker_base = worker_base if worker_base != None else settings_class
+            return worker_base
+        
         ConfigurationService._logger.info("Retrieving settings metadata ...")
-        settings = Settings()
-        result = [{ "name": name, "type": type(getattr(settings, name)).__name__, "value" : getattr(settings, name) } for name in vars(settings) if not name.startswith("_")]
-        return result
+        settingsInstances = [(cls(), get_worker_class(cls), get_worker_base_class(cls)) for cls in Settings.__subclasses__() \
+                             if get_worker_base_class(cls) in [PacketLossSimulator, PLCAlgorithm, OutputAnalyser]]
+        metadata = [
+            {
+                "property": category.__name__,
+                "value": [
+                {
+                    "uuid": Uuid.uuid4(),
+                    "name" : settings[1].__name__,
+                    "settings" : [
+                        {
+                           "property": property,
+                           "value": value,
+                           "type": type(value).__name__,
+                           "mandatory": True
+                        }
+                        for property, value in settings[0].settings.items() if not property.startswith("__")
+                    ]
+                } for settings in list(settingsMetadata) ]
+            } for category, settingsMetadata in groupby(settingsInstances, key=itemgetter(2))
+        ]
+        return metadata
     
     def find_input_files(self):
         self._logger.info("Retrieving input files ...")
