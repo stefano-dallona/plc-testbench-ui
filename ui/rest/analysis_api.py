@@ -5,15 +5,21 @@ from flask_login import login_required
 
 from ..config.app_config import config
 from ..repositories.pickle.run_repository import RunRepository
+from ..repositories.mongodb.run_repository import RunRepository as MongoRunRepository
 from ..services.analysis_service import AnalysisService
 from ..services.ecctestbench_service import EccTestbenchService
 from ..models.base_model import *
+from ..models.samples import *
 
 from .streaming_api import stream_audio_file as stream_file
 from ..services.authentication_service import token_required
 
 run_repository = RunRepository(config.data_dir)
-ecctestbench_service = EccTestbenchService(config.data_dir, run_repository=run_repository)
+
+run_repository_mongodb2 = MongoRunRepository()
+
+#ecctestbench_service = EccTestbenchService(config.data_dir, run_repository=run_repository)
+ecctestbench_service = EccTestbenchService(config.data_dir, run_repository=run_repository_mongodb2)
 analysis_api = Blueprint("analysis", __name__, url_prefix="/analysis")
 analysis_service = AnalysisService(ecctestbench_service=ecctestbench_service)
 
@@ -56,7 +62,8 @@ def get_audio_file_samples(run_id, original_file_node_id, audio_file_node_id):
   
   samples = analysis_service.get_audio_file_samples(run_id, audio_file_node_id, channel, offset, num_samples)
   if samples != None:
-    return json.dumps(samples.data, default=samples.to_json()), status.HTTP_200_OK
+    #return json.dumps(samples.data, default=samples.to_json()), status.HTTP_200_OK
+    return json.dumps(samples.data, default=NpEncoder().default), status.HTTP_200_OK
   else:
     return {}, status.HTTP_404_NOT_FOUND
   

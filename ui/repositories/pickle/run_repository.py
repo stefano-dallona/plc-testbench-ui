@@ -9,7 +9,7 @@ from plctestbench.plc_testbench import PLCTestbench
 from ...models.run import Run
 from ..mongodb.base_repository import BaseMongoRepository as BaseRunRepository
 
-class RunRepository(BaseRunRepository):
+class RunRepository():
     '''
         Handles persistence of EccTestbench objects to support run concept
     '''
@@ -34,12 +34,12 @@ class RunRepository(BaseRunRepository):
         else:
             return None
     
-    def find_by_predicate(self,
-                          predicate = lambda x: True,
+    def find_by_filter(self,
+                          filters = {},
                           projection = None,
                           pagination = BaseRunRepository.__default_pagination__) -> List[Run]:
         run_ids = [d for d in os.listdir(self.root_folder) if os.path.isdir(os.path.join(self.root_folder, d))]
-        runs = list(map(lambda r: self.find_by_id(r), filter(predicate, run_ids)))
+        runs = list(map(lambda r: self.find_by_id(r), filter(lambda x: True, run_ids)))
         runs.sort(key=lambda r: os.path.getmtime(os.path.join(self.root_folder, r.run_id)), reverse=True)
         runs_projection = list(map(lambda r: dict(filter(lambda elem: not elem[0].startswith("_"), r.__dict__.items())), runs))
         return {

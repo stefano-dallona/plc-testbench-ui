@@ -77,8 +77,7 @@ class ConfigurationService:
         
         ConfigurationService._logger.info("Retrieving settings metadata ...")
         settingsInstances = [(cls(), get_worker_class(cls), get_worker_base_class(cls)) for cls in Settings.__subclasses__() \
-                             if cls == GlobalSettings or get_worker_base_class(cls) in \
-                            [GlobalSettings, PacketLossSimulator, PLCAlgorithm, OutputAnalyser]]
+                             if get_worker_base_class(cls) in [PacketLossSimulator, PLCAlgorithm, OutputAnalyser]]
         metadata = [
             {
                 "property": category.__name__,

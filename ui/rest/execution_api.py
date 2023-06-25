@@ -26,8 +26,10 @@ run_repository_mongodb2 = MongoRunRepository()
 
 execution_api = Blueprint("execution", __name__, url_prefix="")
 run_repository = RunRepository(config.data_dir)
-ecctestbench_service = EccTestbenchService(config.data_dir, run_repository=run_repository, socketio=get_socketio())
-execution_service = ExecutionService(ecctestbench_service, run_repository)
+#ecctestbench_service = EccTestbenchService(config.data_dir, run_repository=run_repository, socketio=get_socketio())
+ecctestbench_service = EccTestbenchService(config.data_dir, run_repository=run_repository_mongodb2, socketio=get_socketio())
+#execution_service = ExecutionService(ecctestbench_service, run_repository)
+execution_service = ExecutionService(ecctestbench_service, run_repository=run_repository_mongodb2)
 
 @execution_api.route('/runs', methods=['GET'])
 #@login_required
@@ -37,14 +39,14 @@ def get_runs():
     page_size = int(request.args.get('page_size')) if request.args.get('page_size') != None else -1
     pagination = { 'page': page, 'pageSize': page_size }
     runs = execution_service.get_runs(pagination)
-    return json.dumps({ 'data': runs['data'], 'totalRecords': runs['totalRecords'] }), 200
+    return json.dumps({ 'data': runs['data'], 'totalRecords': runs['totalRecords'] }, default=lambda o: o.__class__.__name__ if isinstance(o, type) else o.__dict__), 200
   
 @execution_api.route('/runs/searches', methods=['POST'])
 #@login_required
 @token_required
 def search_runs():
     search = json.loads(request.json['body'])
-    query = search["queryString"]
+    query = json.loads(search["queryString"])
     projection = search["projectionString"]
     pagination = search["pagination"]      
     runs = run_repository_mongodb2.find_by_query(query=query,
@@ -76,7 +78,7 @@ def launch_run_execution(run_id):
   
 @execution_api.route('/runs/<run_id>', methods=['GET'])
 #@login_required
-@token_required
+#@token_required
 def get_run(run_id):
     run = ecctestbench_service.load_run(run_id)
     if run != None:
@@ -87,7 +89,7 @@ def get_run(run_id):
 #http://localhost:5000/runs/76728771-9de8-42bd-a71e-f4d3c08e3ae6/executions/76728771-9de8-42bd-a71e-f4d3c08e3ae6/hierarchy
 @execution_api.route('/runs/<run_id>/executions/<execution_id>/hierarchy', methods=['GET'])
 #@login_required
-@token_required
+#@token_required
 def get_execution_hierarchy(run_id: str, execution_id: str):
   hierarchy = execution_service.get_execution_hierarchy(run_id=run_id, execution_id=execution_id)
   if hierarchy != None:

@@ -3,9 +3,10 @@ services:
   mongo:
     image: 'mongo:4.4.18'
     environment:
-      MONGO_INITDB_ROOT_USERNAME: 'root'
-      MONGO_INITDB_ROOT_PASSWORD: 'Marmolada3343'
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_DATABASE : 'admin'
     ports:
       - '27017:27017'
     volumes:
-      - .\data:/data/db
+      - ${MONGO_DATA_VOLUME_PATH}:/data/db

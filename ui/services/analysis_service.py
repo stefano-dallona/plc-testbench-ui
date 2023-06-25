@@ -29,7 +29,8 @@ class AnalysisService:
         
         self._logger.info(f"Loaded ecctestbench for {run_id} ...")
         
-        for file_tree in run.__ecctestbench__.data_manager.get_data_trees():
+        plb_testbench = self.ecctestbench_service.build_testbench_from_run(run)
+        for file_tree in plb_testbench.data_manager.get_data_trees():
             audio_file = self.__find_audio_file_by_node_id__(file_tree, audio_file_node_id)
             if audio_file != None:
                 audio_file.load()
@@ -47,7 +48,8 @@ class AnalysisService:
             return None
         self._logger.info(f"Loaded ecctestbench for {run_id} ...")
         
-        file_tree = self.__find_file_tree_by_node_id__(run.__ecctestbench__, original_file_node_id)
+        plc_testbench = self.ecctestbench_service.build_testbench_from_run(run)
+        file_tree = self.__find_file_tree_by_node_id__(plc_testbench, original_file_node_id)
         original_audio_file = file_tree.file
         self._logger.info(f"file_tree:  {file_tree} ...")
         
@@ -97,7 +99,8 @@ class AnalysisService:
             return None
         self._logger.info(f"Loaded ecctestbench for {run_id} ...")
         
-        audio_file = self.__find_node_by_id__(run.__ecctestbench__, audio_file_node_id)
+        plc_testbench = self.ecctestbench_service.build_testbench_from_run(run)
+        audio_file = self.__find_node_by_id__(plc_testbench, audio_file_node_id)
         if audio_file == None:
             return None
         audio_file.load()
@@ -132,7 +135,7 @@ class AnalysisService:
     
     @staticmethod
     def __find_node_by_id__(ecctestbench: PLCTestbench, node_id: str) -> Node:
-        search = lambda x : x.uuid == node_id
+        search = lambda x : x.get_id() == node_id
         result = list(map(lambda tree: AnalysisService.__find_nodes_in_file_tree__(tree, search), ecctestbench.data_manager.get_data_trees()))
         result = list(itertools.chain(*result))
         return AnalysisService.__get_first__(result)
@@ -144,23 +147,24 @@ class AnalysisService:
     
     @staticmethod
     def __find_file_tree_by_node_id__(ecctestbench: PLCTestbench, node_id: str) -> Node:
-        search = lambda x : isinstance(x, OriginalTrackNode) and x.uuid == node_id
+        search = lambda x : isinstance(x, OriginalTrackNode) and x.get_id() == node_id #and x.uuid == node_id
         files_trees = list(filter(search, ecctestbench.data_manager.get_data_trees()))
         return AnalysisService.__get_first__(files_trees)
     
     @staticmethod
     def __find_lost_simulation_file_by_node_id__(file_tree: Node, node_id: str) -> Node:
-        search = lambda x: isinstance(x, LostSamplesMaskNode) and x.uuid == node_id
+        search = lambda x: isinstance(x, LostSamplesMaskNode) and x.get_id() == node_id #and x.uuid == node_id
         return AnalysisService.__get_first__(AnalysisService.__find_nodes_in_file_tree__(file_tree, search))
     
     @staticmethod
     def __find_audio_file_by_node_id__(file_tree: Node, node_id: str) -> Node:
-        search = lambda x: any(isinstance(x, n) for n in [OriginalTrackNode, ReconstructedTrackNode]) and x.uuid == node_id
+        search = lambda x: any(isinstance(x, n) for n in [OriginalTrackNode, ReconstructedTrackNode]) and x.get_id() == node_id #and x.uuid == node_id
         return AnalysisService.__get_first__(AnalysisService.__find_nodes_in_file_tree__(file_tree, search))
     
     @staticmethod
     def __find_metric_file_by_node_id__(file_tree: Node, node_id: str, category = None) -> Node:
-        search = lambda x: isinstance(x, OutputAnalysisNode) and x.uuid == node_id \
+        #search = lambda x: isinstance(x, OutputAnalysisNode) and x.uuid == node_id \
+        search = lambda x: isinstance(x, OutputAnalysisNode) and x.get_id() == node_id \
             and (category == None or category == ConfigurationService.get_output_analyser_category(x.worker))
         return AnalysisService.__get_first__(AnalysisService.__find_nodes_in_file_tree__(file_tree, search))
     

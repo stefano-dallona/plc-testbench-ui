@@ -12,6 +12,16 @@ from .base_model import *
 
 minFloat = np.float32("1.0e-10")
 
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        if isinstance(obj, np.floating):
+            return float(obj)
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return json.JSONEncoder.default(self, obj)
+
 class LostInterval(Serializable):
     
     def __init__(self, start_sample, num_samples, sample_rate = 1):

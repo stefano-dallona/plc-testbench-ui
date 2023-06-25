@@ -8,6 +8,7 @@ from plctestbench.path_manager import *
 from plctestbench.node import *
 from plctestbench.file_wrapper import *
 
+import os
 import logging
 from flask import json
 from flask_socketio import SocketIO
@@ -24,7 +25,7 @@ from threading import Thread
 from eventlet import sleep
 
 from ..repositories.pickle.run_repository import RunRepository
-from ..config.app_config import Config
+from ..config.app_config import *
 from ..models.run import *
 
 class TqdmExt(std_tqdm):
@@ -97,11 +98,40 @@ class EccTestbenchService:
             target_file_path = os.path.join(run_root_folder, file_basename)
             shutil.copyfile(src=source_file_path, dst=target_file_path)
     
+    def build_testbench_from_run(self, run: Run) -> PLCTestbench:
+        get_worker = lambda x: (globals()[x[0]], x[1])
+        
+        path_manager = PathManager(run.root_folder)
+        database_manager = DatabaseManager(db_host, db_port, db_username, db_password)
+        data_manager = DataManager(path_manager, database_manager, progress_monitor=__async_func__)
+
+        packet_loss_simulators = list(map(get_worker, run.packet_loss_simulators))
+        plc_algorithms = list(map(get_worker, run.plc_algorithms))
+        output_analysers = list(map(get_worker, run.output_analysers))
+        
+        testbench = PLCTestbench(
+                                 packet_loss_simulators,
+                                 plc_algorithms,
+                                 output_analysers,
+                                 data_manager,
+                                 path_manager,
+                                 run.run_id
+                                 )
+        '''
+        original_audio_tracks_ids = map(lambda x: { x[0]: x[1] }, run.original_audio_tracks)
+        original_audio_tracks_ids_map = functools.reduce(lambda x, y: dict(list(x.items()) + list(y.items())),
+                                                     original_audio_tracks_ids, dict())
+        for original_audio_track_node in testbench.data_manager.get_data_trees():
+            file_basename = os.path.basename(original_audio_track_node.file.path)
+            original_audio_track_node.uuid = original_audio_tracks_ids_map[file_basename]
+        '''
+        return testbench
+    
     def create_run(self, json_dict, run_id) -> PLCTestbench:
 
         configuration_map = {
             InputFileSelection: None,
-            GlobalSettings: [],
+            #GlobalSettings: [],
             PacketLossSimulator: [],
             PLCAlgorithm: [],
             OutputAnalyser: []
@@ -127,47 +157,53 @@ class EccTestbenchService:
                                                          and worker_constructor.__base__ != Settings \
                                                       else None
             worker_key = worker_base if worker_base != None else worker_constructor
+            worker_id = str(uuid.uuid4())
             
             if worker_settings_constructor != None:
                 copy_attributes(worker_settings, json_dict)
             if isinstance(configuration_map[worker_key], list):
-                configuration_map[worker_key].extend([(worker_constructor, worker_settings) if worker_settings_constructor != None and worker_constructor != worker_settings.__class__ else worker_settings])
+                configuration_map[worker_key].extend([(worker_constructor, worker_settings, worker_id) if worker_settings_constructor != None and worker_constructor != worker_settings.__class__ else worker_settings])
             else:
                 configuration_map[worker_key] = worker_settings
             return configuration_map
         
         configuration_map = functools.reduce(parse_configuration, json_dict, configuration_map)
         
-        for global_settings in configuration_map[GlobalSettings]:
-            global_settings.__progress_monitor__ = __async_func__
+        #for global_settings in configuration_map[GlobalSettings]:
+        #    global_settings.__progress_monitor__ = __async_func__
         
         run_root_folder = os.path.join(self.root_folder, run_id)
         self.prepare_run_directory(configuration_map[InputFileSelection], self.root_folder, run_root_folder)
         
-        path_manager = PathManager(run_root_folder)
-        data_manager = DataManager(path_manager)
-
-        testbench = PLCTestbench(configuration_map[PacketLossSimulator],
-                                 configuration_map[PLCAlgorithm],
-                                 configuration_map[OutputAnalyser],
-                                 configuration_map[GlobalSettings], data_manager, path_manager, run_id)
+        run = Run( run_id=run_id,
+                   root_folder=run_root_folder,
+                   selected_input_files=configuration_map[InputFileSelection],
+                   packet_loss_simulators=configuration_map[PacketLossSimulator],
+                   plc_algorithms=configuration_map[PLCAlgorithm],
+                   output_analysers=configuration_map[OutputAnalyser])
         
-        return Run(testbench, configuration_map[InputFileSelection])
+        testbench = self.build_testbench_from_run(run)
+        
+        return run
     
     def save_run(self, run: Run):
         self.logger.info("Saving run %s", run.run_id)
-        self.run_repository.add(run)
+        self.run_repository.update(run)
         
     def load_run(self, run_id) -> Run:
         self.logger.info("Loading run %s", run_id)
-        return self.run_repository.find_by_id(run_id)
+        run = self.run_repository.find_by_id(run_id)
+        return run
     
     def launch_run_execution(self, run_id) -> PLCTestbench:
         self.logger.info("Executing run %s", run_id)
         run = self.load_run(run_id)
-        run.__ecctestbench__.global_settings_list[0].__progress_monitor__ = __async_func__
+        #run.__ecctestbench__.global_settings_list[0].__progress_monitor__ = __async_func__
+        #plc_testbench = run.__ecctestbench__
         
-        task = self.socketio.start_background_task(execute_elaboration, run.__ecctestbench__, self.on_run_completed)
+        plc_testbench = self.build_testbench_from_run(run)
+        
+        task = self.socketio.start_background_task(execute_elaboration, plc_testbench, self.on_run_completed)
         '''
         thread_0 = Thread(target=execute_elaboration,
                           args=[run.__ecctestbench__, self.on_run_completed])
@@ -184,6 +220,7 @@ class EccTestbenchService:
         self.save_run(run)
         __notifyRunCompletion__(run_id)
 
+
 def __notifyRunCompletion__(run_id):
     msg = __format_sse__(data=json.dumps({
                             "total": 100,
@@ -195,8 +232,10 @@ def __notifyRunCompletion__(run_id):
                             "timestamp": str(datetime.now())
                         }, indent = 4).replace('\n', ' '),
                         event="run_execution")
-    print("msg:%s" % (msg))
-    announcer.announce(msg=msg)
+    for idx in range(1, 10):
+        announcer.announce(msg=msg)
+        print("msg:%s" % (msg))
+        sleep(0.1)
     
 def __async_func__(self):
     progressLoggerMethod = "TqdmExt" 

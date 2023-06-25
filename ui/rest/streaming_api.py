@@ -14,12 +14,15 @@ from ..config.app_config import config
 from ..services.analysis_service import AnalysisService
 from ..services.ecctestbench_service import EccTestbenchService
 from ..repositories.pickle.run_repository import RunRepository
+from ..repositories.mongodb.run_repository import RunRepository as MongoRunRepository
 
 logging.getLogger('engineio').setLevel(level=logging.DEBUG)
 
 streaming_api = Blueprint("streaming", __name__, url_prefix="/streaming")
 run_repository = RunRepository(config.data_dir)
-ecctestbench_service = EccTestbenchService(config.data_dir, run_repository=run_repository)
+run_repository_mongodb2 = MongoRunRepository()
+#ecctestbench_service = EccTestbenchService(config.data_dir, run_repository=run_repository)
+ecctestbench_service = EccTestbenchService(config.data_dir, run_repository=run_repository_mongodb2)
 analysis_service = AnalysisService(ecctestbench_service=ecctestbench_service)
 
 ping_interval = 1

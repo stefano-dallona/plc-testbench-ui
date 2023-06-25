@@ -1,0 +1,100 @@
+{
+  "_id": "19db15f3-afa9-420e-a1e3-15a3b5eca83e",
+  "run_id": "19db15f3-afa9-420e-a1e3-15a3b5eca83e",
+  "root_folder": "C:\\Data\\personale\\Università\\2022-2023\\original_tracks\\19db15f3-afa9-420e-a1e3-15a3b5eca83e",
+  "selected_input_files": [
+    "Blues_Bass.wav",
+    "Blues_Guitar.wav"
+  ],
+  "description": "",
+  "created_on": "2023-06-20 15:59:08.355305",
+  "creator": "anonymous",
+  "status": "CREATED",
+  "progress": 0,
+  "packet_loss_simulators": [
+    [
+      "BinomialPLS",
+      {
+        "settings": {
+          "seed": 1,
+          "packet_size": 32,
+          "per": 0.0001
+        },
+        "seed": 1,
+        "packet_size": 32,
+        "per": 0.0001,
+        "_id": null,
+        "classname": "BinomialPLSSettings"
+      }
+    ],
+    [
+      "GilbertElliotPLS",
+      {
+        "settings": {
+          "seed": 1,
+          "packet_size": 32,
+          "p": 0.001,
+          "r": 0.05,
+          "h": 0.5,
+          "k": 0.999999
+        },
+        "seed": 1,
+        "packet_size": 32,
+        "p": 0.001,
+        "r": 0.05,
+        "h": 0.5,
+        "k": 0.999999,
+        "_id": null,
+        "classname": "GilbertElliotPLSSettings"
+      }
+    ]
+  ],
+  "plc_algorithms": [
+    [
+      "ZerosPLC",
+      {
+        "settings": {},
+        "_id": null,
+        "classname": "ZerosPLCSettings"
+      }
+    ],
+    [
+      "LastPacketPLC",
+      {
+        "settings": {},
+        "placeholder": "Needed to avoid empty class",
+        "_id": null,
+        "classname": "LastPacketPLCSettings"
+      }
+    ]
+  ],
+  "output_analysers": [
+    [
+      "MSECalculator",
+      {
+        "settings": {
+          "N": 1024,
+          "hop": 512,
+          "amp_scale": 1
+        },
+        "N": 1024,
+        "hop": 512,
+        "amp_scale": 1,
+        "_id": null,
+        "classname": "MSECalculatorSettings"
+      }
+    ],
+    [
+      "PEAQCalculator",
+      {
+        "settings": {
+          "peaq_mode": "nb"
+        },
+        "peaq_mode": "nb",
+        "_id": null,
+        "classname": "PEAQCalculatorSettings"
+      }
+    ]
+  ],
+  "classname": "Run"
+}

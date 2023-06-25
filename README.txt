@@ -83,6 +83,9 @@ docker-machine start default2
 cd <project-root>
 docker-compose up
 
+# Start mongodb with custom env variables from file
+docker compose --env-file <path-to-env-file> up
+
 #generate SSL cert and key
 # run openssl in gitbash
 openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem
