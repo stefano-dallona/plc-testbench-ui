@@ -19,6 +19,8 @@ from ..services.configuration_service import ConfigurationService
 
 event_repository = EventRepository()
 
+progress_cache = dict()
+
 class ExecutionService:
     
     _logger = logging.getLogger(__name__)
@@ -27,30 +29,43 @@ class ExecutionService:
         self.ecctestbench_service = ecctestbench_service
         self.run_repository = run_repository
         
-    def get_execution_hierarchy(self, run_id, execution_id) -> List[Node]:
-        run = self.ecctestbench_service.load_run(run_id)
+    def get_execution_hierarchy(self, run_id, execution_id, user) -> List[Node]:
+        run = self.ecctestbench_service.load_run(run_id, user)
         if run == None:
             return None
         self._logger.info(f"Loaded run for {run_id} ...")
         execution = RunExecution(run_id=run_id, hierarchy=[])
         
         #for file_tree in run.__ecctestbench__.data_manager.get_data_trees():
-        plc_testbench = self.ecctestbench_service.build_testbench_from_run(run)
+        plc_testbench = self.ecctestbench_service.build_testbench_from_run(run, user)
         for file_tree in plc_testbench.data_manager.get_data_trees():
             execution.hierarchy.append(self.__build_output_hierarchy__(file_tree))
         return execution.hierarchy
     
-    def get_runs(self, pagination) -> List[Run]:
-        return self.run_repository.find_by_filter(filters={}, projection=None, pagination=pagination)
+    def get_runs(self, pagination, user) -> List[Run]:
+        return self.run_repository.find_by_filter(filters={}, projection=None, pagination=pagination, user=user)
     
-    def get_execution_events(self, session_id, run_id, execution_id, last_event_id = None):
+    def update_progress_cache(execution_id, caller, node_id, progress) -> dict:
+        current_state = progress_cache[execution_id]
+        new_state = dict(**current_state)
+        new_state[node_id] = progress
+        if caller == type(PLCTestbench):
+            new_state["run_id"] = caller.run_id
+        return new_state
+    
+    def clean_progress_cache(execution_id):
+        if execution_id in progress_cache.keys():
+            del progress_cache[execution_id]
+    
+    def get_execution_events(self, session_id, run_id, execution_id, last_event_id = None, user = None):
         try:
+            '''
             if (last_event_id != None):
-                last_event = self.find_last_run_event(run_id, last_event_id)
-                unseen_events = self.find_events_after_last(run_id, last_event_id)
+                last_event = self.find_last_run_event(run_id, last_event_id, user)
+                unseen_events = self.find_events_after_last(run_id, last_event_id, user)
                 for unseen_event in unseen_events["data"]:
                     yield str(unseen_event)
-
+            '''
             messages = announcer.listen(session_id)  # returns a queue.Queue
             sequence = 1
             while True:
@@ -65,9 +80,10 @@ class ExecutionService:
                         source_id=data["nodeid"],
                         sequence=sequence,
                         data=data)
-                    event_repository.add(event)
+#                    event_repository.add(event, user)
                     messages.task_done()
                     yield str(event)
+                    self.update_progress_cache(execution_id, caller, data["nodeid"], data["currentPercentage"])
                     self._logger.info(f"Received event {event}")
                     sequence += 1
                 except Exception as e:
@@ -79,16 +95,16 @@ class ExecutionService:
             self._logger.error(f"SSE generator: an exception occurred: {str(e)}")
         finally:
             #announcer.disconnect(run_id)
-            pass
+            self.clean_progress_cache(execution_id)
         
-    def find_last_run_event(self, run_id, last_event_id):
+    def find_last_run_event(self, run_id, last_event_id, user):
         query = { '_id': last_event_id }
-        last_event = event_repository.find_by_query(query)
+        last_event = event_repository.find_by_query(query, user)
         return last_event
     
-    def find_events_after_last(self, run_id, last_event_id):
+    def find_events_after_last(self, run_id, last_event_id, user):
         query = { '_id': last_event_id, 'data.run_id': run_id }
-        events = event_repository.find_by_query(query)
+        events = event_repository.find_by_query(query, user)
         return events
 
     @staticmethod
@@ -113,7 +129,7 @@ class ExecutionService:
             name = node.worker.__class__.__name__
             file += ".pickle"
             category = ConfigurationService.get_output_analyser_category(node.worker.__class__)
-        node_id = node.get_id()
+        node_id = str(node.get_id())
         print("level:%d, name:%s, type:%s, uuid:%s, file:%s" % (node.depth, name, type, node_id, file))
         transformed_node = Node(name, parent=parent, parent_id=parent.uuid if parent != None else None, type=type, file=file, uuid=node_id, category=category)
         transformed_node.children = [ExecutionService.__build_output_hierarchy__(child, transformed_node) for child in node.children]

@@ -27,7 +27,8 @@ class RunExecution(Serializable):
 
 class Run(Serializable):
     def __init__(self,
-                 run_id: str = None,
+                 #run_id: str = None,
+                 run_id = None,
                  root_folder: str = "",
                  selected_input_files: list = [],
                  description: str = "",
@@ -39,7 +40,7 @@ class Run(Serializable):
                  plc_algorithms: list = [],
                  output_analysers: list = []):
         self.root_folder = root_folder
-        self.run_id = run_id if run_id != None else str(uuid.uuid4())
+        self.run_id = run_id #if run_id != None else str(uuid.uuid4())
         self.selected_input_files = selected_input_files
         self.description = description
         self.created_on = created_on if created_on != "" else str(datetime.now())

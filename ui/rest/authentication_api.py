@@ -1,6 +1,6 @@
 
 import os
-from flask import Blueprint, json, redirect, request, url_for
+from flask import Blueprint, json, redirect, request, url_for, session
 from flask_login import login_required, login_user, logout_user
 from oauthlib.oauth2 import WebApplicationClient
 import requests
@@ -93,6 +93,8 @@ def callback():
 
     # Begin user session by logging the user in
     login_user(user)
+    
+    session["user"] = user
 
     # Send user back to homepage
     return redirect("/home")

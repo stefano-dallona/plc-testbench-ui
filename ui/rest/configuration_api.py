@@ -14,44 +14,44 @@ configuration_service = ConfigurationService(config.data_dir)
 @configuration_api.route('/ecc_algorithms', methods=['GET'])
 #@login_required
 @token_required
-def ecc_algorithms():
+def ecc_algorithms(user):
   return json.dumps(configuration_service.find_ecc_algorithms()), status.HTTP_200_OK
 
 @configuration_api.route('/loss_simulators', methods=['GET'])
 #@login_required
 @token_required
-def loss_simulators():
+def loss_simulators(user):
   return json.dumps(configuration_service.find_loss_simulators()), status.HTTP_200_OK
 
 @configuration_api.route('/loss_models', methods=['GET'])
 #@login_required
 @token_required
-def loss_models():
+def loss_models(user):
   return json.dumps(configuration_service.find_loss_models()), status.HTTP_200_OK
 
 @configuration_api.route('/output_analysers', methods=['GET'])
 #@login_required
 @token_required
-def output_analysers():
+def output_analysers(user):
   category = request.args.get("category", type=str, default=None)
   return json.dumps(configuration_service.find_output_analysers(category)), status.HTTP_200_OK
 
 @configuration_api.route('/settings_metadata', methods=['GET'])
 #@login_required
 @token_required
-def settings_metadata():
+def settings_metadata(user):
     return json.dumps(configuration_service.find_settings_metadata()), status.HTTP_200_OK
 
 @configuration_api.route('/input_files', methods=['GET'])
 #@login_required
 @token_required
-def input_files():
+def input_files(user):
   return json.dumps(configuration_service.find_input_files()), status.HTTP_200_OK
 
 @configuration_api.route('/upload', methods=['POST'])
 #@login_required
 @token_required
-def upload():
+def upload(user):
     file = request.files['file']
     total_file_size = int(request.form['dztotalfilesize'])
     chunk_index = int(request.form['dzchunkindex'])

@@ -50,6 +50,7 @@ db.OriginalTrackNode.aggregate([
  db.getCollection("OriginalTrack-1").drop()
  db.getCollection("OriginalTrack-2").drop()
  db.getCollection("OriginalTrack-3").drop()
+ db.getCollection("OriginalTrack-4").drop()
 
  db.createView("OriginalTrack-1", "ReconstructedTrackNode", [{
     $graphLookup: {
@@ -83,6 +84,90 @@ db.OriginalTrackNode.aggregate([
         as: "lostSamplesMasks"
      }
  }])
+
+ db.createView("OriginalTrack-4", "runs", [{
+    $graphLookup: {
+        from: "OriginalTrack-3",
+        startWith: "$_id",
+        connectFromField: "_id",
+        connectToField: "run_id",
+        maxDepth: 4,
+        as: "originalTracks"
+     }
+ }])
+
+ db.getCollection("RunView").drop()
+ db.createView("RunView", "runs", [
+     {
+         $project: {
+           _id: 1,
+           selected_input_files: {
+             $map: {
+               input: "$nodes",
+               as: "node",
+               in: "$$node._id"
+             }
+           }
+         }
+     },
+     {
+         $lookup: {
+             from: "OriginalTrackNode",
+             localField: "selected_input_files",
+             foreignField: "_id",
+             as: "selected_input_files"
+         }
+     },
+     {
+         $project: {
+           _id: 1,
+           selected_input_files: {
+             $map: {
+               input: "$selected_input_files",
+               as: "input_file",
+               in: { $last: { $split: [ "$$input_file.filename", "\\" ] } }
+             }
+           }
+         }
+     }
+   ])
+ 
+  db.getCollection("RunView").find({})
+
+  db.runs.aggregate([
+    {
+        $project: {
+          _id: 1,
+          input_files: {
+            $map: {
+              input: "$nodes",
+              as: "node",
+              in: "$$node._id"
+            }
+          }
+        }
+    },
+    {
+        $lookup: {
+            from: "OriginalTrackNode",
+            localField: "input_files",
+            foreignField: "_id",
+            as: "input_files"
+        }
+    },
+    {
+        $project: {
+          _id: 1,
+          input_files: {
+            $map: {
+              input: "$input_files",
+              as: "selected_input_files",
+              in: { $last: { $split: [ "$$input_file.filename", "\\" ] } }
+            }
+          }
+        }
+    }
+  ])
 
 db.getCollection("OriginalTrack-3").find(
     {

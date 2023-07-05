@@ -1,9 +1,13 @@
 from typing import List
 import json
-from pymongo.errors import OperationFailure
+from pymongo.database import Database
+
+from plctestbench.database_manager import *
+from plctestbench.utils import *
 
 from ...config.app_config import *
 from ...models.run import Run
+from ...models.user import User
 from .base_repository import BaseMongoRepository
 
 collection = "Run"
@@ -49,6 +53,44 @@ views = [
                 'as': "lostSamplesMasks"
             }
         }]
+    },
+    {
+        'name': 'RunView',
+        'on': 'runs',
+        'pipeline': [
+            {
+                '$project': {
+                '_id': 1,
+                'selected_input_files': {
+                    '$map': {
+                    'input': "$nodes",
+                    'as': "node",
+                    'in': "$$node._id"
+                    }
+                }
+                }
+            },
+            {
+                '$lookup': {
+                    'from': "OriginalTrackNode",
+                    'localField': "selected_input_files",
+                    'foreignField': "_id",
+                    'as': "selected_input_files"
+                }
+            },
+            {
+                '$project': {
+                '_id': 1,
+                'selected_input_files': {
+                    '$map': {
+                    'input': "$selected_input_files",
+                    'as': "input_file",
+                    'in': { '$last': { '$split': [ "$$input_file.filename", "\\" ] } }
+                    }
+                }
+                }
+            }
+        ]
     }
 ]
 
@@ -56,72 +98,49 @@ class RunRepository(BaseMongoRepository):
     
     def __init__(self):
         super().__init__()
-        
         self.collection_metadata = { 'name' : 'OriginalTrack-3' }
-
         self.collection = collection
-        self.__create_collection__(self.collection)
+          
+    def initialize_database(self, database: Database):
+        if self.initialized:
+            return
+        
+        initialized = False
+        initialized |= self.__create_collection__(database, self.collection)
         
         for view in views:
-            self.__create_view__(view)
+            initialized |= self.__create_view__(database, view)
         
-        self.__create_role_for_views__()
-        self.__grant_find_role_on_views__()
-    
-    def __create_collection__(self, collection):
-
-        if not collection in self.db.list_collection_names():
-            self.logger.info(f"Collection {collection} missing. Creating ...")
-            self.db.create_collection(
-                collection
-            )
-            self.logger.info(f"Collection {collection} created")
-        else:
-            self.logger.info(f"Collection {collection} already exists")
-    
-    def __create_view__(self, view):
-        if not view['name'] in self.db.list_collection_names():
-            self.logger.info(f"View {view['name']} missing. Creating ...")
-            self.db.create_collection(
-                view['name'],
-                viewOn = view['on'],
-                pipeline = view['pipeline']
-            )
-            self.logger.info(f"View {view['name']} created")
-        else:
-            self.logger.info(f"View {view['name']} already exists")
-            
-    def __grant_find_role_on_views__(self):
-        self.admin.command("grantRolesToUser", db_username, roles=["readViewCollection"])
-    
-    def __create_role_for_views__(self):
-        try:
-            self.admin.command(
-                'createRole', 'readViewCollection',
-                privileges=[{
-                    'actions': ['find'],
-                    'resource': {'db': 'plc_database', 'collection': 'system.views'}
-                }],
-                roles=[])
-        except OperationFailure as exception:
-            self.logger.error(exception)
-            pass
+        initialized |= self.__create_role_for_views__(database)
+        initialized |= self.__grant_find_role_on_views__(database)
         
-    def add(self, item: Run):
-        result = self.db.get_collection(self.collection).insert_one(BaseMongoRepository.toDict(item, "classname", "run_id"))
+        self.initialized = initialized
+        
+    def get_plc_database_manager(self, user: User):
+        return DatabaseManager(ip=db_host, port=db_port, username=db_username, password=db_password, user=user.__dict__)
+        
+    def add(self, item: Run, user: User):
+        result = self.get_database(user).get_collection(self.collection).insert_one(BaseMongoRepository.toDict(item, "classname", "run_id"))
         return result.inserted_id
         
-    def find_by_id(self, id) -> Run:
+    def find_by_id(self, id: str, user: User) -> Run:
         #data = self.db.get_collection(self.collection_metadata["name"]).find_one({'_id': id })
-        data = self.db.get_collection(self.collection).find_one({'_id': id })
+        data = self.get_database(user).get_collection("RunView").find_one({'_id': int(id) })
+        #data = self.get_plc_database_manager(user).get_run(int(id))
+        data["run_id"] = data["_id"]
+        data["classname"] = "Run"
+        data["creator"] = "anonymous"
+        data["root_folder"] = config.data_dir
         return BaseMongoRepository.fromDict(data)
     
     def find_by_filter(self,
                       filters,
                       projection,
-                      pagination) -> List[Run]:
+                      pagination,
+                      user: User) -> List[Run]:
         #collection = self.db.get_collection(self.collection_metadata["name"])
-        collection = self.db.get_collection(self.collection)
+        #collection = self.get_database(user).get_collection(self.collection)
+        collection = self.get_database(user).get_collection("RunView")
         totalRecords = collection.count_documents(filters)
         query = collection  \
             .find(filters, projection=projection)
@@ -129,19 +148,23 @@ class RunRepository(BaseMongoRepository):
             .skip(pagination["page"] * pagination["pageSize"]) \
             .limit(pagination["pageSize"])
         data = list(cursor)
+        
+        enriched_data = list(map(lambda x: dict(x, classname="Run", creator=user.email, run_id=str(x["_id"])), data))
+        typed_data = list(map(BaseMongoRepository.fromDict, enriched_data))
+        
         return {
-            'data': BaseMongoRepository.fromDict(data),
+            'data': typed_data,
             'totalRecords': totalRecords
         }
     
-    def update(self, item: Run) -> int:
-        deleteCount = self.delete(item)
+    def update(self, item: Run, user: User) -> int:
+        deleteCount = self.delete(item, user)
         if deleteCount >= 0:
-            id = self.add(item)
+            id = self.add(item, user)
             return 1
         else:
             return 0
     
-    def delete(self, item: Run) -> int:
-        result = self.db.get_collection(self.collection).delete_one({ '_id' : item.run_id })
+    def delete(self, item: Run, user) -> int:
+        result = self.get_database(user).get_collection(self.collection).delete_one({ '_id' : item.run_id })
         return result.deleted_count

@@ -1,11 +1,13 @@
 import logging
 from pymongo import MongoClient
+from pymongo.database import Database
 from typing import List
 
 from ui.repositories.mongodb.base_repository import BaseMongoRepository
 
 from ...config.app_config import *
 from ...models.event import Event
+from ...models.user import User
 
 class EventRepository(BaseMongoRepository):
     
@@ -13,29 +15,31 @@ class EventRepository(BaseMongoRepository):
         super().__init__()
 
         self.collection_metadata = { 'name': 'Events' }
-        self.__create_collection__(self.collection_metadata)
-    
-    def __create_collection__(self, collection):
-        if not collection['name'] in self.db.list_collection_names():
-            self.logger.info(f"Collection {collection['name']} missing. Creating ...")
-            self.db.create_collection(
-                collection['name']
-            )
-            self.logger.info(f"Collection {collection['name']} created")
-        else:
-            self.logger.info(f"Collection {collection['name']} already exists")
         
-    def add(self, item: Event):
-        return self.db.get_collection(self.collection_metadata["name"]).insert_one(item.__dict__)
+    def initialize_database(self, database: Database):
+        if self.initialized:
+            return
         
-    def get(self, **kwargs) -> Event:
-        return Event(kwargs=self.db.get_collection(self.collection_metadata["name"]).find_one({'_id': kwargs["id"]}))
+        initialized = False
+        initialized |= self.__create_collection__(database, self.collection_metadata["name"])
+        
+        self.initialized = initialized
+        
+    def add(self, item: Event, user):
+        return super().get_database(user).get_collection(self.collection_metadata["name"]).insert_one(item.__dict__)
+        
+    def find_by_id(self,
+                   id,
+                   projection = None,
+                   user = None) -> any:
+        return Event(kwargs=super().get_database(user).get_collection(self.collection_metadata["name"]).find_one({'_id': id}))
     
     def find_by_query(self,
                       query,
                       projection = None,
-                      pagination = None) -> List[Event]:
-        collection = self.db.get_collection(self.collection_metadata["name"])
+                      pagination = None,
+                      user = None) -> List[Event]:
+        collection = super().get_database(user).get_collection(self.collection_metadata["name"])
         totalRecords = collection.count_documents(query)
         query = collection  \
             .find(query, projection=projection)
@@ -47,8 +51,8 @@ class EventRepository(BaseMongoRepository):
             'totalRecords': totalRecords
         }
     
-    def update(self, item):
+    def update(self, item, user):
         pass
     
-    def delete(self, item):
+    def delete(self, item, user):
         pass

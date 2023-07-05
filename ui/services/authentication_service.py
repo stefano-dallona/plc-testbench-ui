@@ -6,6 +6,11 @@ import os
 
 from ..models.user import User
 
+class MissingTokenException(Exception):
+    pass
+
+class TokenDecodingException(Exception):
+    pass
 
 def get_google_certs():
     headers = {'Accept': 'application/json'}
@@ -13,36 +18,43 @@ def get_google_certs():
     certs = r.json()
     return certs
 
+def get_user_from_jwt_token(token) -> User:
+    if not token:
+        raise MissingTokenException()
+    try:
+        data = jwt.decode(token, get_google_certs())
+        current_user = User.get(data["email"])
+        return current_user
+    except Exception as e:
+        raise TokenDecodingException(e)
+
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = None
-        if "Authorization" in request.headers:
-            token = request.headers["Authorization"]
-        if not token:
-            return {
-                "message": "Authentication Token is missing!",
-                "data": None,
-                "error": "Unauthorized"
-            }, 401
         try:
-            data = jwt.decode(token, get_google_certs())
-            current_user = User.get(data["email"])
+            token = None
+            if "Authorization" in request.headers:
+                token = request.headers["Authorization"]
+            current_user = get_user_from_jwt_token(token)
             if current_user is None:
                 return {
                 "message": "Invalid Authentication token!",
                 "data": None,
                 "error": "Unauthorized"
             }, 401
-            #if not current_user["active"]:
-            #    abort(403)
-        except Exception as e:
+        except MissingTokenException as ex:
+            return {
+                "message": "Authentication Token is missing!",
+                "data": None,
+                "error": "Unauthorized"
+            }, 401
+        except TokenDecodingException as ex:
             return {
                 "message": "Something went wrong",
                 "data": None,
-                "error": str(e)
+                "error": str(ex)
             }, 500
 
-        return f(*args, **kwargs)
+        return f(*args, **dict(kwargs, user=current_user))
 
     return decorated

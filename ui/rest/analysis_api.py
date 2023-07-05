@@ -1,4 +1,4 @@
-from flask import Blueprint, json, request, make_response, send_file
+from flask import Blueprint, json, request, make_response, send_file, session
 from flask import current_app
 from flask_api import status
 from flask_login import login_required
@@ -28,12 +28,12 @@ analysis_service = AnalysisService(ecctestbench_service=ecctestbench_service)
 @analysis_api.route('/runs/<run_id>/input-files/<original_file_node_id>/loss-simulations/<loss_simulation_node_id>', methods=['GET'])
 #@login_required
 @token_required
-def find_lost_samples(run_id, original_file_node_id, loss_simulation_node_id):
+def find_lost_samples(run_id, original_file_node_id, loss_simulation_node_id, user):
   unit_of_meas = request.args.get('unit_of_meas')
   unit_of_meas = unit_of_meas if unit_of_meas != None else "samples"
   
   current_app.logger.info(f"Retrieving lost samples from run_id {run_id} and file {original_file_node_id} and loss simulation {loss_simulation_node_id}")
-  lost_samples = analysis_service.find_lost_samples(run_id, original_file_node_id, loss_simulation_node_id, unit_of_meas)
+  lost_samples = analysis_service.find_lost_samples(run_id, original_file_node_id, loss_simulation_node_id, unit_of_meas, user)
   if lost_samples != None:
     return json.dumps(lost_samples, default=lost_samples.to_json()), status.HTTP_200_OK
   else:
@@ -44,8 +44,8 @@ def find_lost_samples(run_id, original_file_node_id, loss_simulation_node_id):
 @analysis_api.route("/runs/<run_id>/input-files/<original_file_node_id>/output-files/<audio_file_node_id>")
 #@login_required
 @token_required
-def stream_audio_file(run_id, original_file_node_id, audio_file_node_id):
-  audio_file = analysis_service.find_audio_file(run_id, audio_file_node_id)
+def stream_audio_file(run_id, original_file_node_id, audio_file_node_id, user):
+  audio_file = analysis_service.find_audio_file(run_id, audio_file_node_id, user)
   if audio_file != None:
     return send_file(audio_file.path, mimetype='audio/x-wav')
   else:
@@ -55,12 +55,12 @@ def stream_audio_file(run_id, original_file_node_id, audio_file_node_id):
 @analysis_api.route('/runs/<run_id>/input-files/<original_file_node_id>/output-files/<audio_file_node_id>/samples', methods=['GET'])
 #@login_required
 @token_required
-def get_audio_file_samples(run_id, original_file_node_id, audio_file_node_id):
+def get_audio_file_samples(run_id, original_file_node_id, audio_file_node_id, user):
   channel = request.args.get("channel", type=int, default=0)
   offset = request.args.get("offset", type=int, default=0)
   num_samples = request.args.get("num_samples", type=int, default=1000)
   
-  samples = analysis_service.get_audio_file_samples(run_id, audio_file_node_id, channel, offset, num_samples)
+  samples = analysis_service.get_audio_file_samples(run_id, audio_file_node_id, channel, offset, num_samples, user=user)
   if samples != None:
     #return json.dumps(samples.data, default=samples.to_json()), status.HTTP_200_OK
     return json.dumps(samples.data, default=NpEncoder().default), status.HTTP_200_OK
@@ -71,7 +71,7 @@ def get_audio_file_samples(run_id, original_file_node_id, audio_file_node_id):
 @analysis_api.route('/runs/<run_id>/input-files/<original_file_node_id>/output-files/<audio_file_node_id>/waveform', methods=['GET'])
 #@login_required
 @token_required
-def get_audio_file_waveform(run_id, original_file_node_id, audio_file_node_id):
+def get_audio_file_waveform(run_id, original_file_node_id, audio_file_node_id, user):
   channel = request.args.get("channel", type=int, default=0)
   offset = request.args.get("offset", type=int, default=0)
   num_samples = request.args.get("num_samples", type=int, default=1000)
@@ -80,7 +80,7 @@ def get_audio_file_waveform(run_id, original_file_node_id, audio_file_node_id):
   offset = None if offset == None or offset < 0 else offset
   num_samples = None if num_samples == None or num_samples < 0 else num_samples
   
-  waveform = analysis_service.get_audio_file_waveform(run_id, audio_file_node_id, max_slices)
+  waveform = analysis_service.get_audio_file_waveform(run_id, audio_file_node_id, max_slices, user)
   waveform.load(channel, offset, num_samples)
   if waveform != None:
     return json.dumps({
@@ -100,7 +100,7 @@ def get_audio_file_waveform(run_id, original_file_node_id, audio_file_node_id):
 @analysis_api.route('/runs/<run_id>/input-files/<original_file_node_id>/output-files/<audio_file_node_id>/metrics/<metric_node_id>', methods=['GET'])
 #@login_required
 @token_required
-def get_metric_samples(run_id, original_file_node_id, audio_file_node_id, metric_node_id):
+def get_metric_samples(run_id, original_file_node_id, audio_file_node_id, metric_node_id, user):
   channel = request.args.get("channel", type=int, default=0)
   offset = request.args.get("offset", type=int, default=0)
   num_samples = request.args.get("num_samples", type=int) #, default=1000)
@@ -114,7 +114,8 @@ def get_metric_samples(run_id, original_file_node_id, audio_file_node_id, metric
                                                offset = offset,
                                                num_samples = num_samples,
                                                unit_of_meas = unit_of_meas,
-                                               category=category)
+                                               category=category,
+                                               user=user)
   if metric != None:
     return json.dumps(metric.data, default=metric.to_json()), status.HTTP_200_OK
   else:

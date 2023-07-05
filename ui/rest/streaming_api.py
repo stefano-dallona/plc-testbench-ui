@@ -1,4 +1,4 @@
-from flask import request, Blueprint
+from flask import request, Blueprint, session
 from flask_socketio import SocketIO, emit
 
 import os
@@ -13,6 +13,7 @@ import uuid
 from ..config.app_config import config
 from ..services.analysis_service import AnalysisService
 from ..services.ecctestbench_service import EccTestbenchService
+from ..services.authentication_service import token_required, get_user_from_jwt_token
 from ..repositories.pickle.run_repository import RunRepository
 from ..repositories.mongodb.run_repository import RunRepository as MongoRunRepository
 
@@ -110,8 +111,10 @@ def stream_track(message):
     start_time = message["start_time"]
     stop_time = message["stop_time"]
     stream_id = str(uuid.uuid4())
+    authorization_token = message["authorization"]
+    user = get_user_from_jwt_token(authorization_token)
     
-    audio_file = analysis_service.find_audio_file(run_id, audio_file_node_id)
+    audio_file = analysis_service.find_audio_file(run_id, audio_file_node_id, user)
     
     def send_file(sid, start_time, stop_time):
         
