@@ -27,6 +27,9 @@ from eventlet import sleep
 from ..repositories.pickle.run_repository import RunRepository
 from ..config.app_config import *
 from ..models.run import *
+from ..models.user import *
+
+progress_cache = dict()
 
 class TqdmExt(std_tqdm):
     
@@ -243,7 +246,9 @@ class EccTestbenchService:
 
 
 def __notifyRunCompletion__(run_id):
+    execution_progress = get_execution_progress_by_run_id(run_id, User(id_="", email="", name=""))
     msg = __format_sse__(data=json.dumps({
+                            "task_id": execution_progress["task_id"],
                             "total": 100,
                             "nodeid" : str(run_id),
                             "nodetype" : "RunExecution",
@@ -257,6 +262,41 @@ def __notifyRunCompletion__(run_id):
         announcer.announce(msg=msg)
         print("msg:%s" % (msg))
         sleep(0.1)
+
+def get_execution_progress_by_run_id(run_id, user) -> str:
+    for execution_id in progress_cache.copy():
+        if progress_cache[execution_id] \
+                and "run_id" in progress_cache[execution_id].keys() \
+                and progress_cache[execution_id]["run_id"] == str(run_id):
+            return execution_id
+    return None
+
+def get_execution_last_event(last_event_id, user):
+    return progress_cache[last_event_id] if last_event_id in progress_cache.keys() else None
+        
+def update_progress_cache(execution_id, node_type, node_id, progress) -> dict:
+    if not execution_id in progress_cache.keys():
+        progress_cache[execution_id] = dict()
+    current_state = progress_cache[execution_id]
+    if node_id in current_state.keys() and current_state[node_id] == progress:
+        return current_state
+    current_state["revision"] = current_state["revision"] + 1 \
+        if "revision" in current_state.keys() else 1
+    current_state[node_id] = progress
+    if node_type == PLCTestbench.__name__:
+        current_state["run_id"] = node_id
+    if node_type == OriginalTrackWorker.__name__ \
+            and (not "current_root" in current_state.keys() \
+                or node_id != current_state["current_root"]):
+        current_state["current_root"] = node_id
+        current_state["current_root_index"] = current_state["current_root_index"] + 1 \
+            if "current_root_index" in current_state.keys() else 0
+
+    return current_state
+
+def clean_progress_cache(run_id: str, user):
+    execution_id = get_execution_progress_by_run_id(run_id, user)
+    del progress_cache[execution_id]       
     
 def __async_func__(task_id = None):
     tid = task_id if task_id else str(uuid.uuid4())
@@ -270,20 +310,28 @@ def external_callback(task_id, caller, *args, **kwargs):
     nodeid = str(caller.uuid) if hasattr(caller, "uuid") else str(caller.run_id) if hasattr(caller, "run_id") else ""
     currentPercentage = math.floor(kwargs["n"] / kwargs["total"] * 100)
     eta = math.ceil((kwargs["total"] - kwargs["elapsed"]) * (1 / (kwargs["rate"] if kwargs["rate"] != None else float('inf'))))
-    data = json.dumps({
-        "task_id": task_id,
-        "total": kwargs["total"],
-        "nodeid" : nodeid,
-        "nodetype" : caller_class_name,
-        "elapsed" : kwargs["elapsed"],
-        "currentPercentage": currentPercentage,
-        "eta": eta,
-        "timestamp": str(datetime.now())
-    }, indent=4).replace('\n', ' ')
-    msg = __format_sse__(data=data,
-        event="run_execution")
-    print("msg:%s" % (msg))
-    announcer.announce(msg=msg)
+    
+    progress_state = get_execution_last_event(task_id, User(id_="", email="", name=""))
+    revision = progress_state["revision"] if progress_state and "revision" in progress_state.keys() else 0
+    progress_state = update_progress_cache(task_id, caller_class_name, nodeid, currentPercentage)
+    new_revision = progress_state["revision"]
+    
+    if revision != new_revision:    
+        data = json.dumps({
+            "task_id": task_id,
+            "total": kwargs["total"],
+            "nodeid" : nodeid,
+            "nodetype" : caller_class_name,
+            "elapsed" : kwargs["elapsed"],
+            "currentPercentage": currentPercentage,
+            "eta": eta,
+            "timestamp": str(datetime.now()),
+            "progress": progress_cache[task_id]
+        }, indent=4).replace('\n', ' ')
+        msg = __format_sse__(data=data,
+            event="run_execution")
+        print("msg:%s" % (msg))
+        announcer.announce(msg=msg)
 
 def __format_sse__(data: str, event=None) -> str:
     msg = f'data: {data}\n\n'
@@ -295,3 +343,4 @@ def execute_elaboration(ecctestbench, user, callback):
     ecctestbench.run()
     run_id = ecctestbench.run_id
     callback(run_id, user)
+    clean_progress_cache(run_id, user)

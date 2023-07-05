@@ -60,14 +60,16 @@ views = [
         'pipeline': [
             {
                 '$project': {
-                '_id': 1,
-                'selected_input_files': {
-                    '$map': {
-                    'input': "$nodes",
-                    'as': "node",
-                    'in': "$$node._id"
-                    }
-                }
+                    '_id': 1,
+                    'selected_input_files': {
+                        '$map': {
+                        'input': "$nodes",
+                        'as': "node",
+                        'in': "$$node._id"
+                        }
+                    },
+                    "workers": 1,
+                    "nodes": 1
                 }
             },
             {
@@ -80,14 +82,22 @@ views = [
             },
             {
                 '$project': {
-                '_id': 1,
-                'selected_input_files': {
-                    '$map': {
-                    'input': "$selected_input_files",
-                    'as': "input_file",
-                    'in': { '$last': { '$split': [ "$$input_file.filename", "\\" ] } }
-                    }
-                }
+                    '_id': 1,
+                    'selected_input_files': {
+                        '$map': {
+                        'input': "$selected_input_files",
+                        'as': "input_file",
+                        'in': { '$last': { '$split': [ "$$input_file.filename", "\\" ] } }
+                        }
+                    },
+                    "workers": {
+                        "$reduce": {
+                        "input": '$workers',
+                        "initialValue": [],
+                        "in": {"$concatArrays": ['$$value', '$$this']}
+                        }
+                    },
+                    "nodes": 1
                 }
             }
         ]

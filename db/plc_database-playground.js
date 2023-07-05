@@ -107,7 +107,9 @@ db.OriginalTrackNode.aggregate([
                as: "node",
                in: "$$node._id"
              }
-           }
+           },
+           workers: 1,
+           nodes: 1
          }
      },
      {
@@ -127,7 +129,15 @@ db.OriginalTrackNode.aggregate([
                as: "input_file",
                in: { $last: { $split: [ "$$input_file.filename", "\\" ] } }
              }
-           }
+           },
+           workers: {
+            $reduce: {
+              input: '$workers',
+              initialValue: [],
+              in: {$concatArrays: ['$$value', '$$this']}
+            }
+           },
+           nodes: 1
          }
      }
    ])

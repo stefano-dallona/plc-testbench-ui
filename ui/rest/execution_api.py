@@ -113,6 +113,7 @@ def get_execution_events(run_id: str, execution_id: str, user):
   last_event_id = request.headers.get("Last-Event-ID")
   sessionID = sessionID if sessionID != None else str(uuid.uuid4())
   user = None
+  '''
   token = request.args["token"]
   if not token:
     return {
@@ -128,7 +129,7 @@ def get_execution_events(run_id: str, execution_id: str, user):
         "data": None,
         "error": str(ex)
     }, 401
-  
+  '''
   events = execution_service.get_execution_events(session_id=sessionID,
     run_id=run_id,
     execution_id=execution_id,

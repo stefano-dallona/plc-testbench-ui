@@ -10,7 +10,7 @@ from plctestbench.data_manager import *
 from plctestbench.path_manager import *
 
 from ..config.app_config import *
-from .ecctestbench_service import EccTestbenchService, announcer
+from .ecctestbench_service import EccTestbenchService, announcer, get_execution_last_event
 from ..models.run import *
 from ..models.event import Event
 from ..repositories.pickle.run_repository import RunRepository
@@ -18,8 +18,6 @@ from ..repositories.mongodb.event_repository import EventRepository
 from ..services.configuration_service import ConfigurationService
 
 event_repository = EventRepository()
-
-progress_cache = dict()
 
 class ExecutionService:
     
@@ -45,18 +43,6 @@ class ExecutionService:
     def get_runs(self, pagination, user) -> List[Run]:
         return self.run_repository.find_by_filter(filters={}, projection=None, pagination=pagination, user=user)
     
-    def update_progress_cache(execution_id, caller, node_id, progress) -> dict:
-        current_state = progress_cache[execution_id]
-        new_state = dict(**current_state)
-        new_state[node_id] = progress
-        if caller == type(PLCTestbench):
-            new_state["run_id"] = caller.run_id
-        return new_state
-    
-    def clean_progress_cache(execution_id):
-        if execution_id in progress_cache.keys():
-            del progress_cache[execution_id]
-    
     def get_execution_events(self, session_id, run_id, execution_id, last_event_id = None, user = None):
         try:
             '''
@@ -66,37 +52,36 @@ class ExecutionService:
                 for unseen_event in unseen_events["data"]:
                     yield str(unseen_event)
             '''
+            if (last_event_id != None):
+                event = get_execution_last_event(last_event_id, user)
+                yield str(event)
+            
             messages = announcer.listen(session_id)  # returns a queue.Queue
-            sequence = 1
             while True:
                 try:
                     msg = messages.get()  # blocks until a new message arrives
                     msg_entries = map(lambda x: (x[0].strip(), x[1].strip()), map(lambda x: x.split(":", 1), filter(lambda x: len(x.strip()) > 0, msg.split("\n"))))
                     message = dict(msg_entries)
                     data = json.loads(message["data"])
-                    data["run_id"] = run_id
-                    data["execution_id"] = execution_id
                     event = Event(type=message["event"],
                         source_id=data["nodeid"],
-                        sequence=sequence,
+                        task_id=data["task_id"],
                         data=data)
-#                    event_repository.add(event, user)
+                    #event_repository.add(event, user)
                     messages.task_done()
                     yield str(event)
-                    self.update_progress_cache(execution_id, caller, data["nodeid"], data["currentPercentage"])
                     self._logger.info(f"Received event {event}")
-                    sequence += 1
                 except Exception as e:
                     self._logger.info(f"An exception occurred: {str(e)}")
         except GeneratorExit as e:
-            announcer.disconnect(run_id)
+            announcer.disconnect(session_id)
             self._logger.error(f"SSE generator: exited: {str(e)}")
         except Exception as e:
             self._logger.error(f"SSE generator: an exception occurred: {str(e)}")
         finally:
-            #announcer.disconnect(run_id)
-            self.clean_progress_cache(execution_id)
-        
+            #announcer.disconnect(session_id)
+            pass
+
     def find_last_run_event(self, run_id, last_event_id, user):
         query = { '_id': last_event_id }
         last_event = event_repository.find_by_query(query, user)
