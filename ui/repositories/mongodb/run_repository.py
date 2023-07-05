@@ -141,6 +141,7 @@ class RunRepository(BaseMongoRepository):
         data["classname"] = "Run"
         data["creator"] = "anonymous"
         data["root_folder"] = config.data_dir
+        data["selected_input_files"] = sorted(data["selected_input_files"])
         return BaseMongoRepository.fromDict(data)
     
     def find_by_filter(self,

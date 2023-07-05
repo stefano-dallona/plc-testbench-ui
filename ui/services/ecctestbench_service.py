@@ -249,9 +249,9 @@ class EccTestbenchService:
 
 
 def __notifyRunCompletion__(run_id):
-    execution_progress = get_execution_progress_by_run_id(run_id, User(id_="", email="", name=""))
+    execution_id = get_execution_id_by_run_id(run_id, User(id_="", email="", name=""))
     msg = __format_sse__(data=json.dumps({
-                            "task_id": execution_progress["task_id"],
+                            "task_id": execution_id,
                             "total": 100,
                             "nodeid" : str(run_id),
                             "nodetype" : "RunExecution",
@@ -266,7 +266,7 @@ def __notifyRunCompletion__(run_id):
         print("msg:%s" % (msg))
         sleep(0.1)
 
-def get_execution_progress_by_run_id(run_id, user) -> str:
+def get_execution_id_by_run_id(run_id, user) -> str:
     for execution_id in progress_cache.copy():
         if progress_cache[execution_id] \
                 and "run_id" in progress_cache[execution_id].keys() \
@@ -298,8 +298,8 @@ def update_progress_cache(execution_id, node_type, node_id, progress) -> dict:
     return current_state
 
 def clean_progress_cache(run_id: str, user):
-    execution_id = get_execution_progress_by_run_id(run_id, user)
-    del progress_cache[execution_id]       
+    execution_id = get_execution_id_by_run_id(run_id, user)
+    del progress_cache[execution_id]
     
 def __async_func__(task_id = None):
     tid = task_id if task_id else str(uuid.uuid4())
