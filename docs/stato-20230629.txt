@@ -6,3 +6,4 @@ Per evitare inutili computazioni ed essere compatibili con l'UI è necessario:
 3 - aggiungere lo stato nel run come attributo "status": appena creato dovrebbe essere "CREATED",
     durante l'esecuzione "RUNNING" e quando l'esecuzione è terminata dovrebbe diventare "COMPLETED" o "FAILED" in caso di errore
 4 - aggiungere attributo "exception|execution_log" da popolare in caso di fallimento dell'elaborazione con l'errore che ha causato l'interruzione o con il path del file di log
+5 - salvare la lista dei file da processare in fase di creazione del run oppure popolare OriginalTrackNode al momento della creazione del run
