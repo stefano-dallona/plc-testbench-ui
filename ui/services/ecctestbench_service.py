@@ -255,13 +255,14 @@ def __notifyRunCompletion__(run_id):
                             "elapsed" : 0,
                             "currentPercentage": 100,
                             "eta": 0,
-                            "timestamp": str(datetime.now())
+                            "timestamp": str(datetime.now()),
+                            "progress": progress_cache[execution_id]
                         }, indent = 4).replace('\n', ' '),
                         event="run_execution")
-    for idx in range(1, 10):
+    for idx in range(1, 2):
         announcer.announce(msg=msg)
         print("msg:%s" % (msg))
-        sleep(0.1)
+        sleep(1)
 
 def get_execution_id_by_run_id(run_id, user) -> str:
     for execution_id in progress_cache.copy():

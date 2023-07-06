@@ -6,4 +6,8 @@ Per evitare inutili computazioni ed essere compatibili con l'UI è necessario:
 3 - aggiungere lo stato nel run come attributo "status": appena creato dovrebbe essere "CREATED",
     durante l'esecuzione "RUNNING" e quando l'esecuzione è terminata dovrebbe diventare "COMPLETED" o "FAILED" in caso di errore
 4 - aggiungere attributo "exception|execution_log" da popolare in caso di fallimento dell'elaborazione con l'errore che ha causato l'interruzione o con il path del file di log
-5 - salvare la lista dei file da processare in fase di creazione del run oppure popolare OriginalTrackNode al momento della creazione del run
+5 - convertire il run da dict a oggetto
+6 - convertire i testbench_settings da dic a oggetto
+7 - salvare la lista dei file da processare in fase di creazione del run oppure popolare OriginalTrackNode al momento della creazione del run
+    serve anche per prevenire la rimozione dei file dalla cartella se utilizzati dal run
+8 - aggiungere testbench possibilità di passare tramite i testench_settings o il pathmanager un filtro sui file da elaborare, sotto forma di lambda che riceve il nome del file e ritorna true o false

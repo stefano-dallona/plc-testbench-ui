@@ -136,7 +136,7 @@ class RunRepository(BaseMongoRepository):
         typed_data = list(map(BaseMongoRepository.fromDict, enriched_data))
         
         return {
-            'data': typed_data,
+            'data': json.loads(json.dumps(typed_data, default=lambda o: o.__dict__)),
             'totalRecords': totalRecords
         }
     

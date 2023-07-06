@@ -52,7 +52,7 @@ def search_runs(user):
     query = json.loads(search["queryString"])
     projection = search["projectionString"]
     pagination = search["pagination"]      
-    runs = run_repository_mongodb2.find_by_filter(query=query,
+    runs = run_repository_mongodb2.find_by_filter(filters=query,
                                           projection=projection,
                                           pagination=pagination,
                                           user=user)
