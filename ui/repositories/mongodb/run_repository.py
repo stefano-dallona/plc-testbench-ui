@@ -61,35 +61,7 @@ views = [
             {
                 '$project': {
                     '_id': 1,
-                    'selected_input_files': {
-                        '$map': {
-                        'input': "$nodes",
-                        'as': "node",
-                        'in': "$$node._id"
-                        }
-                    },
-                    "workers": 1,
-                    "nodes": 1
-                }
-            },
-            {
-                '$lookup': {
-                    'from': "OriginalTrackNode",
-                    'localField': "selected_input_files",
-                    'foreignField': "_id",
-                    'as': "selected_input_files"
-                }
-            },
-            {
-                '$project': {
-                    '_id': 1,
-                    'selected_input_files': {
-                        '$map': {
-                        'input': "$selected_input_files",
-                        'as': "input_file",
-                        'in': { '$last': { '$split': [ "$$input_file.filename", "\\" ] } }
-                        }
-                    },
+                    'selected_input_files': 1,
                     "workers": {
                         "$reduce": {
                         "input": '$workers',

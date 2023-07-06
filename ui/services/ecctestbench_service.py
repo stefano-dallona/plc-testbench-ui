@@ -208,9 +208,6 @@ class EccTestbenchService:
         testbench = self.build_testbench_from_run(run, user)
         run.run_id = testbench.run_id
         
-        for original_audio_track_node in testbench.data_manager.get_data_trees():
-            original_audio_track_node._save_to_database()
-        
         return run
     
     def save_run(self, run: Run, user):
