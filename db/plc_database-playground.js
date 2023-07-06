@@ -137,16 +137,109 @@ db.createView("RunView", "runs", [
           sortBy: 1
         }
       },
-      workers: {
-        $reduce: {
-          input: '$workers',
-          initialValue: [],
-          in: { $concatArrays: ['$$value', '$$this'] }
-        }
+      lostSamplesMasks: {
+        $arrayElemAt: [ "$workers", 0 ]
+      },
+      reconstructedTracks: {
+        $arrayElemAt: [ "$workers", 1 ]
+      },
+      outputAnalysis: {
+        $arrayElemAt: [ "$workers", 2 ]
       },
       nodes: 1
     }
   }
+])
+
+db.createView("RunView", "runs", [
+  {
+    $addFields: { 'runId': '', 'description': '', 'status': '', 'createdBy': '', 'createdOn': '' }
+  },
+  {
+    $project: {
+      _id: 1,
+      runId: 1,
+      description: 1,
+      status: 1,
+      createdBy: 1,
+      createdOn: 1,
+      selected_input_files: 1,
+      lostSamplesMasks: {
+        $arrayElemAt: [ "$workers", 0 ]
+      },
+      reconstructedTracks: {
+        $arrayElemAt: [ "$workers", 1 ]
+      },
+      outputAnalysis: {
+        $arrayElemAt: [ "$workers", 2 ]
+      },
+      nodes: 1
+    }
+  },
+  {
+      $project: {
+        _id: 1,
+        runId: 1,
+        description: 1,
+        status: 1,
+        createdBy: 1,
+        createdOn: 1,
+        selected_input_files: 1,
+        lostSamplesMasks: {
+          $map: {
+              input: "$lostSamplesMasks",
+              in: {
+                  $mergeObjects: [
+                      {
+                          worker: "$$this.name"
+                      },
+                      "$$this",
+                      "$$this.settings"
+                  ]
+              }
+          }
+        },
+        reconstructedTracks: {
+          $map: {
+              input: "$reconstructedTracks",
+              in: {
+                  $mergeObjects: [
+                      {
+                          worker: "$$this.name"
+                      },
+                      "$$this",
+                      "$$this.settings"
+                  ]
+              }
+          }
+        },
+        outputAnalysis: {
+          $map: {
+              input: "$outputAnalysis",
+              in: {
+                  $mergeObjects: [
+                      {
+                          worker: "$$this.name"
+                      },
+                      "$$this",
+                      "$$this.settings"
+                  ]
+              }
+          }
+        },
+        nodes: 1
+      }
+    },
+    {
+      $project: {
+          "lostSamplesMasks.name": 0,
+          "lostSamplesMasks.settings": 0,
+          "reconstructedTracks.name": 0,
+          "reconstructedTracks.settings": 0,
+          "outputAnalysis.name": 0,
+          "outputAnalysis.settings": 0
+      }
+    }
 ])
 
 db.getCollection("RunView").find({})
