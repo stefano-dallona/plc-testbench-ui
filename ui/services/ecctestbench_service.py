@@ -33,9 +33,10 @@ progress_cache = dict()
 
 class TqdmExt(std_tqdm):
     
-    def __init__(self, task_id, caller, *args, **kwargs):
+    def __init__(self, task_id, run_id, caller, *args, **kwargs):
         super(TqdmExt, self).__init__(*args, **kwargs)
         self.task_id = task_id
+        self.run_id = run_id
         self.caller = caller
         
     def update(self, n=1):
@@ -43,7 +44,7 @@ class TqdmExt(std_tqdm):
         sleep()
         if displayed:
             try:
-                external_callback(self.task_id, self.caller, **self.format_dict)
+                external_callback(self.task_id, self.run_id, self.caller, **self.format_dict)
             finally:
                 pass
         return displayed
@@ -51,7 +52,7 @@ class TqdmExt(std_tqdm):
     def close(self):
         cleanup = super(TqdmExt, self).close
         try:
-            external_callback(self.task_id, self.caller, **self.format_dict)
+            external_callback(self.task_id, self.run_id, self.caller, **self.format_dict)
         finally:
             cleanup()
 
@@ -60,25 +61,25 @@ class MessageAnnouncer:
     def __init__(self):
         self.listeners = dict()
 
-    def listen(self, session_id):
-        if session_id not in self.listeners.keys():
+    def listen(self, task_id):
+        if task_id not in self.listeners.keys():
             q = queue.Queue(maxsize=1000000)
-            self.listeners[session_id] = q
-        return self.listeners[session_id]
+            self.listeners[task_id] = q
+        return self.listeners[task_id]
     
-    def disconnect(self, session_id):
-        if session_id in self.listeners.keys():
-            while not self.listeners[session_id].empty():
-                msg = self.listeners[session_id].get()
+    def disconnect(self, task_id):
+        if task_id in self.listeners.keys():
+            while not self.listeners[task_id].empty():
+                msg = self.listeners[task_id].get()
                 msg.task_done()
-            del self.listeners[session_id]
+            del self.listeners[task_id]
 
-    def announce(self, msg):
-        for session_id in self.listeners.keys():
-            #try:
-                self.listeners[session_id].put_nowait(msg)
-            #except queue.Full:
-            #    del self.listeners[run_id]
+    def announce(self, msg, task_id):
+        #try:
+            if task_id in self.listeners.keys():
+                self.listeners[task_id].put_nowait(msg)
+        #except queue.Full:
+        #    del self.listeners[session_id][run_id]
 
 announcer = MessageAnnouncer()
                 
@@ -102,7 +103,7 @@ class EccTestbenchService:
             target_file_path = os.path.join(run_root_folder, file_basename)
             shutil.copyfile(src=source_file_path, dst=target_file_path)
     
-    def build_testbench_from_run(self, run: Run, user) -> PLCTestbench:
+    def build_testbench_from_run(self, run: Run, user, task_id:str = None) -> PLCTestbench:
         get_worker = lambda x: (globals()[x[0]], x[1])
         
         #path_manager = PathManager(run.root_folder)
@@ -129,7 +130,7 @@ class EccTestbenchService:
             'db_port': db_port,
             'db_username': db_username,
             'db_password': db_password,
-            'progress_monitor': __async_func__()
+            'progress_monitor': __async_func__(task_id, str(run.run_id)) if task_id else None
         }
         testbench = PLCTestbench(
                                 packet_loss_simulators,
@@ -219,15 +220,15 @@ class EccTestbenchService:
         run = self.run_repository.find_by_id(run_id, user)
         return run
     
-    def launch_run_execution(self, run_id, user) -> PLCTestbench:
-        self.logger.info("Executing run %s", run_id)
+    def launch_run_execution(self, run_id, user, task_id) -> PLCTestbench:
+        self.logger.info("Task %s, executing run %s", task_id, run_id)
         run = self.load_run(run_id, user)
         #run.__ecctestbench__.global_settings_list[0].__progress_monitor__ = __async_func__
         #plc_testbench = run.__ecctestbench__
         
-        plc_testbench = self.build_testbench_from_run(run, user)
+        plc_testbench = self.build_testbench_from_run(run, user, task_id)
         
-        task = self.socketio.start_background_task(execute_elaboration, plc_testbench, user, self.on_run_completed)
+        task = self.socketio.start_background_task(execute_elaboration, plc_testbench, user, self.on_run_completed(task_id))
         '''
         thread_0 = Thread(target=execute_elaboration,
                           args=[run.__ecctestbench__, self.on_run_completed])
@@ -238,17 +239,14 @@ class EccTestbenchService:
         self.logger.info("Run %s: execution %s launched", run_id, execution_id)
         return execution_id
     
-    def on_run_completed(self, run_id, user):
-        run = self.load_run(run_id, user)
-        #run.status = RunStatus.COMPLETED
-        #self.save_run(run, user)
-        __notifyRunCompletion__(run_id)
+    def on_run_completed(self, task_id):
+        return lambda run_id, user: partial(__notifyRunCompletion__, task_id)(run_id, user)
 
 
-def __notifyRunCompletion__(run_id):
-    execution_id = get_execution_id_by_run_id(run_id, User(id_="", email="", name=""))
+def __notifyRunCompletion__(task_id, run_id, user):
     msg = __format_sse__(data=json.dumps({
-                            "task_id": execution_id,
+                            "task_id": task_id,
+                            "run_id": run_id,
                             "total": 100,
                             "nodeid" : str(run_id),
                             "nodetype" : "RunExecution",
@@ -256,29 +254,21 @@ def __notifyRunCompletion__(run_id):
                             "currentPercentage": 100,
                             "eta": 0,
                             "timestamp": str(datetime.now()),
-                            "progress": progress_cache[execution_id]
+                            "progress": progress_cache[str(run_id)]
                         }, indent = 4).replace('\n', ' '),
                         event="run_execution")
     for idx in range(1, 2):
-        announcer.announce(msg=msg)
-        print("msg:%s" % (msg))
+        announcer.announce(msg=msg, task_id=task_id, run_id=run_id)
+        #print("msg:%s" % (msg))
         sleep(1)
-
-def get_execution_id_by_run_id(run_id, user) -> str:
-    for execution_id in progress_cache.copy():
-        if progress_cache[execution_id] \
-                and "run_id" in progress_cache[execution_id].keys() \
-                and progress_cache[execution_id]["run_id"] == str(run_id):
-            return execution_id
-    return None
 
 def get_execution_last_event(last_event_id, user):
     return progress_cache[last_event_id] if last_event_id in progress_cache.keys() else None
         
-def update_progress_cache(execution_id, node_type, node_id, progress) -> dict:
-    if not execution_id in progress_cache.keys():
-        progress_cache[execution_id] = dict()
-    current_state = progress_cache[execution_id]
+def update_progress_cache(run_id, node_type, node_id, progress) -> dict:
+    if not run_id in progress_cache.keys():
+        progress_cache[run_id] = dict()
+    current_state = progress_cache[run_id]
     if node_id in current_state.keys() and current_state[node_id] == progress:
         return current_state
     current_state["revision"] = current_state["revision"] + 1 \
@@ -295,31 +285,32 @@ def update_progress_cache(execution_id, node_type, node_id, progress) -> dict:
 
     return current_state
 
-def clean_progress_cache(run_id: str, user):
-    execution_id = get_execution_id_by_run_id(run_id, user)
-    del progress_cache[execution_id]
+def clean_progress_cache(run_id:str, user:User):
+    del progress_cache[run_id]
     
-def __async_func__(task_id = None):
-    tid = task_id if task_id else str(uuid.uuid4())
+def __async_func__(task_id:str = None, run_id:str = None):
     progressLoggerMethod = "TqdmExt"
-    progressLogger = lambda caller: partial(globals()[progressLoggerMethod], tid, caller) if progressLoggerMethod in globals().keys() else std_tqdm
+    tid = task_id if task_id else str(uuid.uuid4())
+    rid = run_id if run_id else str(uuid.uuid4())
+    progressLogger = lambda caller: partial(globals()[progressLoggerMethod], tid, rid, caller) if progressLoggerMethod in globals().keys() else std_tqdm
     return progressLogger
 
-def external_callback(task_id, caller, *args, **kwargs):
+def external_callback(task_id:str, run_id:str, caller, *args, **kwargs):
     caller_class_name = caller.__class__.__name__
-    print("caller_class_name=%s, args=%s, kwargs=%s" % (caller_class_name, args, kwargs))
+    #print("caller_class_name=%s, args=%s, kwargs=%s" % (caller_class_name, args, kwargs))
     nodeid = str(caller.uuid) if hasattr(caller, "uuid") else str(caller.run_id) if hasattr(caller, "run_id") else ""
     currentPercentage = math.floor(kwargs["n"] / kwargs["total"] * 100)
     eta = math.ceil((kwargs["total"] - kwargs["elapsed"]) * (1 / (kwargs["rate"] if kwargs["rate"] != None else float('inf'))))
     
-    progress_state = get_execution_last_event(task_id, User(id_="", email="", name=""))
+    progress_state = get_execution_last_event(run_id, User(id_="", email="", name=""))
     revision = progress_state["revision"] if progress_state and "revision" in progress_state.keys() else 0
-    progress_state = update_progress_cache(task_id, caller_class_name, nodeid, currentPercentage)
+    progress_state = update_progress_cache(run_id, caller_class_name, nodeid, currentPercentage)
     new_revision = progress_state["revision"]
     
     if revision != new_revision:    
         data = json.dumps({
             "task_id": task_id,
+            "run_id": run_id,
             "total": kwargs["total"],
             "nodeid" : nodeid,
             "nodetype" : caller_class_name,
@@ -327,12 +318,12 @@ def external_callback(task_id, caller, *args, **kwargs):
             "currentPercentage": currentPercentage,
             "eta": eta,
             "timestamp": str(datetime.now()),
-            "progress": progress_cache[task_id]
+            "progress": progress_cache[run_id]
         }, indent=4).replace('\n', ' ')
         msg = __format_sse__(data=data,
             event="run_execution")
-        print("msg:%s" % (msg))
-        announcer.announce(msg=msg)
+        #print("msg:%s" % (msg))
+        announcer.announce(msg, task_id)
 
 def __format_sse__(data: str, event=None) -> str:
     msg = f'data: {data}\n\n'

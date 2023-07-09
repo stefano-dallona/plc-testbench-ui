@@ -68,14 +68,15 @@ def create_run(user):
     run = ecctestbench_service.create_run(payload, None, user)
     #ecctestbench_service.save_run(run)
     #run = ecctestbench_service.load_run(run.run_id)
-    return json.dumps({"run_id": run.run_id}), 200
+    return json.dumps({"run_id": str(run.run_id)}), 200
 
 @execution_api.route('/runs/<run_id>/executions', methods=['POST'])
 #@login_required
 @token_required
 def launch_run_execution(run_id, user):
+    task_id = request.get_json()["body"]["task_id"]
     execution = RunExecution(run_id=run_id)
-    execution.execution_id = ecctestbench_service.launch_run_execution(run_id, user=user)
+    execution.execution_id = ecctestbench_service.launch_run_execution(run_id, user=user, task_id=task_id)
     run = ecctestbench_service.load_run(run_id, user=user)
     #run.status = RunStatus.RUNNING
     #ecctestbench_service.save_run(run)
@@ -109,9 +110,8 @@ def get_execution_hierarchy(run_id: str, execution_id: str, user):
 @token_required
 def get_execution_events(run_id: str, execution_id: str, user):
 #def get_execution_events(run_id: str, execution_id: str):
-  sessionID = request.cookies.get("sessionID")
+  task_id = request.args.get("task_id")
   last_event_id = request.headers.get("Last-Event-ID")
-  sessionID = sessionID if sessionID != None else str(uuid.uuid4())
   user = None
   '''
   token = request.args["token"]
@@ -130,7 +130,7 @@ def get_execution_events(run_id: str, execution_id: str, user):
         "error": str(ex)
     }, 401
   '''
-  events = execution_service.get_execution_events(session_id=sessionID,
+  events = execution_service.get_execution_events(task_id=task_id,
     run_id=run_id,
     execution_id=execution_id,
     last_event_id=last_event_id,
@@ -143,5 +143,4 @@ def get_execution_events(run_id: str, execution_id: str, user):
     "Cache-Control": "no-cache",
   }
   response = Response(events, mimetype='text/event-stream', headers=headers)
-  response.set_cookie("sessionID", sessionID)
   return response

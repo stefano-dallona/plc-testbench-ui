@@ -43,7 +43,7 @@ class ExecutionService:
     def get_runs(self, pagination, user) -> List[Run]:
         return self.run_repository.find_by_filter(filters={}, projection=None, pagination=pagination, user=user)
     
-    def get_execution_events(self, session_id, run_id, execution_id, last_event_id = None, user = None):
+    def get_execution_events(self, task_id, run_id, execution_id, last_event_id = None, user = None):
         try:
             '''
             if (last_event_id != None):
@@ -56,7 +56,7 @@ class ExecutionService:
                 event = get_execution_last_event(last_event_id, user)
                 yield str(event)
             
-            messages = announcer.listen(session_id)  # returns a queue.Queue
+            messages = announcer.listen(task_id)  # returns a queue.Queue
             while True:
                 try:
                     msg = messages.get()  # blocks until a new message arrives
@@ -74,12 +74,12 @@ class ExecutionService:
                 except Exception as e:
                     self._logger.info(f"An exception occurred: {str(e)}")
         except GeneratorExit as e:
-            announcer.disconnect(session_id)
+            announcer.disconnect(task_id)
             self._logger.error(f"SSE generator: exited: {str(e)}")
         except Exception as e:
             self._logger.error(f"SSE generator: an exception occurred: {str(e)}")
         finally:
-            #announcer.disconnect(session_id)
+            #announcer.disconnect(task_id)
             pass
 
     def find_last_run_event(self, run_id, last_event_id, user):
