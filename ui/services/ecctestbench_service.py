@@ -257,15 +257,15 @@ def __notifyRunCompletion__(task_id, run_id, user):
                             "progress": progress_cache[str(run_id)]
                         }, indent = 4).replace('\n', ' '),
                         event="run_execution")
-    for idx in range(1, 2):
-        announcer.announce(msg=msg, task_id=task_id, run_id=run_id)
+    for idx in range(1, 10):
+        announcer.announce(msg=msg, task_id=task_id)
         #print("msg:%s" % (msg))
-        sleep(1)
+        sleep(0.1)
 
 def get_execution_last_event(last_event_id, user):
     return progress_cache[last_event_id] if last_event_id in progress_cache.keys() else None
         
-def update_progress_cache(run_id, node_type, node_id, progress) -> dict:
+def update_progress_cache(run_id, node_type, node_id, progress, caller) -> dict:
     if not run_id in progress_cache.keys():
         progress_cache[run_id] = dict()
     current_state = progress_cache[run_id]
@@ -276,6 +276,10 @@ def update_progress_cache(run_id, node_type, node_id, progress) -> dict:
     current_state[node_id] = progress
     if node_type == PLCTestbench.__name__:
         current_state["run_id"] = node_id
+        files = caller.data_manager.get_data_trees()
+        current_file_index = min(len(files) - 1, current_state["current_root_index"] + 1 if "current_root_index" in current_state.keys() else 0)
+        current_file = files[current_file_index]
+        current_state["current_file"] = os.path.basename(current_file.file.path)
     if node_type == OriginalTrackWorker.__name__ \
             and (not "current_root" in current_state.keys() \
                 or node_id != current_state["current_root"]):
@@ -304,7 +308,7 @@ def external_callback(task_id:str, run_id:str, caller, *args, **kwargs):
     
     progress_state = get_execution_last_event(run_id, User(id_="", email="", name=""))
     revision = progress_state["revision"] if progress_state and "revision" in progress_state.keys() else 0
-    progress_state = update_progress_cache(run_id, caller_class_name, nodeid, currentPercentage)
+    progress_state = update_progress_cache(run_id, caller_class_name, nodeid, currentPercentage, caller)
     new_revision = progress_state["revision"]
     
     if revision != new_revision:    
@@ -335,4 +339,5 @@ def execute_elaboration(ecctestbench, user, callback):
     ecctestbench.run()
     run_id = ecctestbench.run_id
     callback(run_id, user)
-    clean_progress_cache(run_id, user)
+    sleep(3)
+    clean_progress_cache(str(run_id), user)
