@@ -1,4 +1,4 @@
-// mongodb://root:Marmolada3343@itwn9370.biz.electrolux.com:27017
+// mongodb://root:Marmolada3343@localhost:27017
 
 use('plc_database');
 
