@@ -13,7 +13,7 @@ from pydantic import BaseModel
 from ..repositories.pickle.run_repository import RunRepository
 from ..repositories.mongodb.run_repository import RunRepository as MongoRunRepository
 from ..config.app_config import *
-from ..services.ecctestbench_service import *
+from ..services.plctestbench_service import *
 from ..services.execution_service import *
 from ..services.authentication_service import *
 from ..models.run import *
@@ -88,7 +88,7 @@ def launch_run_execution(run_id, user):
 def get_run(run_id, user):
     run = ecctestbench_service.load_run(run_id, user=user)
     if run != None:
-      return json.dumps({ "run_id": run.run_id, "selected_input_files": run.selected_input_files}), status.HTTP_200_OK
+      return json.dumps(run, default=lambda o: o.__dict__), status.HTTP_200_OK
     else:
       return {}, status.HTTP_404_NOT_FOUND
 

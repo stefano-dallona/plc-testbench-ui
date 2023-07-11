@@ -10,7 +10,7 @@ from plctestbench.data_manager import *
 from plctestbench.path_manager import *
 
 from ..config.app_config import *
-from .ecctestbench_service import EccTestbenchService, announcer, get_execution_last_event
+from .plctestbench_service import EccTestbenchService, announcer, get_execution_last_event
 from ..models.run import *
 from ..models.event import Event
 from ..repositories.pickle.run_repository import RunRepository
@@ -45,13 +45,6 @@ class ExecutionService:
     
     def get_execution_events(self, task_id, run_id, execution_id, last_event_id = None, user = None):
         try:
-            '''
-            if (last_event_id != None):
-                last_event = self.find_last_run_event(run_id, last_event_id, user)
-                unseen_events = self.find_events_after_last(run_id, last_event_id, user)
-                for unseen_event in unseen_events["data"]:
-                    yield str(unseen_event)
-            '''
             if (last_event_id != None):
                 event = get_execution_last_event(last_event_id, user)
                 yield str(event)

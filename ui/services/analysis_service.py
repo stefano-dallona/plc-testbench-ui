@@ -7,7 +7,7 @@ import math
 
 from ..models.samples import *
 from ..models.user import *
-from ..services.ecctestbench_service import EccTestbenchService
+from .plctestbench_service import EccTestbenchService
 from ..services.configuration_service import ConfigurationService
 
 from plctestbench.node import *

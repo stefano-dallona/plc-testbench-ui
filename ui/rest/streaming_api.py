@@ -12,7 +12,7 @@ import uuid
 
 from ..config.app_config import config
 from ..services.analysis_service import AnalysisService
-from ..services.ecctestbench_service import EccTestbenchService
+from ..services.plctestbench_service import EccTestbenchService
 from ..services.authentication_service import token_required, get_user_from_jwt_token
 from ..repositories.pickle.run_repository import RunRepository
 from ..repositories.mongodb.run_repository import RunRepository as MongoRunRepository

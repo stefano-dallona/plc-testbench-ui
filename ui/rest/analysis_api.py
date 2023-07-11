@@ -7,7 +7,7 @@ from ..config.app_config import config
 from ..repositories.pickle.run_repository import RunRepository
 from ..repositories.mongodb.run_repository import RunRepository as MongoRunRepository
 from ..services.analysis_service import AnalysisService
-from ..services.ecctestbench_service import EccTestbenchService
+from ..services.plctestbench_service import EccTestbenchService
 from ..models.base_model import *
 from ..models.samples import *
 

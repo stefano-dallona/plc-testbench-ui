@@ -13,71 +13,32 @@ from .base_repository import BaseMongoRepository
 collection = "Run"
 views = [
     {
-        'name': 'OriginalTrack-1',
-        'on': 'ReconstructedTrackNode',
-        'pipeline': [{
-            '$graphLookup': {
-                'from': "OutputAnalysisNode",
-                'startWith': "$_id",
-                'connectFromField': "_id",
-                'connectToField': "parent",
-                'maxDepth': 1,
-                'as': "outputAnalysis"
-            }
-        }]
-    },
-    {
-        'name': 'OriginalTrack-2',
-        'on': 'LostSamplesMaskNode',
-        'pipeline': [{
-            '$graphLookup': {
-                'from': "OriginalTrack-1",
-                'startWith': "$_id",
-                'connectFromField': "_id",
-                'connectToField': "parent",
-                'maxDepth': 2,
-                'as': "reconstructedTracks"
-            }
-        }]
-    },
-    {
-        'name': 'OriginalTrack-3',
-        'on': 'OriginalTrackNode',
-        'pipeline': [{
-            '$graphLookup': {
-                'from': "OriginalTrack-2",
-                'startWith': "$_id",
-                'connectFromField': "_id",
-                'connectToField': "parent",
-                'maxDepth': 3,
-                'as': "lostSamplesMasks"
-            }
-        }]
-    },
-    {
         'name': 'RunView',
         'on': 'runs',
         'pipeline': [
             {
-            '$addFields': { 'runId': '', 'description': '', 'status': '', 'createdBy': '', 'createdOn': '' }
+            '$addFields': { 'run_id': '', 'description': '', 'classname': 'Run'  }
             },
             {
                 '$project': {
                     '_id': 1,
-                    'runId': 1,
+                    'classname': 1,
+                    'run_id': "$_id",
                     'description': 1,
                     'status': 1,
-                    'createdBy': 1,
-                    'createdOn': 1,
-                    'selected_input_files': 1,
-                    'lostSamplesMasks': {
+                    'creator': "$creator",
+                    'created_on': 1,
+                    'selected_input_files': {
                         '$arrayElemAt': ["$workers", 0]
                     },
-                    'reconstructedTracks': {
+                    'lostSamplesMasks': {
                         '$arrayElemAt': ["$workers", 1]
                     },
-                    'outputAnalysis': {
+                    'reconstructedTracks': {
                         '$arrayElemAt': ["$workers", 2]
+                    },
+                    'outputAnalysis': {
+                        '$arrayElemAt': ["$workers", 3]
                     },
                     "nodes": 1
                 }
@@ -85,15 +46,21 @@ views = [
             {
                 '$project': {
                     '_id': 1,
-                    'runId': 1,
+                    'classname': 1,
+                    'run_id': 1,
                     'description': 1,
                     'status': 1,
-                    'createdBy': 1,
-                    'createdOn': 1,
-                    'selected_input_files': 1,
-                    'lostSamplesMasks': {
+                    'creator': 1,
+                    'created_on': 1,
+                    'selected_input_files': {
                         '$map': {
-                            'input': "$lostSamplesMasks",
+                            'input': "$selected_input_files",
+                            'in': "$$this.settings.filename"
+                        }
+                    },
+                    'lost_samples_masks': {
+                        '$map': {
+                            'input': "$lost_samples_masks",
                             'in': {
                                 '$mergeObjects': [
                                         {
@@ -105,9 +72,9 @@ views = [
                             }
                         }
                     },
-                    'reconstructedTracks': {
+                    'reconstructed_tracks': {
                         '$map': {
-                            'input': "$reconstructedTracks",
+                            'input': "$reconstructed_tracks",
                             'in': {
                                 '$mergeObjects': [
                                     {
@@ -119,9 +86,9 @@ views = [
                             }
                         }
                     },
-                    'outputAnalysis': {
+                    'output_analysis': {
                         '$map': {
-                            'input': "$outputAnalysis",
+                            'input': "$output_analysis",
                             'in': {
                                 '$mergeObjects': [
                                     {
@@ -138,13 +105,15 @@ views = [
             },
             {
                 '$project': {
-                    "lostSamplesMasks.name": 0,
-                    "lostSamplesMasks.settings": 0,
-                    "reconstructedTracks.name": 0,
-                    "reconstructedTracks.settings": 0,
-                    "outputAnalysis.name": 0,
-                    "outputAnalysis.settings": 0,
-                    "nodes": 0
+                    'nodes': 0,
+                    'selected_input_files.name': 0,
+                    'selected_input_files.settings': 0,        
+                    'lost_samples_masks.name': 0,
+                    'lost_samples_masks.settings': 0,
+                    'reconstructed_tracks.name': 0,
+                    'reconstructed_tracks.settings': 0,
+                    'output_analysis.name': 0,
+                    'output_analysis.settings': 0
                 }
             }
         ]
@@ -156,7 +125,7 @@ class RunRepository(BaseMongoRepository):
 
     def __init__(self):
         super().__init__()
-        self.collection_metadata = {'name': 'OriginalTrack-3'}
+        self.collection_metadata = {'name': 'RunView'}
         self.collection = collection
 
     def initialize_database(self, database: Database):
@@ -183,13 +152,11 @@ class RunRepository(BaseMongoRepository):
         return result.inserted_id
 
     def find_by_id(self, id: str, user: User) -> Run:
-        # data = self.db.get_collection(self.collection_metadata["name"]).find_one({'_id': id })
         data = self.get_database(user).get_collection(
-            "RunView").find_one({'_id': int(id)})
-        # data = self.get_plc_database_manager(user).get_run(int(id))
-        data["run_id"] = data["_id"]
+            self.collection_metadata["name"]).find_one({'_id': str(id)})
+        #data["run_id"] = data["_id"]
         data["classname"] = "Run"
-        data["creator"] = "anonymous"
+        #data["creator"] = "anonymous"
         data["root_folder"] = config.data_dir
         data["selected_input_files"] = sorted(data["selected_input_files"])
         return BaseMongoRepository.fromDict(data)
@@ -199,9 +166,7 @@ class RunRepository(BaseMongoRepository):
                        projection,
                        pagination,
                        user: User) -> List[Run]:
-        # collection = self.db.get_collection(self.collection_metadata["name"])
-        # collection = self.get_database(user).get_collection(self.collection)
-        collection = self.get_database(user).get_collection("RunView")
+        collection = self.get_database(user).get_collection(self.collection_metadata["name"])
         totalRecords = collection.count_documents(filters)
         query = collection  \
             .find(filters, projection=projection)
@@ -210,9 +175,7 @@ class RunRepository(BaseMongoRepository):
             .limit(pagination["pageSize"])
         data = list(cursor)
 
-        enriched_data = list(map(lambda x: dict(
-            x, classname="Run", creator=user.email, run_id=str(x["_id"])), data))
-        typed_data = list(map(BaseMongoRepository.fromDict, enriched_data))
+        typed_data = list(map(BaseMongoRepository.fromDict, data))
 
         return {
             'data': json.loads(json.dumps(typed_data, default=lambda o: o.__dict__)),
@@ -220,14 +183,7 @@ class RunRepository(BaseMongoRepository):
         }
 
     def update(self, item: Run, user: User) -> int:
-        deleteCount = self.delete(item, user)
-        if deleteCount >= 0:
-            id = self.add(item, user)
-            return 1
-        else:
-            return 0
+        pass
 
     def delete(self, item: Run, user) -> int:
-        result = self.get_database(user).get_collection(
-            self.collection).delete_one({'_id': item.run_id})
-        return result.deleted_count
+        pass

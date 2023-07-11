@@ -7,6 +7,7 @@ from plctestbench.data_manager import *
 from plctestbench.path_manager import *
 from plctestbench.node import *
 from plctestbench.file_wrapper import *
+from plctestbench.worker import *
 
 import os
 import logging
@@ -106,24 +107,11 @@ class EccTestbenchService:
     def build_testbench_from_run(self, run: Run, user, task_id:str = None) -> PLCTestbench:
         get_worker = lambda x: (globals()[x[0]], x[1])
         
-        #path_manager = PathManager(run.root_folder)
-        #database_manager = DatabaseManager(db_host, db_port, db_username, db_password)
-        #user = { "email" : run.creator }
-        #data_manager = DataManager(path_manager, database_manager, user, progress_monitor=__async_func__)
-
+        original_audio_tracks = list(map(lambda filename: (OriginalAudio, OriginalAudioSettings(filename)), run.selected_input_files))
         packet_loss_simulators = list(map(get_worker, run.packet_loss_simulators))
         plc_algorithms = list(map(get_worker, run.plc_algorithms))
         output_analysers = list(map(get_worker, run.output_analysers))
-        '''
-        testbench = PLCTestbench(
-                                 packet_loss_simulators,
-                                 plc_algorithms,
-                                 output_analysers,
-                                 data_manager,
-                                 path_manager,
-                                 run.run_id
-                                 )
-        '''
+
         testbench_settings = {
             'root_folder': run.root_folder,
             'db_ip': db_host,
@@ -133,6 +121,7 @@ class EccTestbenchService:
             'progress_monitor': __async_func__(task_id, str(run.run_id)) if task_id else None
         }
         testbench = PLCTestbench(
+                                original_audio_tracks,
                                 packet_loss_simulators,
                                 plc_algorithms,
                                 output_analysers,
@@ -140,14 +129,7 @@ class EccTestbenchService:
                                 user.__dict__,
                                 run.run_id
                                  )
-        '''
-        original_audio_tracks_ids = map(lambda x: { x[0]: x[1] }, run.original_audio_tracks)
-        original_audio_tracks_ids_map = functools.reduce(lambda x, y: dict(list(x.items()) + list(y.items())),
-                                                     original_audio_tracks_ids, dict())
-        for original_audio_track_node in testbench.data_manager.get_data_trees():
-            file_basename = os.path.basename(original_audio_track_node.file.path)
-            original_audio_track_node.uuid = original_audio_tracks_ids_map[file_basename]
-        '''
+
         return testbench
     
     def create_run(self, json_dict, run_id, user) -> PLCTestbench:
@@ -192,15 +174,7 @@ class EccTestbenchService:
         
         configuration_map = functools.reduce(parse_configuration, json_dict, configuration_map)
         
-        #for global_settings in configuration_map[GlobalSettings]:
-        #    global_settings.__progress_monitor__ = __async_func__
-        
-        #run_root_folder = os.path.join(self.root_folder, run_id)
-        #self.prepare_run_directory(configuration_map[InputFileSelection], self.root_folder, run_root_folder)
-        
-        run = Run( #run_id=run_id,
-                   #root_folder=run_root_folder,
-                   root_folder=self.root_folder,
+        run = Run(root_folder=self.root_folder,
                    selected_input_files=configuration_map[InputFileSelection],
                    packet_loss_simulators=configuration_map[PacketLossSimulator],
                    plc_algorithms=configuration_map[PLCAlgorithm],
@@ -280,7 +254,7 @@ def update_progress_cache(run_id, node_type, node_id, progress, caller) -> dict:
         current_file_index = min(len(files) - 1, current_state["current_root_index"] + 1 if "current_root_index" in current_state.keys() else 0)
         current_file = files[current_file_index]
         current_state["current_file"] = os.path.basename(current_file.file.path)
-    if node_type == OriginalTrackWorker.__name__ \
+    if node_type == OriginalAudio.__name__ \
             and (not "current_root" in current_state.keys() \
                 or node_id != current_state["current_root"]):
         current_state["current_root"] = node_id
