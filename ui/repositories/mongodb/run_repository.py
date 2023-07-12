@@ -27,7 +27,7 @@ views = [
                     'description': 1,
                     'status': 1,
                     'creator': "$creator",
-                    'created_on': 1,
+                    'created_on': { "$dateToString":{"format":"%Y-%m-%dT%H:%M:%S", "date":"$created_on"}},
                     'selected_input_files': {
                         '$arrayElemAt': ["$workers", 0]
                     },

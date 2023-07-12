@@ -10,3 +10,22 @@ services:
       - '27017:27017'
     volumes:
       - ${MONGO_DATA_VOLUME_PATH}:/data/db
+#  frontend:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    environment:
+#      FLASK_APP: ${FLASK_APP}
+#      FLASK_DEBUG: ${FLASK_DEBUG}
+#      DATA_FOLDER: /data/original_tracks
+#      DB_CONN_STRING: ${DB_CONN_STRING}
+#      DB_PASSWORD: ${DB_PASSWORD}
+#      GEVENT_SUPPORT: ${GEVENT_SUPPORT}
+#      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+#      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+#      GOOGLE_OAUTH_CERTS: ${GOOGLE_OAUTH_CERTS}
+#      REQUESTS_CA_BUNDLE: ${REQUESTS_CA_BUNDLE}
+#    ports:
+#      - '5000:5000'
+#    volumes:
+#      - ${DATA_FOLDER}:/data/original_tracks

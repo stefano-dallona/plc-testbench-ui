@@ -43,8 +43,8 @@ def create_app():
     
     app = Flask(__name__,
                 static_url_path='', 
-                static_folder='static',
-    #            static_folder='build'
+    #            static_folder='static',
+                static_folder='frontend/build'
     )
     
     from ui.rest.configuration_api import configuration_api
@@ -78,14 +78,17 @@ app = create_app()
 def load_user(user_id):
     return User.get(user_id)
 
-@app.route('/')
-@token_required
-def index():
-    return '<h1>PLC TestBench UI up and running</h1>'        
-    
+@app.route("/", defaults={'path':''})
+def serve(path):
+    return send_from_directory(app.static_folder,'index.html')
+
+@app.errorhandler(404)
+def not_found(e):
+    return app.send_static_file('index.html')
+
 @app.route('/home')
 #@login_required
-@token_required
+#@token_required
 def home():
     return '<h1>PLC TestBench UI up and running</h1>'        
 

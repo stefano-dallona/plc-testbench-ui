@@ -112,3 +112,6 @@ ENV/
 
 #secrets
 /secrets
+
+#original file subdirs
+/original_tracks/**
