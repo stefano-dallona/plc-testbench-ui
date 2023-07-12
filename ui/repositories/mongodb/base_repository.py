@@ -67,6 +67,7 @@ class BaseMongoRepository(ABC):
         return True
             
     def __grant_find_role_on_views__(self, database: Database) -> bool:
+        self.logger.info(f"Granting readViewCollection role to {db_username} ...")
         self.admin.command("grantRolesToUser", db_username, roles=["readViewCollection"])
         return True
     

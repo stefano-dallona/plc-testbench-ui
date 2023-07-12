@@ -19,4 +19,4 @@ COPY . .
 # Install plctestbench:
 RUN python3 -m pip install -f dist plc-testbench
 
-CMD [ "python3", "app.py" ]
+ENTRYPOINT [ "python3", "app.py" ]
