@@ -19,6 +19,7 @@ services:
       FLASK_DEBUG: ${FLASK_DEBUG}
       DATA_FOLDER: /data/original_tracks
       DB_CONN_STRING: ${DB_CONN_STRING}
+      DB_HOST: ${DB_HOST}
       DB_USERNAME: ${DB_USERNAME}
       DB_PASSWORD: ${DB_PASSWORD}
       GEVENT_SUPPORT: ${GEVENT_SUPPORT}
