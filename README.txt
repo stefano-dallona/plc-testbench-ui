@@ -21,7 +21,27 @@ python -m pip install -r requirements.txt
 docker build --tag plc-testbench-ui .
 
 # running the image
-docker run -e DATA_FOLDER="/plc-testbench-ui/original_tracks" --rm -it --memory="16g" -p 5000:5000 [-d (detached mode)] [--entrypoint sh (to override the entrypoint)] plc-testbench-ui
+docker run -e DATA_FOLDER="/plc-testbench-ui/original_tracks" -e ... --rm -it --memory="16g" -p 5000:5000 [-d (detached mode)] [--entrypoint sh (to override the entrypoint)] plc-testbench-ui
+docker run \
+-e MONGO_INITDB_ROOT_USERNAME=root \
+-e MONGO_INITDB_ROOT_PASSWORD="" \
+-e MONGO_DATA_VOLUME_PATH=/c/Data/plc-testbench-ui/plc-testbench-ui/ui/data \
+-e FLASK_APP=app.py \
+-e FLASK_DEBUG=0 \
+-e FRONTEND_DATA_FOLDER=/original_tracks \
+-e DB_CONN_STRING=mongodb://mongo:27017 \
+-e DB_HOST=mongo \
+-e DB_USERNAME=root \
+-e DB_PASSWORD="" \
+-e GEVENT_SUPPORT=True \
+-e GOOGLE_CLIENT_ID="" \
+-e GOOGLE_CLIENT_SECRET="" \
+-e GOOGLE_OAUTH_CERTS=https://www.googleapis.com/oauth2/v1/certs \
+-e REQUESTS_CA_BUNDLE=/plc-testbench-ui/secrets/cacert.pem \
+-e CERT_FILE=/plc-testbench-ui/secrets/cert.pem \
+-e KEY_FILE=/plc-testbench-ui/secrets/key.pem \
+--rm -it --memory="16g" -p 5000:5000 \
+--entrypoint python plc-testbench-ui-frontend app.py
 
 # connect to a running image in a shell
 docker exec <container-id> -it sh
