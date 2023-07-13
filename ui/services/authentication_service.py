@@ -1,6 +1,7 @@
 from functools import wraps
 from flask import request, abort
 from google.auth import jwt
+from google.auth.exceptions import *
 import requests
 import os
 
@@ -10,6 +11,9 @@ class MissingTokenException(Exception):
     pass
 
 class TokenDecodingException(Exception):
+    pass
+
+class TokenExpiredException(Exception):
     pass
 
 def get_google_certs():
@@ -26,7 +30,10 @@ def get_user_from_jwt_token(token) -> User:
         current_user = User.get(data["email"])
         return current_user
     except Exception as e:
-        raise TokenDecodingException(e)
+        if type(e) == InvalidValue and str(e).startswith("Token expired"):
+            raise TokenExpiredException(e)
+        else:
+            raise TokenDecodingException(e)
 
 def token_required(f):
     @wraps(f)
@@ -45,6 +52,12 @@ def token_required(f):
         except MissingTokenException as ex:
             return {
                 "message": "Authentication Token is missing!",
+                "data": None,
+                "error": "Unauthorized"
+            }, 401
+        except TokenExpiredException as ex:
+            return {
+                "message": "Authentication Token is expired!",
                 "data": None,
                 "error": "Unauthorized"
             }, 401
