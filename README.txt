@@ -49,6 +49,10 @@ docker system prune --all --force --volumes
 # free docker orphaned volumes
 https://medium.com/@wlarch/no-space-left-on-device-when-using-docker-compose-why-c4a2c783c6f6#:~:text=1)%20Delete%20Orphaned%20Docker%20Volumes,data%20is%20stored%20on%20them.
 docker volume rm $(docker volume ls -qf dangling=true)
+docker stop $(docker ps -aq)
+docker rm $(docker ps -aq)
+docker system prune -a --volumes
+docker rmi $(docker images -q)
 
 #GitHub Repo:
 #https://github.com/stefano-dallona/plc-testbench-ui/
