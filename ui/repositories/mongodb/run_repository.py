@@ -133,13 +133,15 @@ class RunRepository(BaseMongoRepository):
             return
 
         initialized = False
-        initialized |= self.__create_collection__(database, self.collection)
+        #initialized |= self.__create_collection__(database, self.collection)
 
         for view in views:
             initialized |= self.__create_view__(database, view)
 
-        initialized |= self.__create_role_for_views__(database)
-        initialized |= self.__grant_find_role_on_views__(database)
+        # to be done only if not connecting to mongodb atlas
+        if not config.db_conn_string.startswith("mongodb+srv://") :
+            initialized |= self.__create_role_for_views__(database)
+            initialized |= self.__grant_find_role_on_views__(database)
 
         self.initialized = initialized
 

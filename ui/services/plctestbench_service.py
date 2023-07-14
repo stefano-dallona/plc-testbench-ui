@@ -114,6 +114,7 @@ class EccTestbenchService:
 
         testbench_settings = {
             'root_folder': run.root_folder,
+            'db_conn_string': config.db_conn_string,
             'db_ip': db_host,
             'db_port': db_port,
             'db_username': db_username,

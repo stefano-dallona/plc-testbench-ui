@@ -14,7 +14,9 @@
                 "FLASK_APP": "app.py",
                 "FLASK_DEBUG": "0",
                 "DATA_FOLDER": "C:\\Data\\personale\\Università\\2022-2023\\original_tracks",
-                "DB_CONN_STRING": "mongodb://localhost:27017",
+                "DB_CONN_STRING": "mongodb://127.0.0.1:27017",
+                "DB_HOST": "127.0.0.1",
+                "DB_PORT": "27017",
                 "DB_USERNAME": "root",
                 "DB_PASSWORD": "Marmolada3343",
                 "GEVENT_SUPPORT": "True",
@@ -27,6 +29,31 @@
             },
             "justMyCode": false
         },
+        {
+            "name": "Python: app.py mongo atlas",
+            "type": "python",
+            "request": "launch",
+            "program": "app.py",
+            "console": "integratedTerminal",
+            "env": {
+                "FLASK_APP": "app.py",
+                "FLASK_DEBUG": "0",
+                "DATA_FOLDER": "C:\\Data\\personale\\Università\\2022-2023\\original_tracks",
+                "DB_CONN_STRING": "mongodb+srv://stefanodallona:Aconcagua6961@cluster0.jy1ntqu.mongodb.net/",
+                "DB_HOST": "cluster0.jy1ntqu.mongodb.net",
+                "DB_PORT": "80",
+                "DB_USERNAME": "stefanodallona",
+                "DB_PASSWORD": "Aconcagua6961",
+                "GEVENT_SUPPORT": "True",
+                "GOOGLE_CLIENT_ID": "524953903108-944ibh494ugop6i54jh18gu2pkokfi9r.apps.googleusercontent.com",
+                "GOOGLE_CLIENT_SECRET": "",
+                "GOOGLE_OAUTH_CERTS": "https://www.googleapis.com/oauth2/v1/certs",
+                "REQUESTS_CA_BUNDLE": "C:\\Data\\plc-testbench-ui\\plc-testbench-ui\\secrets\\cacert.pem",
+                "CERT_FILE": "C:\\Data\\plc-testbench-ui\\plc-testbench-ui\\secrets\\cert.pem",
+                "KEY_FILE": "C:\\Data\\plc-testbench-ui\\plc-testbench-ui\\secrets\\key.pem"
+            },
+            "justMyCode": false
+        },   
         {
             "name": "Python: file corrente",
             "type": "python",

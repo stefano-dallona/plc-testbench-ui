@@ -97,8 +97,8 @@ if __name__ == '__main__':
     app.secret_key = 'super secret key'
     app.config['SESSION_TYPE'] = 'filesystem'
     #https://github.com/miguelgrinberg/python-socketio/discussions/860
-    certfile=os.environ["CERT_FILE"]
-    keyfile=os.environ["KEY_FILE"]
+    certfile=os.environ["CERT_FILE"] if "CERT_FILE" in os.environ.keys() else None
+    keyfile=os.environ["KEY_FILE"] if "KEY_FILE" in os.environ.keys() else None
     get_socketio().run(app, host='0.0.0.0', use_reloader=False, certfile=certfile, keyfile=keyfile)
     #serve(app, host="0.0.0.0", port=5000, threads=10)
     #eventlet.wsgi.server(eventlet.listen(("127.0.0.1", 5000)), app, debug=True)

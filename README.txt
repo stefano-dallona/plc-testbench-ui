@@ -71,7 +71,7 @@ https://medium.com/@wlarch/no-space-left-on-device-when-using-docker-compose-why
 docker volume rm $(docker volume ls -qf dangling=true)
 docker stop $(docker ps -aq)
 docker rm $(docker ps -aq)
-docker system prune -a --volumes
+docker system prune -a --volumes #most useful to reclaim space
 docker rmi $(docker images -q)
 
 #GitHub Repo:
