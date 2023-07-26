@@ -10,10 +10,14 @@ services:
       - '27017:27017'
     volumes:
       - ${MONGO_DATA_VOLUME_PATH}:/data/db
-  frontend:
+  webapp:
     build:
       context: .
       dockerfile: Dockerfile
+    image: stdallona/plc-testbench-ui:1.0.0
+    cpus: 8.0
+    mem_reservation: 32gb
+    mem_limit: 32gb
     environment:
       FLASK_APP: ${FLASK_APP}
       FLASK_DEBUG: ${FLASK_DEBUG}

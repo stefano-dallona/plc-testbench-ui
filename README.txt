@@ -41,7 +41,7 @@ docker run \
 -e CERT_FILE=/plc-testbench-ui/secrets/cert.pem \
 -e KEY_FILE=/plc-testbench-ui/secrets/key.pem \
 --rm -it --memory="16g" -p 5000:5000 \
---entrypoint python plc-testbench-ui-frontend app.py
+--entrypoint python plc-testbench-ui app.py
 
 # connect to a running image in a shell
 docker exec <container-id> -it sh
@@ -112,6 +112,36 @@ docker-compose up
 
 # Start mongodb with custom env variables from file
 docker compose --env-file <path-to-env-file> up
+
+docker login --username stdallona
+# access_token as password
+
+docker run \
+--rm -it --memory="4g" -p 27010:27010 \
+--env-file .\development-docker.env  \
+--name mongo \
+library/mongo:4.4.18
+
+docker run \
+--rm -it --memory="16g" -p 5000:5000 \
+--env-file .\development-docker.env  \
+--name plc-testbench-ui \
+--link mongo:mongo \
+stdallona/plc-testbench-ui:1.0.0
+
+docker run ^
+--rm -it --memory="4g" -p 27010:27010 ^
+--env-file .\development-docker.env  ^
+--name mongo ^
+library/mongo:4.4.18
+
+docker run ^
+--rm -it --memory="16g" -p 5000:5000 ^
+--env-file .\development-docker.env  ^
+--name plc-testbench-ui ^
+--link mongo:mongo ^
+stdallona/plc-testbench-ui:1.0.0
+
 
 #generate SSL cert and key
 # run openssl in gitbash
