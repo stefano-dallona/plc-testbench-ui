@@ -143,6 +143,12 @@ docker run ^
 stdallona/plc-testbench-ui:1.0.0
 
 
+docker run ^
+--rm -it --memory="16g" -p 5000:5000 ^
+--env-file .\development-docker-mongoatlas.env  ^
+--name plc-testbench-ui ^
+stdallona/plc-testbench-ui:1.0.0
+
 #generate SSL cert and key
 # run openssl in gitbash
 openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem
