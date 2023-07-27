@@ -142,6 +142,8 @@ docker run ^
 --link mongo:mongo ^
 stdallona/plc-testbench-ui:1.0.0
 
+#Bug in google login (https://github.com/metabase/metabase/issues/32602)
+#in order to fix it width in GoogleLogin component needs to be set as an int width={<w>} instead of width='<w>'
 
 docker run ^
 --rm -it --memory="16g" -p 5000:5000 ^
