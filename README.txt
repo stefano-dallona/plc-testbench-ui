@@ -130,7 +130,7 @@ docker run \
 stdallona/plc-testbench-ui:1.0.0
 
 docker run ^
---rm -it --memory="4g" -p 27010:27010 ^
+--rm -it --memory="4g" -p 27017:27017 ^
 --env-file .\development-docker.env  ^
 --name mongo ^
 library/mongo:4.4.18
