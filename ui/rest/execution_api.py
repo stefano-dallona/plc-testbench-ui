@@ -5,6 +5,8 @@ from anytree.exporter import JsonExporter
 from flask_login import login_required
 import uuid
 import time
+import logging
+import traceback
 
 from redbird.repos import MongoRepo
 from pymongo import MongoClient
@@ -34,15 +36,21 @@ ecctestbench_service = EccTestbenchService(config.data_dir, run_repository=run_r
 #execution_service = ExecutionService(ecctestbench_service, run_repository)
 execution_service = ExecutionService(ecctestbench_service, run_repository=run_repository_mongodb2)
 
+logger = logging.getLogger()
+
 @execution_api.route('/runs', methods=['GET'])
 #@login_required
 @token_required
 def get_runs(user):
-    page = int(request.args.get('page')) if request.args.get('page') != None else 0
-    page_size = int(request.args.get('page_size')) if request.args.get('page_size') != None else -1
-    pagination = { 'page': page, 'pageSize': page_size }
-    runs = execution_service.get_runs(pagination, user)
-    return json.dumps({ 'data': runs['data'], 'totalRecords': runs['totalRecords'] }, default=lambda o: o.__class__.__name__ if isinstance(o, type) else o.__dict__), 200
+  logger.info(f"Start retrieving runs ...")
+  page = int(request.args.get('page')) if request.args.get('page') != None else 0
+  page_size = int(request.args.get('page_size')) if request.args.get('page_size') != None else -1
+  pagination = { 'page': page, 'pageSize': page_size }
+  logger.info(f"Calling execution service")
+  runs = execution_service.get_runs(pagination, user)
+  logger.info(f"Finished calling execution service")
+  #raise Exception("Test exception")
+  return json.dumps({ 'data': runs['data'], 'totalRecords': runs['totalRecords'] }, default=lambda o: o.__class__.__name__ if isinstance(o, type) else o.__dict__), 200
   
 @execution_api.route('/runs/searches', methods=['POST'])
 #@login_required

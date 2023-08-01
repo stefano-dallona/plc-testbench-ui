@@ -44,7 +44,7 @@ docker run \
 --entrypoint python plc-testbench-ui app.py
 
 # connect to a running image in a shell
-docker exec <container-id> -it sh
+docker exec -it <container-id> sh
 
 # attach to a running image
 docker attach 0425a3719996
@@ -71,7 +71,7 @@ https://medium.com/@wlarch/no-space-left-on-device-when-using-docker-compose-why
 docker volume rm $(docker volume ls -qf dangling=true)
 docker stop $(docker ps -aq)
 docker rm $(docker ps -aq)
-docker system prune -a --volumes #most useful to reclaim space
+docker system prune --volumes #most useful to reclaim space
 docker rmi $(docker images -q)
 
 #GitHub Repo:
@@ -112,6 +112,7 @@ docker-compose up
 
 # Start mongodb with custom env variables from file
 docker compose --env-file <path-to-env-file> up [--build #to refresh the image]
+docker compose --env-file .\development-docker.env up [--build #to refresh the image]
 
 docker login --username stdallona
 # access_token as password
@@ -141,11 +142,11 @@ powershell.exe -noprofile -executionpolicy bypass -file .\launch-command-with-en
 powershell.exe -noprofile -executionpolicy bypass -file .\launch-command-with-env.ps1 -EnvFile development-docker.env  gci env:
 
 powershell.exe -noprofile -executionpolicy bypass -file .\launch-command-with-env.ps1 -EnvFile development-docker.env docker run `
---rm -it --memory="16g" --publish 7000:5000 `
+--rm -it --memory="16g" --publish 5000:5000 `
 --env-file .\development-docker.env `
 --name plc-testbench-ui `
 --link mongo:mongo `
-stdallona/plc-testbench-ui:1.0.1
+stdallona/plc-testbench-ui:1.0.0
 
 #Bug in google login (https://github.com/metabase/metabase/issues/32602)
 #in order to fix it width in GoogleLogin component needs to be set as an int width={<w>} instead of width='<w>'

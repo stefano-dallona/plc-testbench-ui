@@ -1,5 +1,6 @@
 from typing import List
 import json
+import logging
 from pymongo.database import Database
 
 from plctestbench.database_manager import *
@@ -120,6 +121,7 @@ views = [
     }
 ]
 
+#_logger = logging.getLogger(__name__)
 
 class RunRepository(BaseMongoRepository):
 
@@ -127,6 +129,8 @@ class RunRepository(BaseMongoRepository):
         super().__init__()
         self.collection_metadata = {'name': 'RunView'}
         self.collection = collection
+        self.logger = logging.getLogger()
+        self.logger.info(f"Repository {__name__} initialized successfully")
 
     def initialize_database(self, database: Database):
         if self.initialized:
