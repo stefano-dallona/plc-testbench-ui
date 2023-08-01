@@ -20,10 +20,11 @@ WORKDIR /plc-testbench-ui/gstpeaq
 RUN aclocal && autoheader && ./autogen.sh && sed -i 's/SUBDIRS = src doc/SUBDIRS = src/' Makefile.am && ./configure --libdir=/usr/lib && automake && make && make install
 # End of download and compile gstpeaq
 WORKDIR /plc-testbench-ui
+# Install plctestbench
+RUN git clone --branch ui https://github.com/LucaVignati/plc-testbench.git && cd plc-testbench && python setup.py sdist && python3 -m pip install -f ./dist plc-testbench
+# Install ui dependencies
 RUN python3 -m pip install --upgrade pip && python3 -m pip install -r requirements.txt
 
 COPY . .
-# Install plctestbench:
-RUN python3 -m pip install -f dist plc-testbench
 
 ENTRYPOINT [ "python3", "app.py" ]

@@ -116,31 +116,36 @@ docker compose --env-file <path-to-env-file> up
 docker login --username stdallona
 # access_token as password
 
-docker run \
+ENV_FILE=/mongodb/development-docker.env && set -o allexport && source $ENV_FILE && set +o allexport && docker run \
 --rm -it --memory="4g" -p 27010:27010 \
---env-file .\development-docker.env  \
+--env-file "$ENV_FILE"  \
+--volume "$MONGO_DATA_VOLUME_PATH:/data/db" \
 --name mongo \
 library/mongo:4.4.18
 
-docker run \
+ENV_FILE=/mongodb/development-docker.env && set -o allexport && source $ENV_FILE && set +o allexport && docker run \
 --rm -it --memory="16g" -p 5000:5000 \
---env-file .\development-docker.env  \
+--env-file "$ENV_FILE" \
 --name plc-testbench-ui \
 --link mongo:mongo \
 stdallona/plc-testbench-ui:1.0.0
 
-docker run ^
---rm -it --memory="4g" -p 27017:27017 ^
---env-file .\development-docker.env  ^
---name mongo ^
-library/mongo:4.4.18
+#"`"C:/Program Files/Docker Toolbox/docker-machine.exe`" ssh default2 `"[ -d /mongo-data ] || rm -fR /mongo-data`"" | cmd
+powershell.exe -noprofile -executionpolicy bypass -file .\launch-command-with-env.ps1 -EnvFile development-docker.env docker run `
+--rm -it --memory="4g" --publish '27017:27017' `
+--env-file .\development-docker.env  `
+--volume '${MONGO_DATA_VOLUME_PATH}:/data/db' `
+--name mongo `
+"library/mongo:4.4.18"
 
-docker run ^
---rm -it --memory="16g" -p 5000:5000 ^
---env-file .\development-docker.env  ^
---name plc-testbench-ui ^
---link mongo:mongo ^
-stdallona/plc-testbench-ui:1.0.0
+powershell.exe -noprofile -executionpolicy bypass -file .\launch-command-with-env.ps1 -EnvFile development-docker.env  gci env:
+
+powershell.exe -noprofile -executionpolicy bypass -file .\launch-command-with-env.ps1 -EnvFile development-docker.env docker run `
+--rm -it --memory="16g" --publish 7000:5000 `
+--env-file .\development-docker.env `
+--name plc-testbench-ui `
+--link mongo:mongo `
+stdallona/plc-testbench-ui:1.0.1
 
 #Bug in google login (https://github.com/metabase/metabase/issues/32602)
 #in order to fix it width in GoogleLogin component needs to be set as an int width={<w>} instead of width='<w>'
@@ -156,3 +161,7 @@ stdallona/plc-testbench-ui:1.0.0
 openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem
 openssl x509 -inform der -in zscaler-root-ca.cer -out zscaler-root-ca.pem
 # application URL: https://127.0.0.1:5000/
+
+
+# Debug python inside docker container with VS
+#https://code.visualstudio.com/docs/containers/debug-python
