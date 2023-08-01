@@ -111,20 +111,20 @@ cd <project-root>
 docker-compose up
 
 # Start mongodb with custom env variables from file
-docker compose --env-file <path-to-env-file> up
+docker compose --env-file <path-to-env-file> up [--build #to refresh the image]
 
 docker login --username stdallona
 # access_token as password
 
-ENV_FILE=/mongodb/development-docker.env && set -o allexport && source $ENV_FILE && set +o allexport && docker run \
+ENV_FILE=/mongodb/development-docker.env && set -o allexport && dos2unix $ENV_FILE && source $ENV_FILE && set +o allexport && docker run \
 --rm -it --memory="4g" -p 27010:27010 \
 --env-file "$ENV_FILE"  \
---volume "$MONGO_DATA_VOLUME_PATH:/data/db" \
+--volume "${MONGO_DATA_VOLUME_PATH}:/data/db" \
 --name mongo \
 library/mongo:4.4.18
 
-ENV_FILE=/mongodb/development-docker.env && set -o allexport && source $ENV_FILE && set +o allexport && docker run \
---rm -it --memory="16g" -p 5000:5000 \
+ENV_FILE=/mongodb/development-docker.env && set -o allexport && dos2unix $ENV_FILE && source $ENV_FILE && set +o allexport && docker run \
+--rm -it -p "7000:${APP_PORT}" --memory="16g" \
 --env-file "$ENV_FILE" \
 --name plc-testbench-ui \
 --link mongo:mongo \
