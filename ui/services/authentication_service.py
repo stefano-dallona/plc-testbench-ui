@@ -23,6 +23,11 @@ def get_google_certs():
     return certs
 
 def get_user_from_jwt_token(token) -> User:
+    security_enabled = eval(os.environ.get("SECURITY_ENABLED")) if "SECURITY_ENABLED" in os.environ.keys() else False
+    
+    if not security_enabled:
+        return User(id_=None, name="anonymus", email="anonymus@plctestbench.com")
+    
     if not token:
         raise MissingTokenException()
     try:

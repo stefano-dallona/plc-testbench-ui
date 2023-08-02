@@ -25,6 +25,7 @@
                 "GOOGLE_OAUTH_CERTS": "https://www.googleapis.com/oauth2/v1/certs",
                 "REQUESTS_CA_BUNDLE": "C:\\Data\\plc-testbench-ui\\plc-testbench-ui\\secrets\\cacert.pem",
                 "APP_PORT": "5000",
+                "SECURITY_ENABLED": "True",
                 "CERT_FILE": "C:\\Data\\plc-testbench-ui\\plc-testbench-ui\\secrets\\cert.pem",
                 "KEY_FILE": "C:\\Data\\plc-testbench-ui\\plc-testbench-ui\\secrets\\key.pem"
             },

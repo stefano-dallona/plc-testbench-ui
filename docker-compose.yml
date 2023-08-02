@@ -14,7 +14,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: stdallona/plc-testbench-ui:1.0.0
+    image: stdallona/plc-testbench-ui:1.0.1
     cpus: 8.0
     mem_reservation: 32gb
     mem_limit: 32gb
@@ -31,9 +31,11 @@ services:
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
       GOOGLE_OAUTH_CERTS: ${GOOGLE_OAUTH_CERTS}
       REQUESTS_CA_BUNDLE: ${REQUESTS_CA_BUNDLE}
+      SECURITY_ENABLED: ${SECURITY_ENABLED}
+      APP_PORT: ${APP_PORT}
       CERT_FILE: ${CERT_FILE}
       KEY_FILE: ${KEY_FILE}
     ports:
-      - '5000:5000'
+      - '${APP_PORT}:${APP_PORT}'
     volumes:
       - ${FRONTEND_DATA_FOLDER}:/data/original_tracks

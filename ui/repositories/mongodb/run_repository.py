@@ -148,6 +148,7 @@ class RunRepository(BaseMongoRepository):
             initialized |= self.__grant_find_role_on_views__(database)
 
         self.initialized = initialized
+        self.logger.info(f"Database initialized: {self.initialized}")
 
     def get_plc_database_manager(self, user: User):
         return DatabaseManager(ip=db_host, port=db_port, username=db_username, password=db_password, user=user.__dict__)
