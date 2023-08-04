@@ -70,11 +70,11 @@ workflows:
       # Run the build first
       - build
       # Push the image second
-#      - push:
-#          # Build needs to finish first
-#          requires:
-#            - build
-#          # Only push images from the master branch
-#          filters:
-#            branches:
-#              only: master
+      - push:
+          # Build needs to finish first
+          requires:
+            - build
+          # Only push images from the master branch
+          filters:
+            branches:
+              only: master
