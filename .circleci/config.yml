@@ -66,18 +66,19 @@ jobs:
             echo "${DOCKERHUB_PASS}" | docker login --username "${DOCKERHUB_USERNAME}" --password-stdin
             docker push "${IMAGE_TAG}"
 
-# Orchestrate jobs using workflows
-# See: https://circleci.com/docs/configuration-reference/#workflows
-build-push:
+# Run the two different jobs as a sequenced workflow
+workflows:
+  version: 2
+  build-push:
     jobs:
       # Run the build first
       - build
       # Push the image second
-      - push:
-          # Build needs to finish first
-          requires:
-            - build
-          # Only push images from the master branch
-          filters:
-            branches:
-              only: master
+#      - push:
+#          # Build needs to finish first
+#          requires:
+#            - build
+#          # Only push images from the master branch
+#          filters:
+#            branches:
+#              only: master
