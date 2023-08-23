@@ -8,6 +8,7 @@ from plctestbench.path_manager import *
 from plctestbench.node import *
 from plctestbench.file_wrapper import *
 from plctestbench.worker import *
+import plctestbench.utils as plctestbenchutils
 
 import os
 import logging
@@ -29,6 +30,7 @@ from ..repositories.pickle.run_repository import RunRepository
 from ..config.app_config import *
 from ..models.run import *
 from ..models.user import *
+from ..services.configuration_service import *
 
 progress_cache = dict()
 
@@ -104,14 +106,7 @@ class EccTestbenchService:
             target_file_path = os.path.join(run_root_folder, file_basename)
             shutil.copyfile(src=source_file_path, dst=target_file_path)
     
-    def build_testbench_from_run(self, run: Run, user, task_id:str = None) -> PLCTestbench:
-        get_worker = lambda x: (globals()[x[0]], x[1])
-        
-        original_audio_tracks = list(map(lambda filename: (OriginalAudio, OriginalAudioSettings(filename)), run.selected_input_files))
-        packet_loss_simulators = list(map(get_worker, run.packet_loss_simulators))
-        plc_algorithms = list(map(get_worker, run.plc_algorithms))
-        output_analysers = list(map(get_worker, run.output_analysers))
-
+    def get_testbench_settings(self, run: Run, config: Config, task_id: str = None) -> dict:
         testbench_settings = {
             'root_folder': run.root_folder,
             'db_conn_string': config.db_conn_string,
@@ -119,19 +114,54 @@ class EccTestbenchService:
             'db_port': db_port,
             'db_username': db_username,
             'db_password': db_password,
-            'progress_monitor': __async_func__(task_id, str(run.run_id)) if task_id else None
+        #    'progress_monitor': __async_func__(task_id, str(run.run_id)) if task_id else None
         }
+        return testbench_settings
+    
+    def build_testbench_from_run(self, run: Run, user, task_id: str = None) -> PLCTestbench:
+        get_worker = lambda x: (globals()[x[0]], x[1])
+        
+        original_audio_tracks = list(map(lambda filename: (OriginalAudio, OriginalAudioSettings(filename)), run.selected_input_files))
+        packet_loss_simulators = list(map(get_worker, run.packet_loss_simulators))
+        plc_algorithms = list(map(get_worker, run.plc_algorithms))
+        output_analysers = list(map(get_worker, run.output_analysers))
+
+        testbench_settings = self.get_testbench_settings(run, config, task_id)
         testbench = PLCTestbench(
-                                original_audio_tracks,
-                                packet_loss_simulators,
-                                plc_algorithms,
-                                output_analysers,
+                                original_audio_tracks if not run.run_id else None,
+                                packet_loss_simulators if not run.run_id else None,
+                                plc_algorithms if not run.run_id else None,
+                                output_analysers if not run.run_id else None,
                                 testbench_settings,
                                 user.__dict__,
                                 run.run_id
-                                 )
+                                )
 
         return testbench
+    
+    def load_files(self, plc_testbench: PLCTestbench, node_ids: list):
+        nodes_to_load = []
+        for root_node in plc_testbench.data_manager.root_nodes:
+            for node in LevelOrderIter(root_node):
+                if node.get_id() in node_ids:
+                    nodes_to_load.append(node)
+
+        for node in nodes_to_load:
+            node_class = node.__class__
+            if node_class == OriginalTrackNode:
+                node.file = AudioFile.from_path(node.absolute_path + '.wav')
+                node.file.persist = False
+                node.file.load()
+            elif node_class == LostSamplesMaskNode:
+                node.file = DataFile(path=node.absolute_path + '.npy', persist=False)
+            elif node_class == ReconstructedTrackNode:
+                node.file = AudioFile.from_path(node.absolute_path + '.wav')
+                node.file.persist = False
+                node.file.load()
+            elif node_class == OutputAnalysisNode:
+                node.file = DataFile(path=node.absolute_path + '.pickle', persist=False)
+
+        return plc_testbench
     
     def create_run(self, json_dict, run_id, user) -> PLCTestbench:
 
@@ -147,8 +177,11 @@ class EccTestbenchService:
             for setting in json_dict["settings"]:
                 try:
                     conversion_function = globals()['__builtins__'][setting["type"]]
-                    if (conversion_function != None):
-                        setattr(settings, setting["property"], conversion_function(setting["value"]))
+                    value = conversion_function(setting["value"]) if (conversion_function != None) else setting["value"]
+                    if (hasattr(settings, "settings") and type(settings.settings) is dict):
+                        settings.settings[setting["property"]] = value
+                    else:
+                        setattr(settings, setting["property"], value)
                 except:
                     self.logger.info("Could not set property %s of type %s on Settings", setting["property"], setting["type"])
         
@@ -162,6 +195,7 @@ class EccTestbenchService:
                                                          and worker_constructor.__base__ != object \
                                                          and worker_constructor.__base__ != Settings \
                                                       else None
+            worker_base = ConfigurationService.get_worker_base_class(worker_constructor)
             worker_key = worker_base if worker_base != None else worker_constructor
             worker_id = str(uuid.uuid4())
             
@@ -201,6 +235,11 @@ class EccTestbenchService:
         #run.__ecctestbench__.global_settings_list[0].__progress_monitor__ = __async_func__
         #plc_testbench = run.__ecctestbench__
         
+        global progress_monitor
+        progress_monitor = __async_func__(task_id, str(run.run_id))
+        
+
+        plctestbenchutils.progress_monitor = __async_func__(task_id, str(run.run_id))
         plc_testbench = self.build_testbench_from_run(run, user, task_id)
         
         task = self.socketio.start_background_task(execute_elaboration, plc_testbench, user, self.on_run_completed(task_id))
@@ -277,7 +316,8 @@ def __async_func__(task_id:str = None, run_id:str = None):
 def external_callback(task_id:str, run_id:str, caller, *args, **kwargs):
     caller_class_name = caller.__class__.__name__
     #print("caller_class_name=%s, args=%s, kwargs=%s" % (caller_class_name, args, kwargs))
-    nodeid = str(caller.uuid) if hasattr(caller, "uuid") else str(caller.run_id) if hasattr(caller, "run_id") else ""
+    #nodeid = str(caller.uuid) if hasattr(caller, "uuid") else str(caller.run_id) if hasattr(caller, "run_id") else ""
+    nodeid = str(caller.get_node_id()) if hasattr(caller, "get_node_id") else str(caller.run_id) if hasattr(caller, "run_id") else ""
     currentPercentage = math.floor(kwargs["n"] / kwargs["total"] * 100)
     eta = math.ceil((kwargs["total"] - kwargs["elapsed"]) * (1 / (kwargs["rate"] if kwargs["rate"] != None else float('inf'))))
     
@@ -311,8 +351,14 @@ def __format_sse__(data: str, event=None) -> str:
     return msg
 
 def execute_elaboration(ecctestbench, user, callback):
-    ecctestbench.run()
     run_id = ecctestbench.run_id
+    '''
+    progress_cache[str(run_id)] = {"revision": 1,
+                                   "run_id": str(run_id),
+                                   "current_root_index": 0,
+                                   "current_file": os.path.basename(ecctestbench.data_manager.get_data_trees()[0].file.path)}
+    '''
+    ecctestbench.run()
     callback(run_id, user)
     sleep(3)
     clean_progress_cache(str(run_id), user)

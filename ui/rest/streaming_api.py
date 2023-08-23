@@ -101,7 +101,7 @@ def on_disconnect():
 def on_track_ack(message):
     chunk_num = message["chunk_num"]
     track_acks[request.sid] = chunk_num
-    print("%s acknowledge received for chunk %d" % (request.sid, chunk_num))
+    #print("%s acknowledge received for chunk %d" % (request.sid, chunk_num))
 
 @socketio.on('track-play')
 def stream_track(message):
@@ -113,7 +113,7 @@ def stream_track(message):
     stream_id = str(uuid.uuid4())
     authorization_token = message["authorization"]
     user = get_user_from_jwt_token(authorization_token)
-    
+
     audio_file = analysis_service.find_audio_file(run_id, audio_file_node_id, user)
     
     def send_file(sid, start_time, stop_time):
@@ -164,9 +164,9 @@ def stream_track(message):
                 }, room=sid)
                 
                 socketio.sleep(0)
-                print("")
-                print("chunk %s-%s sent" % (start_sample, last_sample))
+                #print("chunk %s-%s sent" % (start_sample, last_sample))
     active_streamings[stream_id] = stream_id
+    print("Start streaming %s, start_time:%s, stop_time:%s" % (stream_id, start_time, stop_time))
     print("active_streamings: %s, added stream_id:%s" % (active_streamings, stream_id))
     task = socketio.start_background_task(send_file, request.sid, start_time, stop_time)
     task.join()

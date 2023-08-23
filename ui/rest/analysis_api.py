@@ -14,6 +14,11 @@ from ..models.samples import *
 from .streaming_api import stream_audio_file as stream_file
 from ..services.authentication_service import token_required
 
+class DefaultJsonEncoder:
+  @classmethod
+  def to_json(cls, obj):
+    return obj.__dict__ if hasattr(obj, '__dict__') else obj
+
 run_repository = RunRepository(config.data_dir)
 
 run_repository_mongodb2 = MongoRunRepository()
@@ -35,7 +40,7 @@ def find_lost_samples(run_id, original_file_node_id, loss_simulation_node_id, us
   current_app.logger.info(f"Retrieving lost samples from run_id {run_id} and file {original_file_node_id} and loss simulation {loss_simulation_node_id}")
   lost_samples = analysis_service.find_lost_samples(run_id, original_file_node_id, loss_simulation_node_id, unit_of_meas, user)
   if lost_samples != None:
-    return json.dumps(lost_samples, default=lost_samples.to_json()), status.HTTP_200_OK
+    return json.dumps(lost_samples, default=DefaultJsonEncoder.to_json), status.HTTP_200_OK
   else:
     return {}, status.HTTP_404_NOT_FOUND
 
@@ -117,6 +122,6 @@ def get_metric_samples(run_id, original_file_node_id, audio_file_node_id, metric
                                                category=category,
                                                user=user)
   if metric != None:
-    return json.dumps(metric.data, default=metric.to_json()), status.HTTP_200_OK
+    return json.dumps(metric.data, default=DefaultJsonEncoder.to_json), status.HTTP_200_OK
   else:
     return {}, status.HTTP_404_NOT_FOUND

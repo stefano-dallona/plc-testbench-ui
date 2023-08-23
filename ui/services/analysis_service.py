@@ -31,11 +31,13 @@ class AnalysisService:
         
         self._logger.info(f"Loaded ecctestbench for {run_id} ...")
         
-        plb_testbench = self.ecctestbench_service.build_testbench_from_run(run, user)
-        for file_tree in plb_testbench.data_manager.get_data_trees():
+        plc_testbench = self.ecctestbench_service.build_testbench_from_run(run, user)
+        nodes_to_load = [ audio_file_node_id ]
+        self.ecctestbench_service.load_files(plc_testbench, nodes_to_load)
+        
+        for file_tree in plc_testbench.data_manager.get_data_trees():
             audio_file = self.__find_audio_file_by_node_id__(file_tree, audio_file_node_id)
             if audio_file != None:
-                audio_file.load()
                 return audio_file.file
 
         return None
@@ -52,14 +54,15 @@ class AnalysisService:
         self._logger.info(f"Loaded ecctestbench for {run_id} ...")
         
         plc_testbench = self.ecctestbench_service.build_testbench_from_run(run, user)
+        nodes_to_load = [ original_file_node_id, loss_simulation_node_id ]
+        self.ecctestbench_service.load_files(plc_testbench, nodes_to_load)
+        
         file_tree = self.__find_file_tree_by_node_id__(plc_testbench, original_file_node_id)
         original_audio_file = file_tree.file
         self._logger.info(f"file_tree:  {file_tree} ...")
         
         lost_samples_file = self.__find_lost_simulation_file_by_node_id__(file_tree, loss_simulation_node_id)
         self._logger.info(f"lost_samples_files:  {lost_samples_file} ...")
-        
-        lost_samples_file.load()
         
         sample_rate = 1 if unit_of_meas == "samples" else original_audio_file.samplerate
         lost_samples = self.__convertToLossIntervals__(len(original_audio_file.data), lost_samples_file.file.data, sample_rate)
@@ -106,16 +109,17 @@ class AnalysisService:
         self._logger.info(f"Loaded ecctestbench for {run_id} ...")
         
         plc_testbench = self.ecctestbench_service.build_testbench_from_run(run, user)
+        nodes_to_load = [ audio_file_node_id, metric_node_id ]
+        self.ecctestbench_service.load_files(plc_testbench, nodes_to_load)
+        
         audio_file = self.__find_node_by_id__(plc_testbench, audio_file_node_id)
         if audio_file == None:
             return None
-        audio_file.load()
         total_audio_file_samples = len(audio_file.file.get_data())
         
         metric_file = self.__find_metric_file_by_node_id__(audio_file, metric_node_id, category)
         if metric_file == None:
             return None
-        metric_file.load()
         
         metric_samples = metric_file.get_data()
         category = "linear" if hasattr(metric_file.get_data(), '__iter__') else "scalar"

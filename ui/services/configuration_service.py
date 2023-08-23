@@ -6,6 +6,7 @@ import uuid as Uuid
 from operator import itemgetter
 from itertools import groupby
 
+from plctestbench.worker import *
 from plctestbench.loss_simulator import *
 from plctestbench.plc_algorithm import *
 from plctestbench.output_analyser import *
@@ -20,6 +21,51 @@ class ConfigurationService:
     
     def __init__(self, root_folder):
         self.root_folder = root_folder
+    
+    @staticmethod
+    def itersubclasses(cls, _seen=None):
+        """
+        itersubclasses(cls)
+
+        Generator over all subclasses of a given class, in depth first order.
+
+        >>> list(itersubclasses(int)) == [bool]
+        True
+        >>> class A(object): pass
+        >>> class B(A): pass
+        >>> class C(A): pass
+        >>> class D(B,C): pass
+        >>> class E(D): pass
+        >>> 
+        >>> for cls in itersubclasses(A):
+        ...     print(cls.__name__)
+        B
+        D
+        E
+        C
+        >>> # get ALL (new-style) classes currently defined
+        >>> [cls.__name__ for cls in itersubclasses(object)] #doctest: +ELLIPSIS
+        ['type', ...'tuple', ...]
+        """
+        
+        if not isinstance(cls, type):
+            raise TypeError('itersubclasses must be called with '
+                            'new-style classes, not %.100r' % cls)
+        if _seen is None: _seen = set()
+        try:
+            subs = cls.__subclasses__()
+        except TypeError: # fails only when cls is type
+            subs = cls.__subclasses__(cls)
+        for sub in subs:
+            if sub not in _seen:
+                _seen.add(sub)
+                yield sub
+                for sub in ConfigurationService.itersubclasses(sub, _seen):
+                    yield sub
+    @staticmethod
+    def hasSettings(cls):
+        settings_class_name = cls.__name__ + "Settings"
+        return settings_class_name in globals().keys()
     
     @staticmethod
     def find_loss_simulators():
@@ -54,30 +100,34 @@ class ConfigurationService:
     @staticmethod
     def find_output_analysers(category: str = None):
         ConfigurationService._logger.info("Retrieving output analysers ...")
-        result = [cls.__name__ for cls in OutputAnalyser.__subclasses__()
-                  if category == None or
-                    category == ConfigurationService.get_output_analyser_category(cls)]
+        result = [cls.__name__ for cls in ConfigurationService.itersubclasses(OutputAnalyser)
+                  if ConfigurationService.hasSettings(cls) and (category == None or
+                    category == ConfigurationService.get_output_analyser_category(cls))]
         return result
     
     @staticmethod
+    def get_worker_class(settings_class):
+        worker_name = settings_class.__name__.replace("Settings", "")
+        ConfigurationService._logger.info(f"worker_name:{worker_name}")
+        worker_constructor = globals()[worker_name] if worker_name in globals() else None
+        ConfigurationService._logger.info(f"worker_constructor:{worker_constructor}")
+        worker_constructor = worker_constructor if worker_constructor != None else settings_class
+        return worker_constructor
+    
+    @staticmethod
+    def get_worker_base_class(worker_class) -> Worker:
+        ancestors = worker_class.__mro__
+        for ancestor in [ancestor for ancestor in ancestors
+                            if ancestor in [PacketLossSimulator, PLCAlgorithm, OutputAnalyser]]:
+            return ancestor
+        return None
+    
+    @staticmethod
     def find_settings_metadata():
-        
-        def get_worker_class(settings_class):
-            worker_name = settings_class.__name__.replace("Settings", "")
-            worker_constructor = globals()[worker_name] if worker_name in globals() else None
-            worker_constructor = worker_constructor if worker_constructor != None else settings_class
-            return worker_constructor
-        
-        def get_worker_base_class(settings_class):
-            worker_name = settings_class.__name__.replace("Settings", "")
-            worker_constructor = globals()[worker_name] if worker_name in globals() else None
-            worker_base = worker_constructor.__base__ if worker_constructor != None and worker_constructor not in [object, Settings] else worker_constructor
-            worker_base = worker_base if worker_base != None else settings_class
-            return worker_base
-        
+        cs = ConfigurationService
         ConfigurationService._logger.info("Retrieving settings metadata ...")
-        settingsInstances = [(cls(), get_worker_class(cls), get_worker_base_class(cls)) for cls in Settings.__subclasses__() \
-                             if get_worker_base_class(cls) in [PacketLossSimulator, PLCAlgorithm, OutputAnalyser]]
+        settingsInstances = [(cls(), cs.get_worker_class(cls), cs.get_worker_base_class(cs.get_worker_class(cls))) for cls in Settings.__subclasses__() \
+                             if cs.get_worker_base_class(cs.get_worker_class(cls))]
         metadata = [
             {
                 "property": category.__name__,

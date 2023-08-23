@@ -110,5 +110,6 @@ class ExecutionService:
         node_id = str(node.get_id())
         print("level:%d, name:%s, type:%s, uuid:%s, file:%s" % (node.depth, name, type, node_id, file))
         transformed_node = Node(name, parent=parent, parent_id=parent.uuid if parent != None else None, type=type, file=file, uuid=node_id, category=category)
+        #transformed_node = Node(name, parent=parent, parent_id=parent.get_id() if parent != None else None, type=type, file=file, uuid=node_id, category=category)
         transformed_node.children = [ExecutionService.__build_output_hierarchy__(child, transformed_node) for child in node.children]
         return transformed_node
