@@ -10,6 +10,7 @@ from ..services.analysis_service import AnalysisService
 from ..services.plctestbench_service import EccTestbenchService
 from ..models.base_model import *
 from ..models.samples import *
+from ..models.user import *
 
 from .streaming_api import stream_audio_file as stream_file
 from ..services.authentication_service import token_required
@@ -48,8 +49,10 @@ def find_lost_samples(run_id, original_file_node_id, loss_simulation_node_id, us
 #http://localhost:5000/analysis/runs/76728771-9de8-42bd-a71e-f4d3c08e3ae6/input-files/76f9743b-d839-4e64-bf55-01f86107bec0/output-files/76f9743b-d839-4e64-bf55-01f86107bec0
 @analysis_api.route("/runs/<run_id>/input-files/<original_file_node_id>/output-files/<audio_file_node_id>")
 #@login_required
-@token_required
-def stream_audio_file(run_id, original_file_node_id, audio_file_node_id, user):
+#@token_required
+def stream_audio_file(run_id, original_file_node_id, audio_file_node_id, user: User = None):
+  if not user:
+    user = User(id_="stefano.dallona@gmail.com", email="stefano.dallona@gmail.com", name="Stefano")
   audio_file = analysis_service.find_audio_file(run_id, audio_file_node_id, user)
   if audio_file != None:
     return send_file(audio_file.path, mimetype='audio/x-wav')
