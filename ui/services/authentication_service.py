@@ -47,6 +47,8 @@ def token_required(f):
             token = None
             if "Authorization" in request.headers:
                 token = request.headers["Authorization"]
+            if not token and "jwt" in request.args.keys():
+                token = request.args.get("jwt")
             current_user = get_user_from_jwt_token(token)
             if current_user is None:
                 return {

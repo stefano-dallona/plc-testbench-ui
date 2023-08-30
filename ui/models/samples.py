@@ -91,8 +91,8 @@ class DownsampledAudioFile:
 
         result = {}
         for index, slice in enumerate(slices_data):
-            slice_min = min(slice[:])
-            slice_max = max(slice[:])
+            slice_min = min(slice[:]) if len(slice) > 0 else 0
+            slice_max = max(slice[:]) if len(slice) > 0 else 0
             result[str(start_sample + math.floor(index * samples_per_slice))] = str(slice_min)
             result[str(start_sample + math.floor(index * samples_per_slice) + 1)] = str(slice_max)
         
