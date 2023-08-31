@@ -1,3 +1,5 @@
+import functools
+
 from flask import Blueprint, json, request, make_response, send_file, session
 from flask import current_app
 from flask_api import status
@@ -51,7 +53,7 @@ def find_lost_samples(run_id, original_file_node_id, loss_simulation_node_id, us
 #@login_required
 @token_required
 def stream_audio_file(run_id, original_file_node_id, audio_file_node_id, user: User = None):
-  audio_file = analysis_service.find_audio_file(run_id, audio_file_node_id, user)
+  audio_file, plc_testbench = analysis_service.find_audio_file(run_id, audio_file_node_id, user)
   if audio_file != None:
     return send_file(audio_file.path, mimetype='audio/x-wav')
   else:
@@ -66,7 +68,7 @@ def get_audio_file_samples(run_id, original_file_node_id, audio_file_node_id, us
   offset = request.args.get("offset", type=int, default=0)
   num_samples = request.args.get("num_samples", type=int, default=1000)
   
-  samples = analysis_service.get_audio_file_samples(run_id, audio_file_node_id, channel, offset, num_samples, user=user)
+  samples, plc_testbench = analysis_service.get_audio_file_samples(run_id, audio_file_node_id, channel, offset, num_samples, user=user)
   if samples != None:
     #return json.dumps(samples.data, default=samples.to_json()), status.HTTP_200_OK
     return json.dumps(samples.data, default=NpEncoder().default), status.HTTP_200_OK
@@ -86,7 +88,7 @@ def get_audio_file_waveform(run_id, original_file_node_id, audio_file_node_id, u
   offset = None if offset == None or offset < 0 else offset
   num_samples = None if num_samples == None or num_samples < 0 else num_samples
   
-  waveform = analysis_service.get_audio_file_waveform(run_id, audio_file_node_id, max_slices, user)
+  waveform, plc_testbench = analysis_service.get_audio_file_waveform(run_id, audio_file_node_id, max_slices, user, None, offset, num_samples)
   waveform.load(channel, offset, num_samples)
   if waveform != None:
     return json.dumps({
@@ -97,6 +99,42 @@ def get_audio_file_waveform(run_id, original_file_node_id, audio_file_node_id, u
                         #"data": list(map(lambda x: str(x), waveform.data))
                         "data": waveform.data
                       }), status.HTTP_200_OK
+  else:
+    return {}, status.HTTP_404_NOT_FOUND
+  
+@analysis_api.route('/runs/<run_id>/input-files/<original_file_node_id>/waveforms', methods=['GET'])
+#@login_required
+@token_required
+def get_audio_file_waveforms(run_id, original_file_node_id, user: User = None):
+  channel = request.args.get("channel", type=int, default=0)
+  offset = request.args.get("offset", type=int, default=0)
+  num_samples = request.args.get("num_samples", type=int, default=1000)
+  max_slices = request.args.get("max_slices", type=int, default=3000)
+  
+  offset = None if offset == None or offset < 0 else offset
+  num_samples = None if num_samples == None or num_samples < 0 else num_samples
+  
+  run = analysis_service.ecctestbench_service.load_run(run_id, user)
+  plc_testbench = analysis_service.ecctestbench_service.build_testbench_from_run(run, user)
+  file_tree = analysis_service.__find_file_tree_by_node_id__(plc_testbench, original_file_node_id)
+  audio_files = analysis_service.__find_audio_files__(file_tree)
+  
+  def retrieveWaveform(plc_testbench, audio_file_node_id) -> list:
+    waveform, plc_testbench = analysis_service.get_audio_file_waveform(run_id, audio_file_node_id, max_slices, user, plc_testbench, offset, num_samples)
+    waveform.load(channel, offset, num_samples)
+    if waveform != None:
+      return {
+                "uuid": audio_file_node_id,
+                "numSamples": waveform.num_samples,
+                "duration": waveform.duration,
+                "sampleRate": waveform.sample_rate,
+                #"data": list(map(lambda x: str(x), waveform.data))
+                "data": waveform.data
+              }
+  audio_file_node_ids = list(map(lambda x: x.get_id(), audio_files))
+  waveforms = list(map(functools.partial(retrieveWaveform, plc_testbench), audio_file_node_ids))
+  if len(waveforms) > 0:
+    return json.dumps(waveforms), status.HTTP_200_OK
   else:
     return {}, status.HTTP_404_NOT_FOUND
 

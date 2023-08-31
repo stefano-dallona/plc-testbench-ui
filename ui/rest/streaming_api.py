@@ -115,7 +115,7 @@ def stream_track(message):
     authorization_token = message["authorization"]
     user = get_user_from_jwt_token(authorization_token)
 
-    audio_file = analysis_service.find_audio_file(run_id, audio_file_node_id, user)
+    audio_file, plc_testbench = analysis_service.find_audio_file(run_id, audio_file_node_id, user)
     
     def send_file(sid, start_time, stop_time):
         

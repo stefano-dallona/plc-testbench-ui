@@ -25,6 +25,7 @@ import itertools
 from tqdm.auto import tqdm as std_tqdm
 from threading import Thread
 from eventlet import sleep
+from numpy import ndarray
 
 from ..repositories.pickle.run_repository import RunRepository
 from ..config.app_config import *
@@ -139,25 +140,46 @@ class EccTestbenchService:
 
         return testbench
     
-    def load_files(self, plc_testbench: PLCTestbench, node_ids: list):
+    def load_files(self,
+                   plc_testbench: PLCTestbench,
+                   node_ids: list,
+                   offset: int = None,
+                   numsamples: int = None):
         nodes_to_load = []
         for root_node in plc_testbench.data_manager.root_nodes:
             for node in LevelOrderIter(root_node):
                 if node.get_id() in node_ids:
                     nodes_to_load.append(node)
+        
+        def load_audio_file(audio_file: AudioFile,
+                            offset: int = None,
+                            numsamples: int = None) -> ndarray:
+            offset = 0
+            numsamples = -1
+            with sf.SoundFile(audio_file.path, 'r') as file:
+                file.seek(int(offset if offset else 0))
+                audio_file.data = file.read(frames=numsamples if numsamples else -1, dtype=DEFAULT_DTYPE)
+                audio_file.path = file.name
+                audio_file.samplerate = file.samplerate
+                audio_file.channels = file.channels
+                audio_file.subtype = file.subtype
+                audio_file.endian = file.endian
+                audio_file.audio_format = file.format
 
         for node in nodes_to_load:
             node_class = node.__class__
             if node_class == OriginalTrackNode:
                 node.file = AudioFile.from_path(node.absolute_path + '.wav')
                 node.file.persist = False
-                node.file.load()
+                #node.file.load()
+                load_audio_file(node.file, offset, numsamples)
             elif node_class == LostSamplesMaskNode:
                 node.file = DataFile(path=node.absolute_path + '.npy', persist=False)
             elif node_class == ReconstructedTrackNode:
                 node.file = AudioFile.from_path(node.absolute_path + '.wav')
                 node.file.persist = False
-                node.file.load()
+                #node.file.load()
+                load_audio_file(node.file, offset, numsamples)
             elif node_class == OutputAnalysisNode:
                 node.file = DataFile(path=node.absolute_path + '.pickle', persist=False)
 

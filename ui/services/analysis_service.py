@@ -24,23 +24,26 @@ class AnalysisService:
     def find_audio_file(self,
                         run_id: str,
                         audio_file_node_id: str,
-                        user) -> AudioFile:
+                        user,
+                        plc_testbench: PLCTestbench = None,
+                        offset: int = None,
+                        numsamples: int = None) -> AudioFile:
         run = self.ecctestbench_service.load_run(run_id, user)
         if run == None:
             return None
         
         self._logger.info(f"Loaded ecctestbench for {run_id} ...")
         
-        plc_testbench = self.ecctestbench_service.build_testbench_from_run(run, user)
+        plc_testbench = self.ecctestbench_service.build_testbench_from_run(run, user) if not plc_testbench else plc_testbench
         nodes_to_load = [ audio_file_node_id ]
-        self.ecctestbench_service.load_files(plc_testbench, nodes_to_load)
+        self.ecctestbench_service.load_files(plc_testbench, nodes_to_load, offset, numsamples)
         
         for file_tree in plc_testbench.data_manager.get_data_trees():
             audio_file = self.__find_audio_file_by_node_id__(file_tree, audio_file_node_id)
             if audio_file != None:
-                return audio_file.file
+                return audio_file.file, plc_testbench
 
-        return None
+        return None, plc_testbench
     
     def find_lost_samples(self,
                           run_id: str,
@@ -75,23 +78,27 @@ class AnalysisService:
                         offset = None,
                         num_samples = None,
                         unit_of_meas = "samples",
-                        user: User = None):
-        audio_file = self.find_audio_file(run_id, audio_file_node_id, user)
+                        user: User = None,
+                        plc_testbench: PLCTestbench = None):
+        audio_file, plc_testbench = self.find_audio_file(run_id, audio_file_node_id, user, plc_testbench, offset, num_samples)
         self._logger.info(f"Loaded audio file with path {audio_file.path} ...")
         samples = AudioFileSamples(node_id=audio_file_node_id, channel=channel, samples=audio_file.get_data(),
                                    offset=offset, num_samples=num_samples,
                                    sample_rate=1 if unit_of_meas=="samples" else audio_file.samplerate)
-        return samples
+        return samples, plc_testbench
     
     def get_audio_file_waveform(self,
                             run_id: str,
                             audio_file_node_id: str,
                             max_slices: int,
-                            user: User):
-            audio_file = self.find_audio_file(run_id, audio_file_node_id, user)
+                            user: User,
+                            plc_testbench: PLCTestbench = None,
+                            offset = None,
+                            num_samples = None):
+            audio_file, plc_testbench = self.find_audio_file(run_id, audio_file_node_id, user, plc_testbench, offset, num_samples)
             self._logger.info(f"Loaded audio file with path {audio_file.path} ...")
             waveform = DownsampledAudioFile(audio_file, max_slices)
-            return waveform
+            return waveform, plc_testbench
     
     def get_metric_samples(self,
                         run_id: str,
@@ -170,6 +177,11 @@ class AnalysisService:
     def __find_audio_file_by_node_id__(file_tree: Node, node_id: str) -> Node:
         search = lambda x: any(isinstance(x, n) for n in [OriginalTrackNode, ReconstructedTrackNode]) and str(x.get_id()) == node_id #and x.uuid == node_id
         return AnalysisService.__get_first__(AnalysisService.__find_nodes_in_file_tree__(file_tree, search))
+    
+    @staticmethod
+    def __find_audio_files__(file_tree: Node) -> list:
+        search = lambda x: any(isinstance(x, n) for n in [OriginalTrackNode, ReconstructedTrackNode])
+        return AnalysisService.__find_nodes_in_file_tree__(file_tree, search)
     
     @staticmethod
     def __find_metric_file_by_node_id__(file_tree: Node, node_id: str, category = None) -> Node:
