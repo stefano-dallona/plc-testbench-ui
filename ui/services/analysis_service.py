@@ -27,7 +27,8 @@ class AnalysisService:
                         user,
                         plc_testbench: PLCTestbench = None,
                         offset: int = None,
-                        numsamples: int = None) -> AudioFile:
+                        numsamples: int = None,
+                        sample_type: str = 'float32') -> AudioFile:
         run = self.ecctestbench_service.load_run(run_id, user)
         if run == None:
             return None
@@ -36,7 +37,7 @@ class AnalysisService:
         
         plc_testbench = self.ecctestbench_service.build_testbench_from_run(run, user) if not plc_testbench else plc_testbench
         nodes_to_load = [ audio_file_node_id ]
-        self.ecctestbench_service.load_files(plc_testbench, nodes_to_load, offset, numsamples)
+        self.ecctestbench_service.load_files(plc_testbench, nodes_to_load, offset, numsamples, sample_type)
         
         for file_tree in plc_testbench.data_manager.get_data_trees():
             audio_file = self.__find_audio_file_by_node_id__(file_tree, audio_file_node_id)
@@ -93,8 +94,8 @@ class AnalysisService:
                             max_slices: int,
                             user: User,
                             plc_testbench: PLCTestbench = None,
-                            offset = None,
-                            num_samples = None):
+                            offset: int = 0,
+                            num_samples: int = -1):
             audio_file, plc_testbench = self.find_audio_file(run_id, audio_file_node_id, user, plc_testbench, offset, num_samples)
             self._logger.info(f"Loaded audio file with path {audio_file.path} ...")
             waveform = DownsampledAudioFile(audio_file, max_slices)

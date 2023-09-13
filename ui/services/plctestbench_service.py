@@ -115,7 +115,7 @@ class EccTestbenchService:
             'db_port': db_port,
             'db_username': db_username,
             'db_password': db_password,
-        #    'progress_monitor': __async_func__(task_id, str(run.run_id)) if task_id else None
+            'progress_monitor': __async_func__(task_id, str(run.run_id)) if task_id else plctestbenchutils.progress_monitor
         }
         return testbench_settings
     
@@ -143,8 +143,9 @@ class EccTestbenchService:
     def load_files(self,
                    plc_testbench: PLCTestbench,
                    node_ids: list,
-                   offset: int = None,
-                   numsamples: int = None):
+                   offset: int = 0,
+                   numsamples: int = -1,
+                   sample_type: str = 'float32'):
         nodes_to_load = []
         for root_node in plc_testbench.data_manager.root_nodes:
             for node in LevelOrderIter(root_node):
@@ -152,13 +153,15 @@ class EccTestbenchService:
                     nodes_to_load.append(node)
         
         def load_audio_file(audio_file: AudioFile,
-                            offset: int = None,
-                            numsamples: int = None) -> ndarray:
-            offset = 0
-            numsamples = -1
+                            offset: int,
+                            numsamples: int,
+                            sample_type: str = DEFAULT_DTYPE) -> ndarray:
+            #offset = 0
+            #numsamples = -1
             with sf.SoundFile(audio_file.path, 'r') as file:
-                file.seek(int(offset if offset else 0))
-                audio_file.data = file.read(frames=numsamples if numsamples else -1, dtype=DEFAULT_DTYPE)
+                file.seek(min(int(offset if offset else 0), file.frames - 1))
+                setattr(audio_file, "frames", file.frames)
+                audio_file.data = file.read(frames=numsamples if numsamples else -1, dtype=sample_type)
                 audio_file.path = file.name
                 audio_file.samplerate = file.samplerate
                 audio_file.channels = file.channels
@@ -172,16 +175,18 @@ class EccTestbenchService:
                 node.file = AudioFile.from_path(node.absolute_path + '.wav')
                 node.file.persist = False
                 #node.file.load()
-                load_audio_file(node.file, offset, numsamples)
+                load_audio_file(node.file, offset, numsamples, sample_type)
             elif node_class == LostSamplesMaskNode:
                 node.file = DataFile(path=node.absolute_path + '.npy', persist=False)
+                node.file.load()
             elif node_class == ReconstructedTrackNode:
                 node.file = AudioFile.from_path(node.absolute_path + '.wav')
                 node.file.persist = False
                 #node.file.load()
-                load_audio_file(node.file, offset, numsamples)
+                load_audio_file(node.file, offset, numsamples, sample_type)
             elif node_class == OutputAnalysisNode:
                 node.file = DataFile(path=node.absolute_path + '.pickle', persist=False)
+                node.file.load()
 
         return plc_testbench
     

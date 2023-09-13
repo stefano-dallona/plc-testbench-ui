@@ -8,6 +8,7 @@ eventlet.monkey_patch()
 from flask import Flask, Response, send_from_directory, request, redirect
 from flask_cors import CORS
 from flask_socketio import SocketIO, emit
+from flask_compress import Compress
 from waitress import serve
 from eventlet import wsgi
 
@@ -56,6 +57,7 @@ def create_app():
     from ui.rest.streaming_api import streaming_api
     from ui.rest.authentication_api import authentication_api
     
+    #Compress(app)
     CORS(app)
     CORS(configuration_api)
     CORS(execution_api)
@@ -72,6 +74,8 @@ def create_app():
     get_socketio().init_app(app)
     
     login_manager.init_app(app)
+    compress = Compress()
+    compress.init_app(app)
            
     return app
 

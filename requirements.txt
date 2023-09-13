@@ -6,6 +6,7 @@ waitress
 # following packages are needed for websockets
 flask-socketio==5.3.4
 flask-rest-api==0.17.1
+flask-compress==1.14
 #gevent
 #gevent-websocket
 #websocket-client
