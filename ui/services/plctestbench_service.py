@@ -129,9 +129,12 @@ class EccTestbenchService:
         output_analysers = list(map(get_worker, run.output_analysers))
 
         testbench_settings = self.get_testbench_settings(run, config, task_id)
+        
+        #readonly = False
         from plctestbench.plc_testbench import PLCTestbench
         if readonly:
             from ..testbench.customization import PLCTestbench
+            
         testbench = PLCTestbench(
                                 original_audio_tracks if not run.run_id else None,
                                 packet_loss_simulators if not run.run_id else None,
