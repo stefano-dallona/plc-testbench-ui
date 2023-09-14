@@ -84,7 +84,7 @@ class AnalysisService:
         audio_file, plc_testbench = self.find_audio_file(run_id, audio_file_node_id, user, plc_testbench, offset, num_samples)
         self._logger.info(f"Loaded audio file with path {audio_file.path} ...")
         samples = AudioFileSamples(node_id=audio_file_node_id, channel=channel, samples=audio_file.get_data(),
-                                   offset=offset, num_samples=num_samples,
+                                   offset=None, num_samples=None,
                                    sample_rate=1 if unit_of_meas=="samples" else audio_file.samplerate)
         return samples, plc_testbench
     

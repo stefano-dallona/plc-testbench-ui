@@ -206,7 +206,8 @@ def get_audio_file_waveforms(run_id, original_file_node_id, user: User = None):
                 "data": waveform.data
             }
     
-    audio_file_node_ids = list(map(lambda x: x.get_id(), audio_files[0:1]))
+    #audio_file_node_ids = list(map(lambda x: x.get_id(), audio_files[0:1]))
+    audio_file_node_ids = list(map(lambda x: x.get_id(), audio_files))
     waveforms = list(map(functools.partial(
         retrieveWaveform, plc_testbench), audio_file_node_ids))
     if len(waveforms) > 0:
