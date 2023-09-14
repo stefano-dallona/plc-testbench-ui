@@ -32,6 +32,7 @@ from ..config.app_config import *
 from ..models.run import *
 from ..models.user import *
 from ..services.configuration_service import *
+from ..testbench.customization import AudioFile as CustomAudioFile, OriginalTrackNode as CustomOriginalTrackNode
 
 progress_cache = dict()
 
@@ -119,7 +120,7 @@ class EccTestbenchService:
         }
         return testbench_settings
     
-    def build_testbench_from_run(self, run: Run, user, task_id: str = None) -> PLCTestbench:
+    def build_testbench_from_run(self, run: Run, user, task_id: str = None, readonly: bool = False) -> PLCTestbench:
         get_worker = lambda x: (globals()[x[0]], x[1])
         
         original_audio_tracks = list(map(lambda filename: (OriginalAudio, OriginalAudioSettings(filename)), run.selected_input_files))
@@ -128,6 +129,9 @@ class EccTestbenchService:
         output_analysers = list(map(get_worker, run.output_analysers))
 
         testbench_settings = self.get_testbench_settings(run, config, task_id)
+        from plctestbench.plc_testbench import PLCTestbench
+        if readonly:
+            from ..testbench.customization import PLCTestbench
         testbench = PLCTestbench(
                                 original_audio_tracks if not run.run_id else None,
                                 packet_loss_simulators if not run.run_id else None,
@@ -171,8 +175,8 @@ class EccTestbenchService:
 
         for node in nodes_to_load:
             node_class = node.__class__
-            if node_class == OriginalTrackNode:
-                node.file = AudioFile.from_path(node.absolute_path + '.wav')
+            if node_class in [OriginalTrackNode, CustomOriginalTrackNode]:
+                node.file = CustomAudioFile.from_path(node.absolute_path + '.wav')
                 node.file.persist = False
                 #node.file.load()
                 load_audio_file(node.file, offset, numsamples, sample_type)
@@ -180,7 +184,7 @@ class EccTestbenchService:
                 node.file = DataFile(path=node.absolute_path + '.npy', persist=False)
                 node.file.load()
             elif node_class == ReconstructedTrackNode:
-                node.file = AudioFile.from_path(node.absolute_path + '.wav')
+                node.file = CustomAudioFile.from_path(node.absolute_path + '.wav')
                 node.file.persist = False
                 #node.file.load()
                 load_audio_file(node.file, offset, numsamples, sample_type)

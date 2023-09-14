@@ -187,7 +187,7 @@ def get_audio_file_waveforms(run_id, original_file_node_id, user: User = None):
 
     run = analysis_service.ecctestbench_service.load_run(run_id, user)
     plc_testbench = analysis_service.ecctestbench_service.build_testbench_from_run(
-        run, user)
+        run, user, readonly=True)
     file_tree = analysis_service.__find_file_tree_by_node_id__(
         plc_testbench, original_file_node_id)
     audio_files = analysis_service.__find_audio_files__(file_tree)
