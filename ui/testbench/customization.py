@@ -83,4 +83,5 @@ class PLCTestbench(DefaultPLCTestbench):
                                           plc_algorithms,
                                           output_analysers)
 
-        self.run_id = self.data_manager.initialize_tree()
+        calculated_run_id = self.data_manager.initialize_tree()
+        self.run_id = run_id if run_id else calculated_run_id

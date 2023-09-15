@@ -130,7 +130,7 @@ class EccTestbenchService:
 
         testbench_settings = self.get_testbench_settings(run, config, task_id)
         
-        #readonly = False
+        readonly = False
         from plctestbench.plc_testbench import PLCTestbench
         if readonly:
             from ..testbench.customization import PLCTestbench
