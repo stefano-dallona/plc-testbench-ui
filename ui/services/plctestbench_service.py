@@ -32,7 +32,7 @@ from ..config.app_config import *
 from ..models.run import *
 from ..models.user import *
 from ..services.configuration_service import *
-from ..testbench.customization import AudioFile as CustomAudioFile, OriginalTrackNode as CustomOriginalTrackNode
+from ..testbench.customization import AudioFile as CustomAudioFile, OriginalTrackNode as CustomOriginalTrackNode, load_audio_file
 
 progress_cache = dict()
 
@@ -130,7 +130,7 @@ class EccTestbenchService:
 
         testbench_settings = self.get_testbench_settings(run, config, task_id)
         
-        readonly = False
+        #readonly = False
         from plctestbench.plc_testbench import PLCTestbench
         if readonly:
             from ..testbench.customization import PLCTestbench
@@ -147,7 +147,8 @@ class EccTestbenchService:
 
         return testbench
     
-    def load_files(self,
+    @classmethod
+    def load_files(cls,
                    plc_testbench: PLCTestbench,
                    node_ids: list,
                    offset: int = 0,
@@ -158,23 +159,6 @@ class EccTestbenchService:
             for node in LevelOrderIter(root_node):
                 if node.get_id() in node_ids:
                     nodes_to_load.append(node)
-        
-        def load_audio_file(audio_file: AudioFile,
-                            offset: int,
-                            numsamples: int,
-                            sample_type: str = DEFAULT_DTYPE) -> ndarray:
-            #offset = 0
-            #numsamples = -1
-            with sf.SoundFile(audio_file.path, 'r') as file:
-                file.seek(min(int(offset if offset else 0), file.frames - 1))
-                setattr(audio_file, "frames", file.frames)
-                audio_file.data = file.read(frames=numsamples if numsamples else -1, dtype=sample_type)
-                audio_file.path = file.name
-                audio_file.samplerate = file.samplerate
-                audio_file.channels = file.channels
-                audio_file.subtype = file.subtype
-                audio_file.endian = file.endian
-                audio_file.audio_format = file.format
 
         for node in nodes_to_load:
             node_class = node.__class__

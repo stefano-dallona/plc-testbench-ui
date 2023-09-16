@@ -32,13 +32,13 @@ views = [
                     'selected_input_files': {
                         '$arrayElemAt': ["$workers", 0]
                     },
-                    'lostSamplesMasks': {
+                    'lost_samples_masks': {
                         '$arrayElemAt': ["$workers", 1]
                     },
-                    'reconstructedTracks': {
+                    'reconstructed_tracks': {
                         '$arrayElemAt': ["$workers", 2]
                     },
-                    'outputAnalysis': {
+                    'output_analysis': {
                         '$arrayElemAt': ["$workers", 3]
                     },
                     "nodes": 1

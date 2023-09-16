@@ -36,7 +36,7 @@ class ExecutionService:
         execution = RunExecution(run_id=run_id, hierarchy=[])
         
         #for file_tree in run.__ecctestbench__.data_manager.get_data_trees():
-        plc_testbench = self.ecctestbench_service.build_testbench_from_run(run, user, readonly=False)
+        plc_testbench = self.ecctestbench_service.build_testbench_from_run(run, user, readonly=True)
         for file_tree in plc_testbench.data_manager.get_data_trees():
             execution.hierarchy.append(self.__build_output_hierarchy__(file_tree))
         return execution.hierarchy
