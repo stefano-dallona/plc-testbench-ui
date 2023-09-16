@@ -11,17 +11,28 @@ db_password = os.environ.get("DB_PASSWORD")
 
 class Config():
   def __init__(self, data_dir: str,
+               db_host: str,
+               db_port: str,
+               db_database: str,
                db_conn_string: str = None,
                db_name: str = "plc_database",
                db_username: str = None,
                db_password: str = None):
     self.data_dir = data_dir
+    self.db_host = db_host
+    self.db_port = db_port
+    self.db_database = db_database
+    self.db_username = db_username
+    self.db_password = db_password
     self.db_conn_string = db_conn_string.replace("mongodb://", "mongodb://" + db_username + ":" + db_password + "@") \
                                 if db_username != None and db_password != None \
                                 else db_conn_string
     self.db_name = db_name
 
 config = Config(data_dir=root_folder,
+                db_host=db_host,
+                db_port=db_port,
+                db_database=db_database,
                 db_conn_string=db_conn_string,
                 db_username=db_username,
                 db_password=db_password)

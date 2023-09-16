@@ -61,95 +61,95 @@ db.createView("RunView", "runs", [
       description: 1,
       status: 1,
       creator: "$creator",
-      created_on: { "$dateToString":{"format":"%Y-%m-%dT%H:%M:%S", "date":"$created_on"}},
+      created_on: { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S", "date": "$created_on" } },
       selected_input_files: {
-        $arrayElemAt: [ "$workers", 0 ]
+        $arrayElemAt: ["$workers", 0]
       },
       lost_samples_masks: {
-        $arrayElemAt: [ "$workers", 1 ]
+        $arrayElemAt: ["$workers", 1]
       },
       reconstructed_tracks: {
-        $arrayElemAt: [ "$workers", 2 ]
+        $arrayElemAt: ["$workers", 2]
       },
       output_analysis: {
-        $arrayElemAt: [ "$workers", 3 ]
+        $arrayElemAt: ["$workers", 3]
       },
       nodes: 1
     }
   },
   {
-      $project: {
-        _id: 1,
-        classname: 1,
-        run_id: 1,
-        description: 1,
-        status: 1,
-        creator: 1,
-        created_on: 1,
-        selected_input_files: {
-          $map: {
-              input: "$selected_input_files",
-              in: "$$this.settings.filename"
+    $project: {
+      _id: 1,
+      classname: 1,
+      run_id: 1,
+      description: 1,
+      status: 1,
+      creator: 1,
+      created_on: 1,
+      selected_input_files: {
+        $map: {
+          input: "$selected_input_files",
+          in: "$$this.settings.filename"
+        }
+      },
+      lost_samples_masks: {
+        $map: {
+          input: "$lost_samples_masks",
+          in: {
+            $mergeObjects: [
+              {
+                worker: "$$this.name"
+              },
+              "$$this",
+              "$$this.settings"
+            ]
           }
-        },
-        lost_samples_masks: {
-          $map: {
-              input: "$lost_samples_masks",
-              in: {
-                  $mergeObjects: [
-                      {
-                          worker: "$$this.name"
-                      },
-                      "$$this",
-                      "$$this.settings"
-                  ]
-              }
+        }
+      },
+      reconstructed_tracks: {
+        $map: {
+          input: "$reconstructed_tracks",
+          in: {
+            $mergeObjects: [
+              {
+                worker: "$$this.name"
+              },
+              "$$this",
+              "$$this.settings"
+            ]
           }
-        },
-        reconstructed_tracks: {
-          $map: {
-              input: "$reconstructed_tracks",
-              in: {
-                  $mergeObjects: [
-                      {
-                          worker: "$$this.name"
-                      },
-                      "$$this",
-                      "$$this.settings"
-                  ]
-              }
+        }
+      },
+      output_analysis: {
+        $map: {
+          input: "$output_analysis",
+          in: {
+            $mergeObjects: [
+              {
+                worker: "$$this.name"
+              },
+              "$$this",
+              "$$this.settings"
+            ]
           }
-        },
-        output_analysis: {
-          $map: {
-              input: "$output_analysis",
-              in: {
-                  $mergeObjects: [
-                      {
-                          worker: "$$this.name"
-                      },
-                      "$$this",
-                      "$$this.settings"
-                  ]
-              }
-          }
-        },
-        nodes: 1
-      }
-    },
-    {
-      $project: {
-          "nodes": 0,
-          "selected_input_files.name": 0,
-          "selected_input_files.settings": 0,        
-          "lost_samples_masks.name": 0,
-          "lost_samples_masks.settings": 0,
-          "reconstructed_tracks.name": 0,
-          "reconstructed_tracks.settings": 0,
-          "output_analysis.name": 0,
-          "output_analysis.settings": 0
-      }
+        }
+      },
+      nodes: 1
     }
+  },
+  {
+    $project: {
+      "nodes": 0,
+      "selected_input_files.name": 0,
+      "selected_input_files.settings": 0,
+      "lost_samples_masks.name": 0,
+      "lost_samples_masks.settings": 0,
+      "reconstructed_tracks.name": 0,
+      "reconstructed_tracks.settings": 0,
+      "output_analysis.name": 0,
+      "output_analysis.settings": 0
+    }
+  }
 ])
 
 db.getCollection("RunView").find({})
@@ -251,3 +251,116 @@ db.getCollection("OriginalTrack-3").find(
   },
   { "_id": 1 }
 )
+
+db.createView('RunView', 'runs', [
+  {
+    '$addFields': { 'run_id': '', 'description': '', 'classname': 'Run' }
+  },
+  {
+    '$project': {
+      '_id': 1,
+      'classname': 1,
+      'run_id': "$_id",
+      'description': 1,
+      'status': 1,
+      'creator': "$creator",
+      'created_on': { "$dateToString": { "format": "%Y-%m-%dT%H:%M:%S", "date": "$created_on" } },
+      'selected_input_files': {
+        '$arrayElemAt': ["$workers", 0]
+      },
+      'lost_samples_masks': {
+        '$arrayElemAt': ["$workers", 1]
+      },
+      'reconstructed_tracks': {
+        '$arrayElemAt': ["$workers", 2]
+      },
+      'output_analysis': {
+        '$arrayElemAt': ["$workers", 3]
+      },
+      "nodes": 1
+    }
+  },
+  {
+    '$project': {
+      '_id': 1,
+      'classname': 1,
+      'run_id': 1,
+      'description': 1,
+      'status': 1,
+      'creator': 1,
+      'created_on': 1,
+      'selected_input_files': {
+        '$map': {
+          'input': "$selected_input_files",
+          'in': "$$this.settings.filename"
+        }
+      },
+      'lost_samples_masks': {
+        '$map': {
+          'input': "$lost_samples_masks",
+          'in': {
+            '$mergeObjects': [
+              {
+                'worker': "$$this.name"
+              },
+              "$$this",
+              "$$this.settings"
+            ]
+          }
+        }
+      },
+      'reconstructed_tracks': {
+        '$map': {
+          'input': "$reconstructed_tracks",
+          'in': {
+            '$mergeObjects': [
+              {
+                'worker': "$$this.name"
+              },
+              "$$this",
+              "$$this.settings"
+            ]
+          }
+        }
+      },
+      'output_analysis': {
+        '$map': {
+          'input': "$output_analysis",
+          'in': {
+            '$mergeObjects': [
+              {
+                'worker': "$$this.name"
+              },
+              "$$this",
+              "$$this.settings"
+            ]
+          }
+        }
+      },
+      'nodes': 1
+    }
+  },
+  {
+    '$project': {
+      'nodes': 0,
+      'selected_input_files.name': 0,
+      'selected_input_files.settings': 0,
+      'lost_samples_masks.name': 0,
+      'lost_samples_masks.settings': 0,
+      'reconstructed_tracks.name': 0,
+      'reconstructed_tracks.settings': 0,
+      'output_analysis.name': 0,
+      'output_analysis.settings': 0
+    }
+  }
+])
+
+db.createView('NodeView', 'dummy', 
+  [
+    { $unionWith: { coll: "OriginalTrackNode", pipeline: [] } },
+    { $unionWith: { coll: "LostSamplesMaskNode", pipeline: [] } },
+    { $unionWith: { coll: "ReconstructedTrackNode", pipeline: [] } },
+    { $unionWith: { coll: "OutputAnalysisNode", pipeline: [] } }
+  ]
+)
+

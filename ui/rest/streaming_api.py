@@ -88,20 +88,20 @@ def stream_audio_file(socketio, event, namespace, file_path):
 
 @socketio.on('connect')
 def on_connect():
-    print("%s connected" % (request.sid))
     clients[request.sid] = request.sid
+    print("connect: request.sid: %s, clients:%s" % (request.sid, clients))
     
 @socketio.on('disconnect')
 def on_disconnect():
-    print("%s disconnected" % (request.sid))
     del clients[request.sid]
     del track_acks[request.sid]
+    print("disconnect: request.sid: %s, clients:%s" % (request.sid, clients))
     
 @socketio.on('track-ack')
 def on_track_ack(message):
     chunk_num = message["chunk_num"]
     track_acks[request.sid] = chunk_num
-    print("%s acknowledge received for chunk %d" % (request.sid, chunk_num))
+    #print("%s acknowledge received for chunk %d" % (request.sid, chunk_num))
 
 @socketio.on('track-play')
 def stream_track(message):
@@ -110,19 +110,32 @@ def stream_track(message):
     original_file_node_id = message["original_file_node_id"]
     start_time = message["start_time"]
     stop_time = message["stop_time"]
-    stream_id = str(uuid.uuid4())
+    #stream_id = str(uuid.uuid4())
+    stream_id = request.sid
     authorization_token = message["authorization"]
     user = get_user_from_jwt_token(authorization_token)
-    
-    audio_file = analysis_service.find_audio_file(run_id, audio_file_node_id, user)
+
+    audio_file, plc_testbench = analysis_service.find_audio_file(run_id, audio_file_node_id, user)
     
     def send_file(sid, start_time, stop_time):
         
         def moderate_flow(sid, current_chunk_num):
-            while(sid in track_acks.keys() and current_chunk_num - track_acks[sid] > max_nack_chunks):
+            while(stream_id in active_streamings.keys() and sid in track_acks.keys() and current_chunk_num - track_acks[sid] > max_nack_chunks):
                 not_ack_chunks = current_chunk_num - track_acks[sid]
-                print("current_chunk_num: %d, track_acks[%s]: %d, not_ack_chunks: %d" % (current_chunk_num, sid, track_acks[sid], not_ack_chunks))
+                print("stream_id:%s, sid:%s, current_chunk_num: %d, track_acks: %d, not_ack_chunks: %d" % (stream_id, sid, current_chunk_num, track_acks[sid], not_ack_chunks))
                 socketio.sleep(0)
+                
+        def streaming_in_progress(sid, stream_id, current_sample, last_sample):
+            stream_cancelled = not stream_id in active_streamings.keys()
+            session_cancelled = not sid in track_acks.keys()
+            streaming_completed = current_sample >= last_sample
+            if stream_cancelled:
+                print("Streaming %s cancelled before finish" % (sid))
+            if session_cancelled:
+                print("Streaming %s cancelled before finish" % (sid))
+            if streaming_completed:
+                print("Streaming %s completed" % (sid))
+            return not stream_cancelled and not session_cancelled and not streaming_completed
     
         def generate_chunks(infile, start_time, stop_time):
             sr = infile.getframerate()
@@ -132,8 +145,8 @@ def stream_track(message):
             current_sample = start_sample
             chunk_size = sr
             track_acks[sid] = 0
-            chunk_num = 1
-            while(current_sample < last_sample):
+            chunk_num = math.ceil(start_sample * 1.0 / chunk_size)
+            while(streaming_in_progress(sid, stream_id, current_sample, last_sample)):
                 infile.setpos(current_sample)
                 num_samples = min(chunk_size, last_sample - current_sample)
                 chunk = infile.readframes(nframes=num_samples)
@@ -164,16 +177,20 @@ def stream_track(message):
                 }, room=sid)
                 
                 socketio.sleep(0)
-                print("")
-                print("chunk %s-%s sent" % (start_sample, last_sample))
+                print("stream_id: %s, chunk %s-%s sent" % (stream_id, start_sample, last_sample))
     active_streamings[stream_id] = stream_id
+    print("Start streaming %s, start_time:%s, stop_time:%s" % (stream_id, start_time, stop_time))
+    print("active_streamings: %s, added stream_id:%s" % (active_streamings, stream_id))
+    #task = socketio.start_background_task(send_file, request.sid, start_time, stop_time)
     task = socketio.start_background_task(send_file, request.sid, start_time, stop_time)
     task.join()
     if stream_id in active_streamings.keys():
         del active_streamings[stream_id]
+    print("active_streamings: %s, removed stream_id:%s" % (active_streamings, stream_id))
     
 @socketio.on('track-stop')
 def stop_track_streaming(message):
     stream_id = message["stream_id"]
     if stream_id in active_streamings.keys():
         del active_streamings[stream_id]
+    print("active_streamings: %s, removed stream_id:%s" % (active_streamings, stream_id))        

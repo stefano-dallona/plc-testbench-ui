@@ -64,9 +64,10 @@ class DownsampledAudioFile:
     
     def __init__(self, input_file: AudioFile, max_slices: int):
         self.input_file = input_file
+        self.frames = input_file.frames if getattr(input_file, "frames") else len(input_file.data)
         self.num_samples = len(input_file.data)
-        self.duration = self.num_samples * 1.0 / input_file.samplerate
         self.sample_rate = input_file.samplerate
+        self.duration = self.frames * 1.0 / self.sample_rate
         self.max_slices = max_slices if max_slices > 0 else self.num_samples
 
     def load(self, channel, offset: int = None, n_samples: int = None):
@@ -91,8 +92,8 @@ class DownsampledAudioFile:
 
         result = {}
         for index, slice in enumerate(slices_data):
-            slice_min = min(slice[:])
-            slice_max = max(slice[:])
+            slice_min = min(slice[:]) if len(slice) > 0 else 0
+            slice_max = max(slice[:]) if len(slice) > 0 else 0
             result[str(start_sample + math.floor(index * samples_per_slice))] = str(slice_min)
             result[str(start_sample + math.floor(index * samples_per_slice) + 1)] = str(slice_max)
         

@@ -16,6 +16,7 @@ from ..models.event import Event
 from ..repositories.pickle.run_repository import RunRepository
 from ..repositories.mongodb.event_repository import EventRepository
 from ..services.configuration_service import ConfigurationService
+from ..testbench.customization import OriginalTrackNode as CustomOriginalTrackNode
 
 event_repository = EventRepository()
 
@@ -35,7 +36,7 @@ class ExecutionService:
         execution = RunExecution(run_id=run_id, hierarchy=[])
         
         #for file_tree in run.__ecctestbench__.data_manager.get_data_trees():
-        plc_testbench = self.ecctestbench_service.build_testbench_from_run(run, user)
+        plc_testbench = self.ecctestbench_service.build_testbench_from_run(run, user, readonly=True)
         for file_tree in plc_testbench.data_manager.get_data_trees():
             execution.hierarchy.append(self.__build_output_hierarchy__(file_tree))
         return execution.hierarchy
@@ -91,7 +92,7 @@ class ExecutionService:
         type = node.__class__.__name__
         file = node.absolute_path if node.absolute_path != None else ""
 
-        if isinstance(node, OriginalTrackNode):
+        if isinstance(node, OriginalTrackNode) or isinstance(node, CustomOriginalTrackNode):
             name = os.path.basename(file) if file != "" else name
             file += ".wav"
             category = ""
@@ -110,5 +111,6 @@ class ExecutionService:
         node_id = str(node.get_id())
         print("level:%d, name:%s, type:%s, uuid:%s, file:%s" % (node.depth, name, type, node_id, file))
         transformed_node = Node(name, parent=parent, parent_id=parent.uuid if parent != None else None, type=type, file=file, uuid=node_id, category=category)
+        #transformed_node = Node(name, parent=parent, parent_id=parent.get_id() if parent != None else None, type=type, file=file, uuid=node_id, category=category)
         transformed_node.children = [ExecutionService.__build_output_hierarchy__(child, transformed_node) for child in node.children]
         return transformed_node

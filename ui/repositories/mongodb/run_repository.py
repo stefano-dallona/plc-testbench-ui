@@ -32,13 +32,13 @@ views = [
                     'selected_input_files': {
                         '$arrayElemAt': ["$workers", 0]
                     },
-                    'lostSamplesMasks': {
+                    'lost_samples_masks': {
                         '$arrayElemAt': ["$workers", 1]
                     },
-                    'reconstructedTracks': {
+                    'reconstructed_tracks': {
                         '$arrayElemAt': ["$workers", 2]
                     },
-                    'outputAnalysis': {
+                    'output_analysis': {
                         '$arrayElemAt': ["$workers", 3]
                     },
                     "nodes": 1
@@ -176,7 +176,8 @@ class RunRepository(BaseMongoRepository):
         collection = self.get_database(user).get_collection(self.collection_metadata["name"])
         totalRecords = collection.count_documents(filters)
         query = collection  \
-            .find(filters, projection=projection)
+            .find(filters, projection=projection) \
+            .sort("created_on", pymongo.DESCENDING)
         cursor = query \
             .skip(pagination["page"] * pagination["pageSize"]) \
             .limit(pagination["pageSize"])
