@@ -8,9 +8,6 @@ from plctestbench.node import Node
 from plctestbench.data_manager import DataManager
 from plctestbench.plc_testbench import PLCTestbench as DefaultPLCTestbench
 
-from ..repositories.mongodb.node_repository import NodeRepository
-from ..models.user import User
-
 def load_audio_file(audio_file: DefaultAudioFile,
                     offset: int,
                     numsamples: int,
@@ -104,22 +101,5 @@ class PLCTestbench(DefaultPLCTestbench):
                                           packet_loss_simulators,
                                           plc_algorithms,
                                           output_analysers)
-
-        calculated_run_id = self.data_manager.initialize_tree()
-        #run = self.data_manager.database_manager.get_run(run_id)
-        #node_data_map = self.retrieve_node_data(run['nodes'], user)
-        #self.recursively_update_file_hash(node_data_map, self.data_manager.get_data_trees())
             
-        self.run_id = run_id if run_id else calculated_run_id
-        
-    def retrieve_node_data(self, node_ids: str, user):
-        node_repository = NodeRepository()
-        user = User(id_=user["id_"], email=user["email"], name=user["name"])
-        nodes = { node_repository.find_by_id(node_id, user) for node_id in node_ids }
-        return nodes
-    
-    def recursively_update_file_hash(self, node_data_map: dict, node: Node):
-        if node.get_id() in node_data_map.keys():
-            node.file.hash = node_data_map[node].file_hash
-        for child_node in node.children:
-            self.recursively_update_file_hash(node_data_map, child_node)
+        self.run_id = self.data_manager.initialize_tree()
