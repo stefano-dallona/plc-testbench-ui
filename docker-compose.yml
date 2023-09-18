@@ -14,7 +14,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: stdallona/plc-testbench-ui:1.0.1
+    image: stdallona/plc-testbench-ui:1.0.2
     cpus: 8.0
     mem_reservation: 32gb
     mem_limit: 32gb

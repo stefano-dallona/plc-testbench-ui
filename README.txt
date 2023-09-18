@@ -144,6 +144,7 @@ powershell.exe -noprofile -executionpolicy bypass -file .\launch-command-with-en
 powershell.exe -noprofile -executionpolicy bypass -file .\launch-command-with-env.ps1 -EnvFile development-docker.env docker run `
 --rm -it --memory="16g" --publish 5000:5000 `
 --env-file .\development-docker.env `
+--volume 'C:/Data/personale/Università/2022-2023/original_tracks:${FRONTEND_DATA_FOLDER}' `
 --name plc-testbench-ui `
 --link mongo:mongo `
 stdallona/plc-testbench-ui:1.0.0
@@ -166,3 +167,10 @@ openssl x509 -inform der -in zscaler-root-ca.cer -out zscaler-root-ca.pem
 
 # Debug python inside docker container with VS
 #https://code.visualstudio.com/docs/containers/debug-python
+
+"C:\Program Files\Oracle\VirtualBox\VBoxManage.exe" getextradata "default2" enumerate
+"C:\Program Files\Oracle\VirtualBox\VBoxManage.exe" setextradata "$vm_name" VBoxInternal/CPUM/IsaExts/AVX 1
+"C:\Program Files\Oracle\VirtualBox\VBoxManage.exe" setextradata "$vm_name" VBoxInternal/CPUM/IsaExts/AVX2 1
+
+
+https://www.docker.com/products/docker-desktop/
