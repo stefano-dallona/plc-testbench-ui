@@ -41,6 +41,6 @@ RUN python3 -m pip install --upgrade pip && python3 -m pip install -r /tmp/requi
 
 COPY . .
 
-COPY --from=ui-frontend-build /plc-testbench-ui/react-test/build/* /plc-testbench-ui/frontend/
+COPY --from=ui-frontend-build /plc-testbench-ui/react-test/build /plc-testbench-ui/frontend/
 
 ENTRYPOINT [ "python3", "app.py" ]
