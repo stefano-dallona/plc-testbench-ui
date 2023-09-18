@@ -1,4 +1,17 @@
-FROM python:3.8-slim-buster
+# Install react frontend
+FROM node:18.15.0-slim as ui-frontend-build
+RUN apt-get update
+RUN apt-get install git --yes --force-yes
+WORKDIR /plc-testbench-ui
+RUN git clone https://github.com/stefano-dallona/react-test.git
+WORKDIR /plc-testbench-ui/react-test
+RUN npm config set strict-ssl false
+RUN npm install --force
+RUN cp .env.docker .env.local
+RUN npm run build
+# && mkdir frontend && cp build/* /plc-testbench-ui/frontend
+
+FROM python:3.8-slim-buster as ui-backend-build
 #FROM tiangolo/uwsgi-nginx-flask:python3.8-alpine
 
 WORKDIR /plc-testbench-ui
@@ -21,11 +34,13 @@ RUN aclocal && autoheader && ./autogen.sh && sed -i 's/SUBDIRS = src doc/SUBDIRS
 # End of download and compile gstpeaq
 WORKDIR /plc-testbench-ui
 # Install plctestbench
-RUN git clone --branch ui https://github.com/LucaVignati/plc-testbench.git && cd plc-testbench && python setup.py sdist && python3 -m pip install -f ./dist plc-testbench
+RUN git clone --branch public https://github.com/LucaVignati/plc-testbench.git && cd plc-testbench && python setup.py sdist && python3 -m pip install -f ./dist plc-testbench
 # Install ui dependencies
 COPY requirements.txt /tmp
 RUN python3 -m pip install --upgrade pip && python3 -m pip install -r /tmp/requirements.txt
 
 COPY . .
+
+COPY --from=ui-frontend-build /plc-testbench-ui/react-test/build/* /plc-testbench-ui/frontend
 
 ENTRYPOINT [ "python3", "app.py" ]
