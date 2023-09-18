@@ -134,19 +134,20 @@ stdallona/plc-testbench-ui:1.0.0
 #"`"C:/Program Files/Docker Toolbox/docker-machine.exe`" ssh default2 `"[ -d /mongo-data ] || rm -fR /mongo-data`"" | cmd
 powershell.exe -noprofile -executionpolicy bypass -file .\launch-command-with-env.ps1 -EnvFile development-docker.env docker run `
 --rm -it --memory="4g" --publish '27017:27017' `
---env-file .\development-docker.env  `
+--env-file ./development-docker.env  `
 --volume '${MONGO_DATA_VOLUME_PATH}:/data/db' `
 --name mongo `
 "library/mongo:4.4.18"
 
-powershell.exe -noprofile -executionpolicy bypass -file .\launch-command-with-env.ps1 -EnvFile development-docker.env  gci env:
-
 powershell.exe -noprofile -executionpolicy bypass -file .\launch-command-with-env.ps1 -EnvFile development-docker.env docker run `
 --rm -it --memory="16g" --publish 5000:5000 `
---env-file .\development-docker.env `
+--env-file ./development-docker.env `
+--volume 'C:/Data/plc-testbench-ui/plc-testbench-ui/secrets:/plc-testbench-ui/secrets' `
+--volume 'C:/Data/personale/Università/2022-2023/original_tracks:${FRONTEND_DATA_FOLDER}' `
 --name plc-testbench-ui `
 --link mongo:mongo `
-stdallona/plc-testbench-ui:1.0.0
+stdallona/plc-testbench-ui:1.0.2
+
 
 #Bug in google login (https://github.com/metabase/metabase/issues/32602)
 #in order to fix it width in GoogleLogin component needs to be set as an int width={<w>} instead of width='<w>'
