@@ -28,7 +28,7 @@ docker run \
 -e MONGO_DATA_VOLUME_PATH=/c/Data/plc-testbench-ui/plc-testbench-ui/ui/data \
 -e FLASK_APP=app.py \
 -e FLASK_DEBUG=0 \
--e FRONTEND_DATA_FOLDER=/original_tracks \
+-e DATA_FOLDER=/original_tracks \
 -e DB_CONN_STRING=mongodb://mongo:27017 \
 -e DB_HOST=mongo \
 -e DB_USERNAME=root \
@@ -140,10 +140,17 @@ powershell.exe -noprofile -executionpolicy bypass -file .\launch-command-with-en
 "library/mongo:4.4.18"
 
 powershell.exe -noprofile -executionpolicy bypass -file .\launch-command-with-env.ps1 -EnvFile development-docker.env docker run `
+--rm -it --memory="4g" --publish '27017:27017' `
+--env-file ./development-docker.env  `
+--volume '${MONGO_DATA_VOLUME_PATH}:/data/db' `
+--name mongo `
+"library/mongo:4.4.18"
+
+powershell.exe -noprofile -executionpolicy bypass -file .\launch-command-with-env.ps1 -EnvFile development-docker.env docker run `
 --rm -it --memory="16g" --publish 5000:5000 `
 --env-file ./development-docker.env `
 --volume 'C:/Data/plc-testbench-ui/plc-testbench-ui/secrets:/plc-testbench-ui/secrets' `
---volume 'C:/Data/personale/Università/2022-2023/original_tracks:${FRONTEND_DATA_FOLDER}' `
+--volume 'C:/Data/personale/Università/2022-2023/original_tracks:${DATA_FOLDER}' `
 --name plc-testbench-ui `
 --link mongo:mongo `
 stdallona/plc-testbench-ui:1.0.2
@@ -158,6 +165,39 @@ docker run ^
 --name plc-testbench-ui ^
 stdallona/plc-testbench-ui:1.0.0
 
+# start mongo container
+docker run ^
+--rm -it --memory=4g --publish 27017:27017 ^
+--env MONGO_DATA_VOLUME_PATH=/mongo-data ^
+--env MONGO_INITDB_ROOT_PASSWORD=Marmolada3343 ^
+--env MONGO_INITDB_ROOT_USERNAME=root ^
+--volume /mongo-data:/data/db ^
+--name mongo ^
+library/mongo:4.4.18
+
+# start plc-testbench-ui container
+docker run --rm -it --memory=16g --publish 9071:5000 ^
+--env APP_PORT=5000 ^
+--env CERT_FILE=/plc-testbench-ui/secrets/cert.pem ^
+--env DB_CONN_STRING=mongodb://mongo:27017 ^
+--env DB_PASSWORD=Marmolada3343 ^
+--env DB_USERNAME=root ^
+--env FLASK_APP=app.py ^
+--env FLASK_DEBUG=0 ^
+--env DATA_FOLDER=/plc-testbench-ui/original_tracks ^
+--env GEVENT_SUPPORT=True ^
+--env GOOGLE_CLIENT_ID=524953903108-944ibh494ugop6i54jh18gu2pkokfi9r.apps.googleusercontent.com ^
+--env GOOGLE_CLIENT_SECRET="" ^
+--env GOOGLE_OAUTH_CERTS=https://www.googleapis.com/oauth2/v1/certs ^
+--env KEY_FILE=/plc-testbench-ui/secrets/key.pem ^
+--env REQUESTS_CA_BUNDLE=/plc-testbench-ui/secrets/cacert.pem ^
+--env SECURITY_ENABLED=True ^
+--volume /c/Data/plc-testbench-ui/plc-testbench-ui/secrets:/plc-testbench-ui/secrets ^
+--volume /c/Data/personale/Università/2022-2023/original_tracks:/plc-testbench-ui/original_tracks ^
+--name plc-testbench-ui ^
+--link mongo:mongo ^
+stdallona/plc-testbench-ui:1.0.2
+
 #generate SSL cert and key
 # run openssl in gitbash
 openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem
@@ -167,3 +207,29 @@ openssl x509 -inform der -in zscaler-root-ca.cer -out zscaler-root-ca.pem
 
 # Debug python inside docker container with VS
 #https://code.visualstudio.com/docs/containers/debug-python
+
+!!! Attention !!!
+The same DB on Windows cannot be shared between development mode (no containers)
+and linux container mode as the file paths has a different and incompatible format.
+So you need to either empty the DB by using the cleanup mongo statement, or use different
+DBs.
+
+# Dumping mongo database
+mongodump \
+--authenticationDatabase=admin \
+--uri="mongodb://localhost:27017" \
+--username=root --password=Marmolada3343 \
+--db=stefano_dot_dallona_at_gmail_dot_com \
+--archive=plc-testbench-db.20230921.gz \
+--gzip
+
+# Restoring mongo database
+mongorestore \
+--authenticationDatabase=admin \
+--uri="mongodb://localhost:27017" \
+--username=root \
+--password=Marmolada3343 \
+--gzip \
+--archive=plc-testbench-db.20230921.gz \
+--nsFrom "stefano_dot_dallona_at_gmail_dot_com.*" \
+--nsTo "stefano_dot_dallona_2_at_gmail_dot_com.*"

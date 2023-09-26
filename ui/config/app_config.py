@@ -28,6 +28,11 @@ class Config():
                                 if db_username != None and db_password != None \
                                 else db_conn_string
     self.db_name = db_name
+    self.validate()
+    
+  def validate(self):
+    if not (os.path.exists(self.data_dir) and os.access(self.data_dir, os.W_OK)):
+      raise Exception(f"Invalid DATA_FOLDER '{self.data_dir}'. Please ensure that the environment variable is set to a valid and writable path in your system.")
 
 config = Config(data_dir=root_folder,
                 db_host=db_host,

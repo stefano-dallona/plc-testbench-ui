@@ -18,6 +18,7 @@ from ...models.run import *
 from ...models.event import *
 from ...models.samples import *
 from ...models.user import *
+from .loggers import *
 
 class Singleton (type):
     _instances = {}
@@ -34,7 +35,7 @@ class BaseMongoRepository(metaclass=Singleton):
     
     def __init__(self):
         self.logger = logging.getLogger(__name__)
-        self.client = MongoClient(config.db_conn_string)
+        self.client = MongoClient(config.db_conn_string, event_listeners=[CommandLogger()])
         #self.db = self.client.get_database(config.db_name)
         self.admin = self.client.get_database("admin")
         self.initialized = False

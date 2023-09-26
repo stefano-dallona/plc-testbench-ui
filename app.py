@@ -15,8 +15,12 @@ from eventlet import wsgi
 from flask_login import LoginManager, current_user, login_required, login_user, logout_user
 
 import logging
+from pymongo import monitoring
+from pymongo import event_loggers
 import traceback
 from logging.config import dictConfig
+
+from ui.repositories.mongodb.loggers import CommandLogger
 
 dictConfig({
     'version': 1,
@@ -76,6 +80,8 @@ def create_app():
     login_manager.init_app(app)
     compress = Compress()
     compress.init_app(app)
+    
+    monitoring.register(CommandLogger())
            
     return app
 

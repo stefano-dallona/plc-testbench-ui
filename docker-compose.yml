@@ -14,14 +14,14 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: stdallona/plc-testbench-ui:1.0.1
+    image: stdallona/plc-testbench-ui:1.0.2
     cpus: 8.0
     mem_reservation: 32gb
     mem_limit: 32gb
     environment:
       FLASK_APP: ${FLASK_APP}
       FLASK_DEBUG: ${FLASK_DEBUG}
-      DATA_FOLDER: /data/original_tracks
+      DATA_FOLDER: /plc-testbench-ui/original_tracks
       DB_CONN_STRING: ${DB_CONN_STRING}
       DB_HOST: ${DB_HOST}
       DB_USERNAME: ${DB_USERNAME}
@@ -38,4 +38,5 @@ services:
     ports:
       - '${APP_PORT}:${APP_PORT}'
     volumes:
-      - ${FRONTEND_DATA_FOLDER}:/data/original_tracks
+      - ${DATA_FOLDER}:/plc-testbench-ui/original_tracks
+      - ${SECRETS_FOLDER}:/plc-testbench-ui/secrets

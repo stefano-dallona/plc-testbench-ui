@@ -61,10 +61,8 @@ def find_lost_samples(run_id, original_file_node_id, loss_simulation_node_id, us
 
 @analysis_api.route("/runs/<run_id>/input-files/<original_file_node_id>/output-files/<audio_file_node_id>")
 # @login_required
-#@token_required
+@token_required
 def stream_audio_file(run_id, original_file_node_id, audio_file_node_id, user: User = None):
-    if not user:
-        user = User(id_="stefano.dallona@gmail.com", email="stefano.dallona@gmail.com", name="Stefano")
     offset = request.args.get("offset", type=int, default=0)
     num_samples = request.args.get("num_samples", type=int, default=-1)
     audio_file, plc_testbench = analysis_service.find_audio_file(
@@ -83,12 +81,10 @@ def stream_audio_file(run_id, original_file_node_id, audio_file_node_id, user: U
     else:
         return {}, status.HTTP_404_NOT_FOUND
 
-@analysis_api.route("/runs/<run_id>/input-files/<original_file_node_id>/output-files/<audio_file_node_id>/waveform")
+#@analysis_api.route("/runs/<run_id>/input-files/<original_file_node_id>/output-files/<audio_file_node_id>/waveform")
 # @login_required
-#@token_required
+@token_required
 def get_json_waveform(run_id, original_file_node_id, audio_file_node_id, user: User = None):
-    if not user:
-        user = User(id_="stefano.dallona@gmail.com", email="stefano.dallona@gmail.com", name="Stefano")
     channel = request.args.get("channel", type=int, default=0)
     offset = request.args.get("offset", type=int, default=0)
     num_samples = request.args.get("num_samples", type=int, default=-1)
