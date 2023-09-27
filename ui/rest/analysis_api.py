@@ -121,6 +121,22 @@ def get_json_waveform(run_id, original_file_node_id, audio_file_node_id, user: U
     else:
         return {}, status.HTTP_404_NOT_FOUND
 
+@analysis_api.route('/runs/<run_id>/input-files/<original_file_node_id>/output-files/samples', methods=['GET'])
+# @login_required
+@token_required
+def get_audio_files_samples(run_id, original_file_node_id, user):
+    channel = request.args.get("channel", type=int, default=0)
+    offset = request.args.get("offset", type=int, default=0)
+    num_samples = request.args.get("num_samples", type=int, default=1000)
+
+    samples, plc_testbench = analysis_service.get_audio_files_samples(
+        run_id, original_file_node_id, channel, offset, num_samples, user=user)
+    if samples != None:
+        # return json.dumps(samples.data, default=samples.to_json()), status.HTTP_200_OK
+        return json.dumps(samples, default=NpEncoder().default), status.HTTP_200_OK
+    else:
+        return {}, status.HTTP_404_NOT_FOUND
+
 # http://localhost:5000/analysis/runs/76728771-9de8-42bd-a71e-f4d3c08e3ae6/input-files/76f9743b-d839-4e64-bf55-01f86107bec0/output-files/76f9743b-d839-4e64-bf55-01f86107bec0/samples?channel=0&offset=1000000&num_samples=64
 @analysis_api.route('/runs/<run_id>/input-files/<original_file_node_id>/output-files/<audio_file_node_id>/samples', methods=['GET'])
 # @login_required

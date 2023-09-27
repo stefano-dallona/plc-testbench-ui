@@ -50,15 +50,14 @@ class AudioFileSamples(Serializable):
     @staticmethod
     def __filter_data__(samples, channel: int, offset: int, num_samples: int, sample_rate: int):
         channel_samples = samples[:, channel]
-        normalized_channel_samples = (channel_samples-np.min(channel_samples))/(np.max(channel_samples)-np.min(channel_samples))
         position = lambda i : i if sample_rate == 1 else float(i/sample_rate)
         start_sample = offset if offset != None else 0
         start_sample = max(start_sample, 0)
         end_sample = offset + num_samples if offset != None and num_samples != None else len(samples)
         end_sample = min(end_sample, len(samples))
         end_sample = end_sample if end_sample >= start_sample else start_sample
-        normalized_samples = [{"cx": position(start_sample + i), "cy":y} for i,y in enumerate(normalized_channel_samples[start_sample:end_sample])]
-        return normalized_samples
+        filtered_samples = [{"cx": position(start_sample + i), "cy":y} for i,y in enumerate(channel_samples[start_sample:end_sample])]
+        return filtered_samples
 
 class DownsampledAudioFile:
     

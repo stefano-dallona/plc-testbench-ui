@@ -72,6 +72,34 @@ class AnalysisService:
         sample_rate = 1 if unit_of_meas == "samples" else original_audio_file.samplerate
         lost_samples = self.__convertToLossIntervals__(len(original_audio_file.data), lost_samples_file.file.data, sample_rate)
         return lost_samples
+    
+    def get_audio_files_samples(self,
+                        run_id: str,
+                        original_node_id: str,
+                        channel: int = 0,
+                        offset = None,
+                        num_samples = None,
+                        unit_of_meas = "samples",
+                        user: User = None,
+                        plc_testbench: PLCTestbench = None) -> (list, PLCTestbench):
+        
+        run = self.ecctestbench_service.load_run(run_id, user)
+        if run == None:
+            return None
+        self._logger.info(f"Loaded ecctestbench for {run_id} ...")
+        
+        plc_testbench = self.ecctestbench_service.build_testbench_from_run(run, user, readonly=True)
+        original_node = self.__find_file_tree_by_node_id__(plc_testbench, original_node_id)
+        audio_files = self.__find_audio_files__(original_node)
+        samples = []
+        for node in audio_files:
+            node_id = node.get_id()
+            audio_file, plc_testbench = self.find_audio_file(run_id, node_id, user, plc_testbench, offset, num_samples)           
+            self._logger.info(f"Loaded audio file with path {audio_file.path} ...")
+            samples += [ AudioFileSamples(node_id=node_id, channel=channel, samples=audio_file.get_data(),
+                                    offset=None, num_samples=None,
+                                    sample_rate=1 if unit_of_meas=="samples" else audio_file.samplerate).data ]
+        return (samples, plc_testbench)
 
     def get_audio_file_samples(self,
                         run_id: str,
