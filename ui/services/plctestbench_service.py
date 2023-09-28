@@ -337,8 +337,7 @@ def external_callback(task_id:str, run_id:str, caller, *args, **kwargs):
     #nodeid = str(caller.uuid) if hasattr(caller, "uuid") else str(caller.run_id) if hasattr(caller, "run_id") else ""
     nodeid = str(caller.get_node_id()) if hasattr(caller, "get_node_id") else str(caller.run_id) if hasattr(caller, "run_id") else ""
     currentPercentage = math.floor(kwargs["n"] / kwargs["total"] * 100)
-    eta = math.ceil((kwargs["total"] - kwargs["elapsed"]) * (1 / (kwargs["rate"] if kwargs["rate"] != None else float('inf'))))
-    
+    eta = math.ceil((kwargs["total"] - kwargs["n"]) / kwargs["rate"] if kwargs["total"] and kwargs["rate"] and float(kwargs["rate"]) > 0 else 0)
     progress_state = get_execution_last_event(run_id, User(id_="", email="", name=""))
     revision = progress_state["revision"] if progress_state and "revision" in progress_state.keys() else 0
     progress_state = update_progress_cache(run_id, caller_class_name, nodeid, currentPercentage, caller)

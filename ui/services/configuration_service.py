@@ -165,6 +165,8 @@ class ConfigurationService:
             # 400 and 500s will tell dropzone that an error occurred and show an error
             raise UploadException('File already exists')
         
+        # FIXME - check for duplicates
+        
         try:
             with open(save_path, 'ab') as f:
                 f.seek(int(offset))
