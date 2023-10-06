@@ -205,3 +205,12 @@ def get_notifications(user=None):
         return json.dumps(notifications), status.HTTP_200_OK
     except Exception:
         return "Invalid notifications search", status.HTTP_404_NOT_FOUND
+
+@execution_api.route('/runs/<run_id>/nodes/<node_id>', methods=['DELETE'])
+# @login_required
+@token_required
+def delete_run_node(run_id, node_id, user):
+    run = ecctestbench_service.load_run(run_id, user=user)
+    ecc_testbench = ecctestbench_service.build_testbench_from_run(run, user)
+    result = ecc_testbench.data_manager.database_manager.delete_node(node_id)
+    return json.dumps({"result": True}), status.HTTP_201_CREATED
