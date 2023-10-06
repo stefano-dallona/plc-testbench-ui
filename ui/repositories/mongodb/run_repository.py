@@ -170,9 +170,9 @@ class RunRepository(BaseMongoRepository):
 
     def find_by_filter(self,
                        filters,
-                       projection,
-                       pagination,
-                       user: User) -> List[Run]:
+                       projection = None,
+                       pagination = None,
+                       user: User = None) -> List[Run]:
         collection = self.get_database(user).get_collection(self.collection_metadata["name"])
         totalRecords = collection.count_documents(filters)
         query = collection  \
@@ -180,7 +180,8 @@ class RunRepository(BaseMongoRepository):
             .sort("created_on", pymongo.DESCENDING)
         cursor = query \
             .skip(pagination["page"] * pagination["pageSize"]) \
-            .limit(pagination["pageSize"])
+            .limit(pagination["pageSize"]) \
+            if pagination else query
         data = list(cursor)
 
         typed_data = list(map(BaseMongoRepository.fromDict, data))
