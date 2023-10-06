@@ -4,12 +4,15 @@ from flask_login import login_required
 
 
 from ..config.app_config import config
-from ..services.configuration_service import ConfigurationService, UploadException
+from ..services.configuration_service import ConfigurationService, UploadException, DuplicatedKeyException
 from ..services.authentication_service import token_required
+from ..models.filter import *
+from ..repositories.mongodb.filter_repository import *
 
 
 configuration_api = Blueprint("configuration", __name__, url_prefix="")
-configuration_service = ConfigurationService(config.data_dir)
+filter_repository = FilterRepository()
+configuration_service = ConfigurationService(config.data_dir, filter_repository)
 
 @configuration_api.route('/ecc_algorithms', methods=['GET'])
 #@login_required
@@ -38,9 +41,33 @@ def output_analysers(user):
 
 @configuration_api.route('/settings_metadata', methods=['GET'])
 #@login_required
+#@token_required
+def settings_metadata(user = None):
+  return json.dumps(configuration_service.find_settings_metadata()), status.HTTP_200_OK
+  
+@configuration_api.route('/search_fields', methods=['GET'])
+#@login_required
+#@token_required
+def search_fields(user = None):
+  return json.dumps(configuration_service.get_search_fields()), status.HTTP_200_OK
+  
+@configuration_api.route('/filters', methods=['POST'])
+#@login_required
 @token_required
-def settings_metadata(user):
-    return json.dumps(configuration_service.find_settings_metadata()), status.HTTP_200_OK
+def save_filter(user = None):
+  filter = Filter(**request.json["body"])
+  try:
+    result = configuration_service.save_filter(filter, user)
+    return json.dumps(result, default=DefaultJsonEncoder.to_json), status.HTTP_200_OK
+  except DuplicatedKeyException:
+    return "Filter name must be unique", status.HTTP_409_CONFLICT
+
+@configuration_api.route('/filters', methods=['GET'])
+#@login_required
+@token_required
+def find_filters(user = None):
+  name = request.args.get("name", type=str, default=None)
+  return json.dumps(configuration_service.find_filters({name: name} if name else {}, user), default=DefaultJsonEncoder.to_json), status.HTTP_200_OK
 
 @configuration_api.route('/input_files', methods=['GET'])
 #@login_required

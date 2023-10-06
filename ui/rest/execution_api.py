@@ -56,15 +56,19 @@ def get_runs(user):
 #@login_required
 @token_required
 def search_runs(user):
-    search = json.loads(request.json['body'])
-    query = json.loads(search["queryString"])
-    projection = search["projectionString"]
-    pagination = search["pagination"]      
-    runs = run_repository_mongodb2.find_by_filter(filters=query,
-                                          projection=projection,
-                                          pagination=pagination,
-                                          user=user)
-    return json.dumps(runs), 200
+    try:
+      search = json.loads(request.json['body'])
+      query = json.loads(search["queryString"])
+      projection = search["projectionString"]
+      pagination = search["pagination"]
+
+      runs = run_repository_mongodb2.find_by_filter(filters=query,
+                                            projection=projection,
+                                            pagination=pagination,
+                                            user=user)
+      return json.dumps(runs), status.HTTP_200_OK
+    except Exception:
+      return "Invalid search", status.HTTP_404_NOT_FOUND
 
 @execution_api.route('/runs', methods=['POST'])
 #@login_required
