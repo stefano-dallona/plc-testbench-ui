@@ -193,6 +193,7 @@ def get_audio_file_waveforms(run_id, original_file_node_id, user: User = None):
     offset = request.args.get("offset", type=int, default=0)
     num_samples = request.args.get("num_samples", type=int, default=-1)
     max_slices = request.args.get("max_slices", type=int, default=3000)
+    loss_model_node_id = request.args.get("loss_model_node_id", type=int, default=None)
 
     offset = None if offset == None or offset < 0 else offset
     num_samples = None if num_samples == None or num_samples < 0 else num_samples
@@ -202,7 +203,7 @@ def get_audio_file_waveforms(run_id, original_file_node_id, user: User = None):
         run, user, readonly=True)
     file_tree = analysis_service.__find_file_tree_by_node_id__(
         plc_testbench, original_file_node_id)
-    audio_files = analysis_service.__find_audio_files__(file_tree)
+    audio_files = analysis_service.__find_audio_files__(file_tree, loss_model_node_id)
 
     def retrieveWaveform(plc_testbench, audio_file_node_id) -> list:
         waveform, plc_testbench = analysis_service.get_audio_file_waveform(
