@@ -209,8 +209,11 @@ class AnalysisService:
         return AnalysisService.__get_first__(AnalysisService.__find_nodes_in_file_tree__(file_tree, search))
     
     @staticmethod
-    def __find_audio_files__(file_tree: Node) -> list:
-        search = lambda x: any(isinstance(x, n) for n in [OriginalTrackNode, ReconstructedTrackNode, CustomOriginalTrackNode])
+    def __find_audio_files__(file_tree: Node, loss_model_node_id: str) -> list:
+        def search(node):
+            is_audio_node = any(isinstance(node, node_type) for node_type in [OriginalTrackNode, ReconstructedTrackNode, CustomOriginalTrackNode])
+            is_from_selected_loss_model = node.parent.get_id() == str(loss_model_node_id) if node.parent and loss_model_node_id else True
+            return is_audio_node and is_from_selected_loss_model
         return AnalysisService.__find_nodes_in_file_tree__(file_tree, search)
     
     @staticmethod

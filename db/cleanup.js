@@ -15,6 +15,7 @@ db["OutputAnalysisNode"].deleteMany({})
 db["runs"].deleteMany({})
 db["Run"].deleteMany({})
 db["Events"].deleteMany({})
+db["Filters"].deleteMany({})
 
 use('global');
 db["users"].deleteMany({})
