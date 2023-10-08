@@ -36,8 +36,8 @@ WORKDIR /plc-testbench-ui
 # Install plctestbench
 RUN git clone --branch public https://github.com/LucaVignati/plc-testbench.git && cd plc-testbench && python setup.py sdist && python3 -m pip install -f ./dist plc-testbench
 # Install ui dependencies
-COPY requirements.txt /tmp
-RUN python3 -m pip install --upgrade pip && python3 -m pip install -r /tmp/requirements.txt
+COPY requirements-freeze.txt /tmp
+RUN python3 -m pip install --upgrade pip && python3 -m pip install -r /tmp/requirements-freeze.txt
 
 COPY . .
 
