@@ -19,7 +19,6 @@ from ..models.filter import *
 from ..repositories.mongodb.filter_repository import *
 
 
-
 class ConfigurationService:
 
     _logger = logging.getLogger(__name__)
@@ -138,6 +137,25 @@ class ConfigurationService:
         ConfigurationService._logger.info("Retrieving settings metadata ...")
         settingsInstances = [(cls(), cs.get_worker_class(cls), cs.get_worker_base_class(cs.get_worker_class(cls))) for cls in Settings.__subclasses__()
                              if cs.get_worker_base_class(cs.get_worker_class(cls))]
+
+        def get_setting_metadata(property, value):
+            if isinstance(value, Enum):
+                return {
+                    "property": property,
+                    "value": value.value,
+                    "type": "select",
+                    "options": [
+                        member.value for member in type(value)],
+                    "mandatory": True
+                }
+            else:
+                return {
+                    "property": property,
+                    "value": value,
+                    "type": type(value).__name__,
+                    "mandatory": True
+                }
+
         metadata = [
             {
                 "property": category.__name__,
@@ -146,12 +164,7 @@ class ConfigurationService:
                         "uuid": Uuid.uuid4(),
                         "name": settings[1].__name__,
                         "settings": [
-                            {
-                                "property": property,
-                                "value": value,
-                                "type": type(value).__name__,
-                                "mandatory": True
-                            }
+                            get_setting_metadata(property, value)
                             for property, value in settings[0].settings.items() if not property.startswith("__")
                         ]
                     } for settings in list(settingsMetadata)]
@@ -160,7 +173,7 @@ class ConfigurationService:
         return metadata
 
     def get_search_fields(self):
-        
+
         def get_field(setting):
             field = {
                 setting["property"]: {
@@ -168,33 +181,33 @@ class ConfigurationService:
                     "valueSources": ["value"],
                 }
             }
-            if setting["type"] == "EnumMeta":
-                field["fieldSettings"] = "select"
-                field["fieldSettings"] = { "listValues": [ member.name for member in setting["type"] ]}
-            
+            if setting["type"] == "select":
+                field[setting["property"]]["type"] = "select"
+                field[setting["property"]]["fieldSettings"] = { "listValues": setting["options"] }
+
             return field
 
         def get_worker_fields(worker_metadata):
             workers = list(
                 map(lambda algorithm: algorithm["name"], worker_metadata["value"]))
             subfields = [{
-                        "worker": {
-                            "type": "select",
-                            "fieldSettings": {
-                                "listValues": workers,
-                            },
-                            "valueSources": ["value"],
-                        }
-                }]
+                "worker": {
+                    "type": "select",
+                    "fieldSettings": {
+                        "listValues": workers,
+                    },
+                    "valueSources": ["value"],
+                }
+            }]
             subfields += [{
-                    worker + "_Settings": {
-                        "label": worker,
-                        "tooltip": "Group of fields",
-                        "type": "!struct",
-                        "subfields":  OrderedDict(ChainMap(*[get_field(setting) for setting in worker_metadata["value"][index]["settings"]]))
-                    }
-                } for index, worker in enumerate(workers)]
-            
+                worker + "_Settings": {
+                    "label": worker,
+                    "tooltip": "Group of fields",
+                    "type": "!struct",
+                    "subfields":  OrderedDict(ChainMap(*[get_field(setting) for setting in worker_metadata["value"][index]["settings"]]))
+                }
+            } for index, worker in enumerate(workers)]
+
             return {
                 "label": worker_metadata["property"],
                 "type": "!group",
@@ -202,7 +215,7 @@ class ConfigurationService:
             }
 
         metadata = self.find_settings_metadata()
-        
+
         fields = [{
             "run_id": {
                 "label": "Run ID",
@@ -263,16 +276,17 @@ class ConfigurationService:
         } for index, worker_list_field in enumerate(["lost_samples_masks", "reconstructed_tracks", "output_analysis"])]
         fields.reverse()
         return OrderedDict(ChainMap(*fields))
-    
+
     def save_filter(self, filter: Filter, user: User):
         ConfigurationService._logger.info("Saving filter ...")
-        matching_filters = self.find_filters({ "name": filter.name}, user)
+        matching_filters = self.find_filters({"name": filter.name}, user)
         if matching_filters and len(matching_filters) > 0:
-            raise DuplicatedKeyException(f"A filter with name '{filter.name}' already exists!")
+            raise DuplicatedKeyException(
+                f"A filter with name '{filter.name}' already exists!")
         persisted_filter = self.filter_repository.add(filter, user)
         filter._id = str(persisted_filter.inserted_id)
         return filter
-    
+
     def find_filters(self, filter: Filter, user: User):
         ConfigurationService._logger.info("Loading filters ...")
         filters = self.filter_repository.find_by_query(filter, user=user)
@@ -328,8 +342,9 @@ class UploadException(Exception):
 
     def __init__(self, message):
         super().__init__(message)
-        
+
+
 class DuplicatedKeyException(Exception):
-    
+
     def __init__(self, message):
         super().__init__(message)

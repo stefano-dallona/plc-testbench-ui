@@ -1,0 +1,15 @@
+Revisione 20231009
+==================
+- Configuration come landing page
+- Icona più accattivante nella drop area
+- Gestione nome personalizzato per l'istanza dell'algoritmo
+- Aggiunta visualizzazione parametri degli algoritmi selezionati
+- Sulla progress bar globale mettere 1 di n, indicare la percentuale su tutti i valori numerici
+- Sul Run Hierarchy mettere una descrizione di cosa fa la pagina
+- Sulla toolbar del Run Hierarchy raggruppare i pulsanti per tipologia e collocarli in sezioni diverse
+- Rendere coerenti i filtri con la selezione dell'audio riprodotto
+- Modifica colori di default: verde file originale, rosso file con le perdite, ricostruzione. Picker ? Stili linea diversi
+- Larghezza legenda uniforme
+- Grafici metriche - assi e label in bianco anzichè in grigio
+- Metriche - disabilitazione di tutto tranne una metrica, ad es. con click destro anzichè sinistro
+- Aumentare il contrasto sulla sezione di ricerca
