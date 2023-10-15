@@ -247,6 +247,12 @@ class EccTestbenchService:
         run = self.run_repository.find_by_id(run_id, user)
         return run
     
+    def load_run_configuration(self, run_id, user) -> Run:
+        self.logger.info("Loading run %s", run_id)
+        run = self.run_repository.find_by_id(run_id, user)
+        plc_testbench = self.build_testbench_from_run(run, user, None, readonly=True)
+        return plc_testbench.data_manager.worker_classes
+    
     def launch_run_execution(self, run_id, user, task_id) -> PLCTestbench:
         self.logger.info("Task %s, executing run %s", task_id, run_id)
         run = self.load_run(run_id, user)
@@ -272,10 +278,14 @@ class EccTestbenchService:
         return execution_id
     
     def on_run_completed(self, task_id):
-        return lambda run_id, user: partial(__notifyRunCompletion__, task_id)(run_id, user)
+        return lambda run_id, user, success = True, errorMessage = "": partial(__notifyRunCompletion__, task_id)(run_id, user, success, errorMessage)
 
 
-def __notifyRunCompletion__(task_id, run_id, user):
+def __notifyRunCompletion__(task_id,
+                            run_id,
+                            user,
+                            success: bool = True,
+                            errorMessage: str = ""):
     msg = __format_sse__(data=json.dumps({
                             "task_id": task_id,
                             "run_id": run_id,
@@ -286,7 +296,9 @@ def __notifyRunCompletion__(task_id, run_id, user):
                             "currentPercentage": 100,
                             "eta": 0,
                             "timestamp": str(datetime.now()),
-                            "progress": progress_cache[str(run_id)]
+                            "progress": progress_cache[str(run_id)],
+                            "success": str(success).lower(),
+                            "errorMessage": errorMessage
                         }, indent = 4).replace('\n', ' '),
                         event="run_execution")
     for idx in range(1, 10):
@@ -375,7 +387,12 @@ def execute_elaboration(ecctestbench, user, callback):
                                    "current_root_index": 0,
                                    "current_file": os.path.basename(ecctestbench.data_manager.get_data_trees()[0].file.path)}
     '''
-    ecctestbench.run()
-    callback(run_id, user)
+    try:
+        ecctestbench.run()
+        #raise Exception("Elaboration failed")
+        callback(run_id, user)
+    except Exception as ex:
+        callback(run_id, user, success=False, errorMessage=str(ex))
+
     sleep(3)
     clean_progress_cache(str(run_id), user)

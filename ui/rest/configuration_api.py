@@ -4,7 +4,7 @@ from flask_login import login_required
 
 
 from ..config.app_config import config
-from ..services.configuration_service import ConfigurationService, UploadException, DuplicatedKeyException
+from ..services.configuration_service import ConfigurationService, UploadException, DuplicatedKeyException, ValidationException
 from ..services.authentication_service import token_required
 from ..models.filter import *
 from ..repositories.mongodb.filter_repository import *
@@ -90,3 +90,13 @@ def upload(user):
         return make_response("Chunk upload successful", status.HTTP_201_CREATED)
     except UploadException as e:
         return make_response(str(e), 500)
+
+@configuration_api.route('/validation/workers', methods=['POST'])
+#@login_required
+@token_required
+def validate_worker(user):
+  worker = request.json["body"]
+  try:
+    return json.dumps(configuration_service.validate_worker(worker)), status.HTTP_200_OK
+  except ValidationException as ex:
+    return json.dumps(str(ex)), status.HTTP_400_BAD_REQUEST

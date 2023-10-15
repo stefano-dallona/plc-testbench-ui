@@ -114,6 +114,16 @@ def get_run(run_id, user):
         return json.dumps(run, default=lambda o: o.__dict__), status.HTTP_200_OK
     else:
         return {}, status.HTTP_404_NOT_FOUND
+    
+@execution_api.route('/runs/<run_id>/configuration', methods=['GET'])
+# @login_required
+@token_required
+def get_run_configuration(run_id, user):
+    run_configuration = ecctestbench_service.load_run_configuration(run_id, user=user)
+    if run_configuration != None:
+        return json.dumps(run_configuration, default=lambda o: o.__dict__), status.HTTP_200_OK
+    else:
+        return {}, status.HTTP_404_NOT_FOUND
 
 # http://localhost:5000/runs/76728771-9de8-42bd-a71e-f4d3c08e3ae6/executions/76728771-9de8-42bd-a71e-f4d3c08e3ae6/hierarchy
 
