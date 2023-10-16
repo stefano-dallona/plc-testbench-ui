@@ -121,7 +121,7 @@ def get_run(run_id, user):
 def get_run_configuration(run_id, user):
     run_configuration = ecctestbench_service.load_run_configuration(run_id, user=user)
     if run_configuration != None:
-        return json.dumps(run_configuration, default=lambda o: o.__dict__), status.HTTP_200_OK
+        return json.dumps(run_configuration, default=DefaultJsonEncoder.to_json), status.HTTP_200_OK
     else:
         return {}, status.HTTP_404_NOT_FOUND
 
