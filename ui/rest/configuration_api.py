@@ -41,13 +41,13 @@ def output_analysers(user):
 
 @configuration_api.route('/settings_metadata', methods=['GET'])
 #@login_required
-#@token_required
+@token_required
 def settings_metadata(user = None):
   return json.dumps(configuration_service.find_settings_metadata()), status.HTTP_200_OK
   
 @configuration_api.route('/search_fields', methods=['GET'])
 #@login_required
-#@token_required
+@token_required
 def search_fields(user = None):
   return json.dumps(configuration_service.get_search_fields()), status.HTTP_200_OK
   

@@ -166,7 +166,8 @@ class ConfigurationService:
                         "settings": [
                             get_setting_metadata(property, value)
                             for property, value in settings[0].settings.items() if not property.startswith("__")
-                        ]
+                        ],
+                        "doc": settings[1].__doc__
                     } for settings in list(settingsMetadata)]
             } for category, settingsMetadata in groupby(settingsInstances, key=itemgetter(2))
         ]
