@@ -147,7 +147,7 @@ class AnalysisService:
         
         plc_testbench = self.ecctestbench_service.build_testbench_from_run(run, user, readonly=True)
         nodes_to_load = [ audio_file_node_id, metric_node_id ]
-        self.ecctestbench_service.load_files(plc_testbench, nodes_to_load)
+        self.ecctestbench_service.load_files(plc_testbench, nodes_to_load, offset, num_samples)
         
         audio_file = self.__find_node_by_id__(plc_testbench, audio_file_node_id)
         if audio_file == None:
