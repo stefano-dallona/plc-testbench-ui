@@ -4,7 +4,7 @@ from flask_login import login_required
 
 
 from ..config.app_config import config
-from ..services.configuration_service import ConfigurationService, UploadException, DuplicatedKeyException
+from ..services.configuration_service import ConfigurationService, UploadException, DuplicatedKeyException, ValidationException
 from ..services.authentication_service import token_required
 from ..models.filter import *
 from ..repositories.mongodb.filter_repository import *
@@ -41,13 +41,13 @@ def output_analysers(user):
 
 @configuration_api.route('/settings_metadata', methods=['GET'])
 #@login_required
-#@token_required
+@token_required
 def settings_metadata(user = None):
   return json.dumps(configuration_service.find_settings_metadata()), status.HTTP_200_OK
   
 @configuration_api.route('/search_fields', methods=['GET'])
 #@login_required
-#@token_required
+@token_required
 def search_fields(user = None):
   return json.dumps(configuration_service.get_search_fields()), status.HTTP_200_OK
   
@@ -90,3 +90,13 @@ def upload(user):
         return make_response("Chunk upload successful", status.HTTP_201_CREATED)
     except UploadException as e:
         return make_response(str(e), 500)
+
+@configuration_api.route('/validation/workers', methods=['POST'])
+#@login_required
+@token_required
+def validate_worker(user):
+  worker = request.json["body"]
+  try:
+    return json.dumps(configuration_service.validate_worker(worker)), status.HTTP_200_OK
+  except ValidationException as ex:
+    return json.dumps(str(ex)), status.HTTP_400_BAD_REQUEST

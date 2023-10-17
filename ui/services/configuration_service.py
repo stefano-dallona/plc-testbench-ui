@@ -166,7 +166,8 @@ class ConfigurationService:
                         "settings": [
                             get_setting_metadata(property, value)
                             for property, value in settings[0].settings.items() if not property.startswith("__")
-                        ]
+                        ],
+                        "doc": settings[1].__doc__
                     } for settings in list(settingsMetadata)]
             } for category, settingsMetadata in groupby(settingsInstances, key=itemgetter(2))
         ]
@@ -336,6 +337,9 @@ class ConfigurationService:
         else:
             self._logger.debug(f'Chunk {current_chunk + 1} of {total_chunks} '
                                f'for file {file.filename} complete')
+            
+    def validate_worker(worker: Worker):
+        pass
 
 
 class UploadException(Exception):
@@ -345,6 +349,11 @@ class UploadException(Exception):
 
 
 class DuplicatedKeyException(Exception):
+
+    def __init__(self, message):
+        super().__init__(message)
+        
+class ValidationException(Exception):
 
     def __init__(self, message):
         super().__init__(message)
