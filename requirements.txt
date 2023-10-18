@@ -23,3 +23,4 @@ Flask-Login==0.6.2
 #flask_jwt_extended
 pyjwt[crypto]==2.7.0
 Werkzeug==2.2.3
+anytree==2.8.0
