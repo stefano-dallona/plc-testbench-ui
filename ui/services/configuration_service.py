@@ -6,6 +6,7 @@ import uuid as Uuid
 from operator import itemgetter
 from itertools import groupby
 from collections import ChainMap, OrderedDict
+from enum import Enum
 
 from plctestbench.worker import *
 from plctestbench.loss_simulator import *
