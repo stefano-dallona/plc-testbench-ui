@@ -159,18 +159,20 @@ class AnalysisService:
             return None
         
         metric_samples = metric_file.get_data()
+        metric_to_audio_rate = len(metric_samples) * 1.0 / total_audio_file_samples
         category = "linear" if hasattr(metric_file.get_data(), '__iter__') else "scalar"
-        metric_samples_num = num_samples
+        metric_offset = math.floor(offset * metric_to_audio_rate) if offset else 0
+        
         if category == "scalar":
             metric_samples_num = 1
-        elif num_samples == None:
-            metric_samples_num = len(metric_samples)
+        else:
+            metric_samples_num = min(math.ceil(num_samples * metric_to_audio_rate), len(metric_samples)) if num_samples and num_samples >= 0 else len(metric_samples)
         
         scale_position = unit_of_meas != "samples"
         samples = MetricSamples(node_id=metric_node_id,
                                 samples=metric_samples,
                                 total_original_file_samples=total_audio_file_samples,
-                                offset=offset,
+                                offset=metric_offset,
                                 num_samples=metric_samples_num,
                                 scale_position=scale_position,
                                 category=category)
