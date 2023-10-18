@@ -1,6 +1,7 @@
 import logging
 from pymongo import MongoClient
 from pymongo.database import Database
+from bson.objectid import ObjectId
 from typing import List
 
 from ui.repositories.mongodb.base_repository import BaseMongoRepository
@@ -55,4 +56,6 @@ class FilterRepository(BaseMongoRepository):
         pass
     
     def delete(self, item, user):
-        pass
+        collection = super().get_database(user).get_collection(self.collection_metadata["name"])
+        result = collection.delete_one({ "_id": ObjectId(item._id) })
+        return result.deleted_count > 0

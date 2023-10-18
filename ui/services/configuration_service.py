@@ -7,6 +7,7 @@ from operator import itemgetter
 from itertools import groupby
 from collections import ChainMap, OrderedDict
 from enum import Enum
+from bson.objectid import ObjectId
 
 from plctestbench.worker import *
 from plctestbench.loss_simulator import *
@@ -289,6 +290,15 @@ class ConfigurationService:
         filter._id = str(persisted_filter.inserted_id)
         return filter
 
+    def delete_filter(self, filter_id: str, user: User) -> bool:
+        ConfigurationService._logger.info("Deleting filter ...")
+        matching_filters = self.find_filters({"_id": ObjectId(filter_id)}, user)
+        if (not matching_filters) or len(matching_filters) == 0:
+            raise KeyNotFoundException(
+                f"No filter with id '{filter_id}' was found!")
+        result = self.filter_repository.delete(matching_filters[0], user)
+        return result
+
     def find_filters(self, filter: Filter, user: User):
         ConfigurationService._logger.info("Loading filters ...")
         filters = self.filter_repository.find_by_query(filter, user=user)
@@ -353,8 +363,13 @@ class DuplicatedKeyException(Exception):
 
     def __init__(self, message):
         super().__init__(message)
-        
+
 class ValidationException(Exception):
+
+    def __init__(self, message):
+        super().__init__(message)
+   
+class KeyNotFoundException(Exception):
 
     def __init__(self, message):
         super().__init__(message)

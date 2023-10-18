@@ -4,7 +4,7 @@ from flask_login import login_required
 
 
 from ..config.app_config import config
-from ..services.configuration_service import ConfigurationService, UploadException, DuplicatedKeyException, ValidationException
+from ..services.configuration_service import ConfigurationService, UploadException, DuplicatedKeyException, ValidationException, KeyNotFoundException
 from ..services.authentication_service import token_required
 from ..models.filter import *
 from ..repositories.mongodb.filter_repository import *
@@ -61,6 +61,16 @@ def save_filter(user = None):
     return json.dumps(result, default=DefaultJsonEncoder.to_json), status.HTTP_200_OK
   except DuplicatedKeyException:
     return "Filter name must be unique", status.HTTP_409_CONFLICT
+
+@configuration_api.route('/filters/<filter_id>', methods=['DELETE'])
+#@login_required
+@token_required
+def delete_filter(filter_id, user = None):
+  try:
+    result = configuration_service.delete_filter(filter_id, user)
+    return json.dumps(result, default=DefaultJsonEncoder.to_json), status.HTTP_200_OK
+  except KeyNotFoundException:
+    return "Filter not found", status.HTTP_404_NOT_FOUND
 
 @configuration_api.route('/filters', methods=['GET'])
 #@login_required
