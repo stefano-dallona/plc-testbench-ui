@@ -159,8 +159,8 @@ class AnalysisService:
             return None
         
         metric_samples = metric_file.get_data()
-        metric_to_audio_rate = len(metric_samples) * 1.0 / total_audio_file_samples
         category = "linear" if hasattr(metric_file.get_data(), '__iter__') else "scalar"
+        metric_to_audio_rate = len(metric_samples) * 1.0 / total_audio_file_samples if category == "linear" else 1
         metric_offset = math.floor(offset * metric_to_audio_rate) if offset else 0
         
         if category == "scalar":
