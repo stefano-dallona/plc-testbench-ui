@@ -1,6 +1,6 @@
 rem start mongo container
-START /B docker run ^
---rm -it --memory=4g --publish 27017:27017 ^
+docker run ^
+--rm --detach --memory=4g --publish 27017:27017 ^
 --env MONGO_DATA_VOLUME_PATH=/mongo-data ^
 --env MONGO_INITDB_ROOT_PASSWORD=Marmolada3343 ^
 --env MONGO_INITDB_ROOT_USERNAME=root ^
@@ -9,8 +9,7 @@ START /B docker run ^
 library/mongo:4.4.18
 
 rem start plc-testbench-ui container
-START /B docker run --rm -it ^
-#--entrypoint /bin/sh ^
+docker run --rm --detach ^
 --memory=16g ^
 --publish 9071:5000 ^
 --env APP_PORT=5000 ^

@@ -2,16 +2,16 @@
 
 # start mongodb container
 docker run \
---rm -it --memory=4g --publish 27017:27017 \
+--rm --detach --memory=4g --publish 27017:27017 \
 --env MONGO_DATA_VOLUME_PATH=<path-to-your-mongo-data-inside-your-host> \ # e.g. /mongo-data
 --env MONGO_INITDB_ROOT_PASSWORD=<password> \
 --env MONGO_INITDB_ROOT_USERNAME=root \
 --volume ${MONGO_DATA_VOLUME_PATH}:<path-to-your-mongo-data-inside-your-container> \ # e.g. /data/db
 --name mongo \
-library/mongo:4.4.18 &
+library/mongo:4.4.18
 
 # start plc-testbench-ui's web application's container
-docker run --rm -it --memory=16g \
+docker run --rm --detach --memory=16g \
 --env APP_PORT=5000 \
 --env CERT_FILE=<path-to-your-ssl-cert-file> \ # e.g. /plc-testbench-ui/secrets/cert.pem
 --env DATA_FOLDER=/plc-testbench-ui/original_tracks \
@@ -32,4 +32,4 @@ docker run --rm -it --memory=16g \
 --name plc-testbench-ui \
 --link mongo:mongo \
 --publish <host-port>:${APP_PORT} \
-stdallona/plc-testbench-ui:1.0.2 &
+stdallona/plc-testbench-ui:1.0.2
