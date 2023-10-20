@@ -24,3 +24,4 @@ Flask-Login==0.6.2
 pyjwt[crypto]==2.7.0
 Werkzeug==2.2.3
 anytree==2.8.0
+pybind11==2.10.4
