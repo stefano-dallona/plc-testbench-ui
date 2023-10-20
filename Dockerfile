@@ -32,17 +32,16 @@ RUN mkdir gstpeaq && git clone https://github.com/HSU-ANT/gstpeaq.git gstpeaq
 WORKDIR /plc-testbench-ui/gstpeaq
 RUN aclocal && autoheader && ./autogen.sh && sed -i 's/SUBDIRS = src doc/SUBDIRS = src/' Makefile.am && ./configure --libdir=/usr/lib && automake && make && make install
 # End of download and compile gstpeaq
+RUN git clone https://github.com/LucaVignati/burg-python-bindings.git && cd burg-python-bindings && python setup.py install
+# Install cpp_plc_template
+RUN git clone https://github.com/LucaVignati/cpp_plc_template.git && cd cpp_plc_template && python setup.py install
+# Install ui dependencies
 WORKDIR /plc-testbench-ui
 # Install plctestbench
 RUN git clone --branch develop https://github.com/LucaVignati/plc-testbench.git && cd plc-testbench && python setup.py sdist && python3 -m pip install -f ./dist plc-testbench
 # Install burg-python-bindings
 COPY requirements.txt /tmp
 RUN python3 -m pip install --upgrade pip && python3 -m pip install -r /tmp/requirements.txt
-
-RUN git clone https://github.com/LucaVignati/burg-python-bindings.git && cd burg-python-bindings && python setup.py install
-# Install cpp_plc_template
-RUN git clone https://github.com/LucaVignati/cpp_plc_template.git && cd cpp_plc_template && python setup.py install
-# Install ui dependencies
 
 COPY . .
 
