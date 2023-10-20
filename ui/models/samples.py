@@ -30,6 +30,7 @@ class LostInterval(Serializable):
         self.num_samples = num_samples
         self.x = float(self.start_sample / self.__sample_rate__)
         self.width = float(self.num_samples / self.__sample_rate__)
+        self.color = 'white'
 
 class LostSamples(Serializable):
 
