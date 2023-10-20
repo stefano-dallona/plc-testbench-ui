@@ -281,6 +281,7 @@ class EccTestbenchService:
             if index > 0:
                 return [
                         {
+                            "uuid": str(uuid.uuid4()),
                             "name": worker_class.__name__,
                             "settings": [{
                                 "property": key,
@@ -291,6 +292,7 @@ class EccTestbenchService:
                         for (worker_class, worker_settings) in worker_group]
             else:
                 return {
+                    "uuid": str(uuid.uuid4()),
                     "name": "InputFileSelection",
                     "settings": [ worker_settings.settings["filename"]
                                  for (worker_class, worker_settings) in worker_group ]
