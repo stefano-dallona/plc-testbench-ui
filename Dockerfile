@@ -34,7 +34,7 @@ RUN aclocal && autoheader && ./autogen.sh && sed -i 's/SUBDIRS = src doc/SUBDIRS
 # End of download and compile gstpeaq
 WORKDIR /plc-testbench-ui
 # Install plctestbench
-RUN git clone --branch public https://github.com/LucaVignati/plc-testbench.git && cd plc-testbench && python setup.py sdist && python3 -m pip install -f ./dist plc-testbench
+RUN git clone --branch develop https://github.com/LucaVignati/plc-testbench.git && cd plc-testbench && python setup.py sdist && python3 -m pip install -f ./dist plc-testbench
 # Install burg-python-bindings
 COPY requirements.txt /tmp
 RUN python3 -m pip install --upgrade pip && python3 -m pip install -r /tmp/requirements.txt

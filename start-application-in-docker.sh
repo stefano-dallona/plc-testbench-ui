@@ -32,4 +32,4 @@ docker run --rm --detach --memory=16g \
 --name plc-testbench-ui \
 --link mongo:mongo \
 --publish <host-port>:${APP_PORT} \
-stdallona/plc-testbench-ui:1.0.2
+stdallona/plc-testbench-ui:1.0.5

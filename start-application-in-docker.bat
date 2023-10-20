@@ -32,4 +32,4 @@ docker run --rm --detach ^
 --volume /c/Data/personale/Università/2022-2023/original_tracks:/plc-testbench-ui/original_tracks ^
 --name plc-testbench-ui ^
 --link mongo:mongo ^
-stdallona/plc-testbench-ui:1.0.4
+stdallona/plc-testbench-ui:1.0.5
