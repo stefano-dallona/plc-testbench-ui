@@ -453,7 +453,6 @@ def execute_elaboration(ecctestbench, user, callback):
     '''
     try:
         ecctestbench.run()
-        raise Exception("Elaboration failed")
         callback(run_id, user)
     except Exception as ex:
         callback(run_id, user, success=False, errorMessage=str(ex))
