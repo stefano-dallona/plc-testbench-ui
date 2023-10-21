@@ -37,12 +37,15 @@ WORKDIR /plc-testbench-ui
 COPY requirements.txt /tmp
 RUN python3 -m pip install --upgrade pip && python3 -m pip install -r /tmp/requirements.txt
 # Install burg-python-bindings
+WORKDIR /
 RUN git clone https://github.com/LucaVignati/burg-python-bindings.git && cd burg-python-bindings && python setup.py install
 # Install cpp_plc_template
+WORKDIR /
 RUN git clone https://github.com/LucaVignati/cpp_plc_template.git && cd cpp_plc_template && python setup.py install
 # Install plctestbench
 RUN git clone --branch develop https://github.com/LucaVignati/plc-testbench.git && cd plc-testbench && python setup.py sdist && python3 -m pip install -f ./dist plc-testbench
 
+WORKDIR /plc-testbench-ui
 COPY . .
 
 COPY --from=ui-frontend-build /plc-testbench-ui/react-test/build /plc-testbench-ui/frontend/build/

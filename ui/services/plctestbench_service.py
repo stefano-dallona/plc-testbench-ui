@@ -347,7 +347,7 @@ def __notifyRunCompletion__(task_id,
         "timestamp": str(datetime.now()),
         "progress": progress_cache[str(run_id)],
         "success": str(success).lower(),
-        "errorMessage": errorMessage
+        "errorMessage": str(errorMessage).replace('"', '\\"')
     }, indent=4).replace('\n', ' '),
         event="run_execution")
     for idx in range(1, 10):
