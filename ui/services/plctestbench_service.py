@@ -347,7 +347,7 @@ def __notifyRunCompletion__(task_id,
         "timestamp": str(datetime.now()),
         "progress": progress_cache[str(run_id)],
         "success": str(success).lower(),
-        "errorMessage": str(errorMessage).replace('"', '\\"')
+        "errorMessage": str(errorMessage).replace("'", '').replace('"', '')
     }, indent=4).replace('\n', ' '),
         event="run_execution")
     for idx in range(1, 10):
@@ -453,7 +453,7 @@ def execute_elaboration(ecctestbench, user, callback):
     '''
     try:
         ecctestbench.run()
-        #raise Exception("Elaboration failed")
+        raise Exception("Elaboration failed")
         callback(run_id, user)
     except Exception as ex:
         callback(run_id, user, success=False, errorMessage=str(ex))
