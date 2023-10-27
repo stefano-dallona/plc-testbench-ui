@@ -233,3 +233,8 @@ mongorestore \
 --archive=plc-testbench-db.20230921.gz \
 --nsFrom "stefano_dot_dallona_at_gmail_dot_com.*" \
 --nsTo "stefano_dot_dallona_2_at_gmail_dot_com.*"
+
+# Installing jupiter in python virtual environment
+# <venv_root>/Lib/Scripts/activate
+python -m pip install ipykernel==6.16.2
+python -m pip install ipywidgets
