@@ -64,18 +64,18 @@ docker stats <container-id>
 # free space in docker machine
 docker system prune --all --force --volumes
 
-#access the application at URL http://<any-ip-of-the-host-except-loopback>:5000/
+## access the application at URL http://<any-ip-of-the-host-except-loopback>:5000/
 
 # free docker orphaned volumes
 https://medium.com/@wlarch/no-space-left-on-device-when-using-docker-compose-why-c4a2c783c6f6#:~:text=1)%20Delete%20Orphaned%20Docker%20Volumes,data%20is%20stored%20on%20them.
 docker volume rm $(docker volume ls -qf dangling=true)
 docker stop $(docker ps -aq)
 docker rm $(docker ps -aq)
-docker system prune --volumes #most useful to reclaim space
+docker system prune --volumes most useful to reclaim space
 docker rmi $(docker images -q)
 
-#GitHub Repo:
-#https://github.com/stefano-dallona/plc-testbench-ui/
+# GitHub Repo:
+## https://github.com/stefano-dallona/plc-testbench-ui/
 
 # compile eccworkbench
 cd <eccworkbench-src-directory>
@@ -98,7 +98,7 @@ python -m pip install waitress
 python app.py
 
 # App URLs:
-#myIP: 10.223.35.25
+## myIP: 10.223.35.25
 http://<local-machine-ip>:5000/testbench-configuration.html
 http://<local-machine-ip>:5000/testbench-output-analysis.html?run_id=<run_id>
 
@@ -131,7 +131,7 @@ ENV_FILE=/mongodb/development-docker.env && set -o allexport && dos2unix $ENV_FI
 --link mongo:mongo \
 stdallona/plc-testbench-ui:1.0.0
 
-#"`"C:/Program Files/Docker Toolbox/docker-machine.exe`" ssh default2 `"[ -d /mongo-data ] || rm -fR /mongo-data`"" | cmd
+"`"C:/Program Files/Docker Toolbox/docker-machine.exe`" ssh default2 `"[ -d /mongo-data ] || rm -fR /mongo-data`"" | cmd
 powershell.exe -noprofile -executionpolicy bypass -file .\launch-command-with-env.ps1 -EnvFile development-docker.env docker run `
 --rm -it --memory="4g" --publish '27017:27017' `
 --env-file ./development-docker.env  `
@@ -156,8 +156,8 @@ powershell.exe -noprofile -executionpolicy bypass -file .\launch-command-with-en
 stdallona/plc-testbench-ui:1.0.2
 
 
-#Bug in google login (https://github.com/metabase/metabase/issues/32602)
-#in order to fix it width in GoogleLogin component needs to be set as an int width={<w>} instead of width='<w>'
+# Bug in google login (https://github.com/metabase/metabase/issues/32602)
+## in order to fix it width in GoogleLogin component needs to be set as an int width={<w>} instead of width='<w>'
 
 docker run ^
 --rm -it --memory="16g" -p 5000:5000 ^
@@ -198,7 +198,7 @@ docker run --rm -it --memory=16g --publish 9071:5000 ^
 --link mongo:mongo ^
 stdallona/plc-testbench-ui:1.0.2
 
-#generate SSL cert and key
+# generate SSL cert and key
 # run openssl in gitbash
 openssl req -x509 -newkey rsa:4096 -nodes -out cert.pem -keyout key.pem
 openssl x509 -inform der -in zscaler-root-ca.cer -out zscaler-root-ca.pem
