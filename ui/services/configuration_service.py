@@ -218,7 +218,7 @@ class ConfigurationService:
 
             return {
                 "property": property,
-                "value": value,
+                "value": value if not type(value).__name__ == 'list' else ",".join([str(val) for val in value]),
                 "type": type(value).__name__,
                 "mandatory": True,
                 "editable": get_value_type(property, clazz) is not None
