@@ -1,411 +1,3771 @@
 [
     {
-        "editable": false,
-        "mandatory": true,
-        "property": "crossfade",
-        "type": "settingsList",
-        "value": [
+        "key": "0",
+        "data": {
+            "property": "crossfade",
+            "value": "",
+            "valueType": "settingsList",
+            "editable": false
+        },
+        "children": [
             {
-                "name": "ManualCrossfadeSettings",
-                "settings": [
+                "key": "0-0",
+                "data": {
+                    "property": "band-0_settings",
+                    "value": "ManualCrossfadeSettings",
+                    "valueType": "select",
+                    "options": [
+                        {
+                            "name": "ManualCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "NoCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "LinearCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "QuadraticCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "CubicCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "SinusoidalCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "editable": true
+                },
+                "children": [
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "length",
-                        "type": "int",
-                        "value": 10
+                        "key": "0",
+                        "data": {
+                            "property": "length",
+                            "value": 10,
+                            "valueType": "int",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "function",
-                        "type": "str",
-                        "value": "power"
+                        "key": "1",
+                        "data": {
+                            "property": "function",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "exponent",
-                        "type": "float",
-                        "value": 1
+                        "key": "2",
+                        "data": {
+                            "property": "exponent",
+                            "value": 1,
+                            "valueType": "float",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "type",
-                        "type": "str",
-                        "value": "power"
+                        "key": "3",
+                        "data": {
+                            "property": "type",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     }
                 ]
             },
             {
-                "name": "NoCrossfadeSettings",
-                "settings": [
+                "key": "0-1",
+                "data": {
+                    "property": "band-1_settings",
+                    "value": "NoCrossfadeSettings",
+                    "valueType": "select",
+                    "options": [
+                        {
+                            "name": "ManualCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 0,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "NoCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 0,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "LinearCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 0,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "QuadraticCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 0,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "CubicCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 0,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "SinusoidalCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 0,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "editable": true
+                },
+                "children": [
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "length",
-                        "type": "int",
-                        "value": 0
+                        "key": "0",
+                        "data": {
+                            "property": "length",
+                            "value": 0,
+                            "valueType": "int",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "function",
-                        "type": "str",
-                        "value": "power"
+                        "key": "1",
+                        "data": {
+                            "property": "function",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "exponent",
-                        "type": "float",
-                        "value": 1
+                        "key": "2",
+                        "data": {
+                            "property": "exponent",
+                            "value": 1,
+                            "valueType": "float",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "type",
-                        "type": "str",
-                        "value": "power"
+                        "key": "3",
+                        "data": {
+                            "property": "type",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     }
                 ]
             },
             {
-                "name": "LinearCrossfadeSettings",
-                "settings": [
+                "key": "0-2",
+                "data": {
+                    "property": "band-2_settings",
+                    "value": "LinearCrossfadeSettings",
+                    "valueType": "select",
+                    "options": [
+                        {
+                            "name": "ManualCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "NoCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "LinearCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "QuadraticCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "CubicCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "SinusoidalCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "editable": true
+                },
+                "children": [
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "length",
-                        "type": "int",
-                        "value": 10
+                        "key": "0",
+                        "data": {
+                            "property": "length",
+                            "value": 10,
+                            "valueType": "int",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "function",
-                        "type": "str",
-                        "value": "power"
+                        "key": "1",
+                        "data": {
+                            "property": "function",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "exponent",
-                        "type": "float",
-                        "value": 1
+                        "key": "2",
+                        "data": {
+                            "property": "exponent",
+                            "value": 1,
+                            "valueType": "float",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "type",
-                        "type": "str",
-                        "value": "power"
+                        "key": "3",
+                        "data": {
+                            "property": "type",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     }
                 ]
             },
             {
-                "name": "QuadraticCrossfadeSettings",
-                "settings": [
+                "key": "0-3",
+                "data": {
+                    "property": "band-3_settings",
+                    "value": "QuadraticCrossfadeSettings",
+                    "valueType": "select",
+                    "options": [
+                        {
+                            "name": "ManualCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 2,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "NoCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 2,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "LinearCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 2,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "QuadraticCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 2,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "CubicCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 2,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "SinusoidalCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 2,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "editable": true
+                },
+                "children": [
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "length",
-                        "type": "int",
-                        "value": 10
+                        "key": "0",
+                        "data": {
+                            "property": "length",
+                            "value": 10,
+                            "valueType": "int",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "function",
-                        "type": "str",
-                        "value": "power"
+                        "key": "1",
+                        "data": {
+                            "property": "function",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "exponent",
-                        "type": "float",
-                        "value": 2
+                        "key": "2",
+                        "data": {
+                            "property": "exponent",
+                            "value": 2,
+                            "valueType": "float",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "type",
-                        "type": "str",
-                        "value": "power"
+                        "key": "3",
+                        "data": {
+                            "property": "type",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     }
                 ]
             },
             {
-                "name": "CubicCrossfadeSettings",
-                "settings": [
+                "key": "0-4",
+                "data": {
+                    "property": "band-4_settings",
+                    "value": "CubicCrossfadeSettings",
+                    "valueType": "select",
+                    "options": [
+                        {
+                            "name": "ManualCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 3,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "NoCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 3,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "LinearCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 3,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "QuadraticCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 3,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "CubicCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 3,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "SinusoidalCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 3,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "editable": true
+                },
+                "children": [
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "length",
-                        "type": "int",
-                        "value": 10
+                        "key": "0",
+                        "data": {
+                            "property": "length",
+                            "value": 10,
+                            "valueType": "int",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "function",
-                        "type": "str",
-                        "value": "power"
+                        "key": "1",
+                        "data": {
+                            "property": "function",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "exponent",
-                        "type": "float",
-                        "value": 3
+                        "key": "2",
+                        "data": {
+                            "property": "exponent",
+                            "value": 3,
+                            "valueType": "float",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "type",
-                        "type": "str",
-                        "value": "power"
+                        "key": "3",
+                        "data": {
+                            "property": "type",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     }
                 ]
             },
             {
-                "name": "SinusoidalCrossfadeSettings",
-                "settings": [
+                "key": "0-5",
+                "data": {
+                    "property": "band-5_settings",
+                    "value": "SinusoidalCrossfadeSettings",
+                    "valueType": "select",
+                    "options": [
+                        {
+                            "name": "ManualCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "sinusoidal",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "NoCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "sinusoidal",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "LinearCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "sinusoidal",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "QuadraticCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "sinusoidal",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "CubicCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "sinusoidal",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "SinusoidalCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "sinusoidal",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "editable": true
+                },
+                "children": [
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "length",
-                        "type": "int",
-                        "value": 10
+                        "key": "0",
+                        "data": {
+                            "property": "length",
+                            "value": 10,
+                            "valueType": "int",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "function",
-                        "type": "str",
-                        "value": "sinusoidal"
+                        "key": "1",
+                        "data": {
+                            "property": "function",
+                            "value": "sinusoidal",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "type",
-                        "type": "str",
-                        "value": "power"
+                        "key": "2",
+                        "data": {
+                            "property": "type",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     }
                 ]
             }
         ]
     },
     {
-        "editable": false,
-        "mandatory": true,
-        "property": "fade_in",
-        "type": "settingsList",
-        "value": [
+        "key": "1",
+        "data": {
+            "property": "fade_in",
+            "value": "",
+            "valueType": "settingsList",
+            "editable": false
+        },
+        "children": [
             {
-                "name": "ManualCrossfadeSettings",
-                "settings": [
+                "key": "1-0",
+                "data": {
+                    "property": "band-0_settings",
+                    "value": "ManualCrossfadeSettings",
+                    "valueType": "select",
+                    "options": [
+                        {
+                            "name": "ManualCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "NoCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "LinearCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "QuadraticCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "CubicCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "SinusoidalCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "editable": true
+                },
+                "children": [
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "length",
-                        "type": "int",
-                        "value": 10
+                        "key": "0",
+                        "data": {
+                            "property": "length",
+                            "value": 10,
+                            "valueType": "int",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "function",
-                        "type": "str",
-                        "value": "power"
+                        "key": "1",
+                        "data": {
+                            "property": "function",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "exponent",
-                        "type": "float",
-                        "value": 1
+                        "key": "2",
+                        "data": {
+                            "property": "exponent",
+                            "value": 1,
+                            "valueType": "float",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "type",
-                        "type": "str",
-                        "value": "power"
+                        "key": "3",
+                        "data": {
+                            "property": "type",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     }
                 ]
             },
             {
-                "name": "NoCrossfadeSettings",
-                "settings": [
+                "key": "1-1",
+                "data": {
+                    "property": "band-1_settings",
+                    "value": "NoCrossfadeSettings",
+                    "valueType": "select",
+                    "options": [
+                        {
+                            "name": "ManualCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 0,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "NoCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 0,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "LinearCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 0,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "QuadraticCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 0,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "CubicCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 0,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "SinusoidalCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 0,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "editable": true
+                },
+                "children": [
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "length",
-                        "type": "int",
-                        "value": 0
+                        "key": "0",
+                        "data": {
+                            "property": "length",
+                            "value": 0,
+                            "valueType": "int",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "function",
-                        "type": "str",
-                        "value": "power"
+                        "key": "1",
+                        "data": {
+                            "property": "function",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "exponent",
-                        "type": "float",
-                        "value": 1
+                        "key": "2",
+                        "data": {
+                            "property": "exponent",
+                            "value": 1,
+                            "valueType": "float",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "type",
-                        "type": "str",
-                        "value": "power"
+                        "key": "3",
+                        "data": {
+                            "property": "type",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     }
                 ]
             },
             {
-                "name": "LinearCrossfadeSettings",
-                "settings": [
+                "key": "1-2",
+                "data": {
+                    "property": "band-2_settings",
+                    "value": "LinearCrossfadeSettings",
+                    "valueType": "select",
+                    "options": [
+                        {
+                            "name": "ManualCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "NoCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "LinearCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "QuadraticCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "CubicCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "SinusoidalCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 1,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "editable": true
+                },
+                "children": [
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "length",
-                        "type": "int",
-                        "value": 10
+                        "key": "0",
+                        "data": {
+                            "property": "length",
+                            "value": 10,
+                            "valueType": "int",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "function",
-                        "type": "str",
-                        "value": "power"
+                        "key": "1",
+                        "data": {
+                            "property": "function",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "exponent",
-                        "type": "float",
-                        "value": 1
+                        "key": "2",
+                        "data": {
+                            "property": "exponent",
+                            "value": 1,
+                            "valueType": "float",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "type",
-                        "type": "str",
-                        "value": "power"
+                        "key": "3",
+                        "data": {
+                            "property": "type",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     }
                 ]
             },
             {
-                "name": "QuadraticCrossfadeSettings",
-                "settings": [
+                "key": "1-3",
+                "data": {
+                    "property": "band-3_settings",
+                    "value": "QuadraticCrossfadeSettings",
+                    "valueType": "select",
+                    "options": [
+                        {
+                            "name": "ManualCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 2,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "NoCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 2,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "LinearCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 2,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "QuadraticCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 2,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "CubicCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 2,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "SinusoidalCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 2,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "editable": true
+                },
+                "children": [
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "length",
-                        "type": "int",
-                        "value": 10
+                        "key": "0",
+                        "data": {
+                            "property": "length",
+                            "value": 10,
+                            "valueType": "int",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "function",
-                        "type": "str",
-                        "value": "power"
+                        "key": "1",
+                        "data": {
+                            "property": "function",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "exponent",
-                        "type": "float",
-                        "value": 2
+                        "key": "2",
+                        "data": {
+                            "property": "exponent",
+                            "value": 2,
+                            "valueType": "float",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "type",
-                        "type": "str",
-                        "value": "power"
+                        "key": "3",
+                        "data": {
+                            "property": "type",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     }
                 ]
             },
             {
-                "name": "CubicCrossfadeSettings",
-                "settings": [
+                "key": "1-4",
+                "data": {
+                    "property": "band-4_settings",
+                    "value": "CubicCrossfadeSettings",
+                    "valueType": "select",
+                    "options": [
+                        {
+                            "name": "ManualCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 3,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "NoCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 3,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "LinearCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 3,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "QuadraticCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 3,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "CubicCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 3,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "SinusoidalCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "exponent",
+                                        "value": 3,
+                                        "valueType": "float",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "3",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "editable": true
+                },
+                "children": [
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "length",
-                        "type": "int",
-                        "value": 10
+                        "key": "0",
+                        "data": {
+                            "property": "length",
+                            "value": 10,
+                            "valueType": "int",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "function",
-                        "type": "str",
-                        "value": "power"
+                        "key": "1",
+                        "data": {
+                            "property": "function",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "exponent",
-                        "type": "float",
-                        "value": 3
+                        "key": "2",
+                        "data": {
+                            "property": "exponent",
+                            "value": 3,
+                            "valueType": "float",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "type",
-                        "type": "str",
-                        "value": "power"
+                        "key": "3",
+                        "data": {
+                            "property": "type",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     }
                 ]
             },
             {
-                "name": "SinusoidalCrossfadeSettings",
-                "settings": [
+                "key": "1-5",
+                "data": {
+                    "property": "band-5_settings",
+                    "value": "SinusoidalCrossfadeSettings",
+                    "valueType": "select",
+                    "options": [
+                        {
+                            "name": "ManualCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "sinusoidal",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "NoCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "sinusoidal",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "LinearCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "sinusoidal",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "QuadraticCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "sinusoidal",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "CubicCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "sinusoidal",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "SinusoidalCrossfadeSettings",
+                            "settings": [
+                                {
+                                    "key": "0",
+                                    "data": {
+                                        "property": "length",
+                                        "value": 10,
+                                        "valueType": "int",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "1",
+                                    "data": {
+                                        "property": "function",
+                                        "value": "sinusoidal",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                },
+                                {
+                                    "key": "2",
+                                    "data": {
+                                        "property": "type",
+                                        "value": "power",
+                                        "valueType": "str",
+                                        "editable": false,
+                                        "mandatory": true
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "editable": true
+                },
+                "children": [
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "length",
-                        "type": "int",
-                        "value": 10
+                        "key": "0",
+                        "data": {
+                            "property": "length",
+                            "value": 10,
+                            "valueType": "int",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "function",
-                        "type": "str",
-                        "value": "sinusoidal"
+                        "key": "1",
+                        "data": {
+                            "property": "function",
+                            "value": "sinusoidal",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     },
                     {
-                        "editable": false,
-                        "mandatory": true,
-                        "property": "type",
-                        "type": "str",
-                        "value": "power"
+                        "key": "2",
+                        "data": {
+                            "property": "type",
+                            "value": "power",
+                            "valueType": "str",
+                            "editable": false,
+                            "mandatory": true
+                        }
                     }
                 ]
             }
         ]
     },
     {
-        "editable": true,
-        "mandatory": true,
-        "property": "frequencies",
-        "type": "list",
-        "value": [
-            20,
-            2000
-        ]
+        "key": "2",
+        "data": {
+            "property": "frequencies",
+            "value": "20,2000",
+            "valueType": "list",
+            "editable": true,
+            "mandatory": true
+        }
     }
 ]
 =>
