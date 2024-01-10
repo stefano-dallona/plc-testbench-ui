@@ -206,7 +206,7 @@ class ConfigurationService:
                     "options": [
                         member.value for member in type(value)],
                     "mandatory": True,
-                    "editable": True
+                    "editable": get_value_type(property, clazz) is not None
                 }
             elif isinstance(value, Settings):
                 value_type = get_value_type(property, clazz)
