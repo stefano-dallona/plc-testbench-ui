@@ -203,14 +203,29 @@ class EccTestbenchService:
             PLCAlgorithm: [],
             OutputAnalyser: []
         }
+        
+        def settingsList_conversion(setting_data):
+            settings = [ globals()[child["data"]["value"]]() for child in setting_data["children"]]
+            for index, setting in enumerate(settings):
+                copy_attributes(setting, [ property["data"] for property in setting_data["children"][index]["children"] ])
+            return settings
+        
+        def get_conversion_function(value_type, setting_data):
+            try:
+                if value_type == "settingsList" :
+                    return settingsList_conversion
+                else:
+                    return globals()['__builtins__'][value_type]
+            except:
+                return lambda x: x
 
         def copy_attributes(settings, json_dict):
-            for setting in json_dict["settings"]:
+            for setting_data in json_dict["settings"]:
                 try:
-                    conversion_function = globals(
-                    )['__builtins__'][setting["type"]]
-                    value = conversion_function(setting["value"]) if (
-                        conversion_function != None) else setting["value"]
+                    setting = setting_data["data"] if "data" in setting_data.keys() else setting_data
+                    value = setting_data if setting["valueType"] == "settingsList" else setting["value"]
+                    conversion_function = get_conversion_function(setting["valueType"], setting_data)
+                    value = conversion_function(value)
                     if (hasattr(settings, "settings") and type(settings.settings) is dict):
                         settings.settings[setting["property"]] = value
                     else:
