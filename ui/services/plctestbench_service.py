@@ -207,13 +207,15 @@ class EccTestbenchService:
         def settingsList_conversion(setting_data):
             settings = [ globals()[child["data"]["value"]]() for child in setting_data["children"]]
             for index, setting in enumerate(settings):
-                copy_attributes(setting, [ property["data"] for property in setting_data["children"][index]["children"] ])
+                copy_attributes(setting, { "settings" : [ property["data"] for property in setting_data["children"][index]["children"] ] })
             return settings
         
         def get_conversion_function(value_type, setting_data):
             try:
                 if value_type == "settingsList" :
                     return settingsList_conversion
+                elif value_type == "list" :
+                    return lambda x: x.split(",") if type(x) is str else x
                 else:
                     return globals()['__builtins__'][value_type]
             except:
