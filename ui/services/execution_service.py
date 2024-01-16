@@ -111,7 +111,55 @@ class ExecutionService:
             category = ConfigurationService.get_output_analyser_category(node.worker.__class__)
         node_id = str(node.get_id())
         print("level:%d, name:%s, type:%s, uuid:%s, file:%s" % (node.depth, name, type, node_id, file))
-        transformed_node = Node(name, parent=parent, parent_id=parent.uuid if parent != None else None, type=type, file=file, uuid=node_id, category=category, status=status, worker_settings=node.worker.settings.settings)
+        #node.worker.settings.unflatten()
+        node_settings = node.worker.settings.settings
+        node_settings = {
+            "frequencies":[
+                "20",
+                "2000"
+            ],
+            "order":4,
+            "seed":1,
+            "packet_size":32,
+            "per":0.0001,
+            "filename":"Blues_Bass.wav",
+            "fs":44100,
+            "crossfade":[
+                {
+                    "name":"QuadraticCrossfadeSettings",
+                    "exponent":2.0,
+                    "function":"power",
+                    "length":10,
+                    "length_in_samples":0,
+                    "type":"power"
+                },
+                {
+                    "name":"CubicCrossfadeSettings",
+                    "exponent":3.0,
+                    "function":"power",
+                    "length":10,
+                    "length_in_samples":0,
+                    "type":"power"
+                },
+                {
+                    "name":"SinusoidalCrossfadeSettings",
+                    "function":"sinusoidal",
+                    "length":10,
+                    "length_in_samples":0,
+                    "type":"power"
+                }
+            ],
+            "fade_in":[
+                {
+                    "name":"SinusoidalCrossfadeSettings",
+                    "function":"sinusoidal",
+                    "length":10,
+                    "length_in_samples":0,
+                    "type":"power"
+                }
+            ]
+        }
+        transformed_node = Node(name, parent=parent, parent_id=parent.uuid if parent != None else None, type=type, file=file, uuid=node_id, category=category, status=status, worker_settings=node_settings)
         #transformed_node = Node(name, parent=parent, parent_id=parent.get_id() if parent != None else None, type=type, file=file, uuid=node_id, category=category)
         transformed_node.children = [ExecutionService.__build_output_hierarchy__(child, transformed_node, status) for child in node.children]
         return transformed_node
