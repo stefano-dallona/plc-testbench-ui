@@ -43,7 +43,7 @@ RUN git clone https://github.com/LucaVignati/burg-python-bindings.git && cd burg
 WORKDIR /
 RUN git clone https://github.com/LucaVignati/cpp_plc_template.git && cd cpp_plc_template && python setup.py install
 # Install plctestbench
-RUN git clone --branch develop https://github.com/LucaVignati/plc-testbench.git && cd plc-testbench && python setup.py sdist && python3 -m pip install -f ./dist plc-testbench && cp -r dl_models /plc-testbench-ui
+RUN git clone --branch multiband_crossfade https://github.com/LucaVignati/plc-testbench.git && cd plc-testbench && python setup.py sdist && python3 -m pip install -f ./dist plc-testbench && cp -r dl_models /plc-testbench-ui
 
 WORKDIR /plc-testbench-ui
 COPY . .
