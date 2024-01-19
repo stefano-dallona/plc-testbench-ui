@@ -185,7 +185,7 @@ class ConfigurationService:
                             {
                                 "name": type(subclass).__name__,
                                 "settings": [
-                                    get_settings_metadata(property, value, value_type, expand_subclasses=subclasses is None)
+                                    get_settings_metadata(property, value, subclass, expand_subclasses=subclasses is None)
                                     for property, value in subclass.settings.items()
                                     if not property.startswith("__")
                                 ]
