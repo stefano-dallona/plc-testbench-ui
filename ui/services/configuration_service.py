@@ -3,6 +3,10 @@ from werkzeug.utils import secure_filename
 import logging
 import os
 import uuid as Uuid
+import inspect
+import typing
+import typing_extensions
+import re
 from operator import itemgetter
 from itertools import groupby
 from collections import ChainMap, OrderedDict
@@ -16,6 +20,7 @@ from plctestbench.output_analyser import *
 from plctestbench.path_manager import *
 from plctestbench.node import *
 from plctestbench.settings import *
+#from plctestbench.crossfade import *
 
 from ..models.filter import *
 from ..repositories.mongodb.filter_repository import *
@@ -129,18 +134,77 @@ class ConfigurationService:
     def get_worker_base_class(worker_class) -> Worker:
         ancestors = worker_class.__mro__
         for ancestor in [ancestor for ancestor in ancestors
-                         if ancestor in [PacketLossSimulator, PLCAlgorithm, OutputAnalyser]]:
+                         if ancestor in Worker.__subclasses__()
+                         #if ancestor in [PacketLossSimulator, PLCAlgorithm, OutputAnalyser, Crossfade, MultibandCrossfade]
+                         ]:
             return ancestor
         return None
+    
+    @staticmethod
+    def get_subclasses_recursively(cls) -> List[type]:
+        subclasses = cls.__subclasses__()
+        for subclass in subclasses:
+            if subclass.__subclasses__() != []:
+                subclasses.extend(ConfigurationService.get_subclasses_recursively(subclass))
+        return subclasses
 
     @staticmethod
-    def find_settings_metadata():
+    def find_settings_metadata(settingsList: List[Settings] = None):
         cs = ConfigurationService
         ConfigurationService._logger.info("Retrieving settings metadata ...")
-        settingsInstances = [(cls(), cs.get_worker_class(cls), cs.get_worker_base_class(cs.get_worker_class(cls))) for cls in Settings.__subclasses__()
-                             if cs.get_worker_base_class(cs.get_worker_class(cls))]
+        
+        def instantiate_settings(cls):
+            try:
+                return cls()
+            except Exception as e:
+                ConfigurationService._logger.info("Could not instantiate %s: %s", cls.__name__, str(e))
+                
+        settingsInstances = [(instantiate_settings(cls), cs.get_worker_class(cls), cs.get_worker_base_class(cs.get_worker_class(cls))) for cls in ConfigurationService.itersubclasses(Settings)
+                             if cs.get_worker_base_class(cs.get_worker_class(cls)) and instantiate_settings(cls)] if settingsList == None or settingsList == [] else [(settings, cs.get_worker_class(settings.__class__), cs.get_worker_base_class(cs.get_worker_class(settings.__class__))) for settings in settingsList]
 
-        def get_setting_metadata(property, value):
+        def get_value_type(property, clazz):
+            class_constructor_annotations = inspect.getfullargspec(clazz.__init__).annotations
+            value_type = class_constructor_annotations[property] if property in class_constructor_annotations.keys() else None
+            return value_type
+        
+        def get_list_item_type(property, clazz):
+            class_constructor_annotations = inspect.getfullargspec(clazz.__init__).annotations
+            property_name = re.sub(r'\.\d+$', '', property)
+            property_annotation_tuple = typing_extensions.get_args(class_constructor_annotations[property_name])
+            list_item_type = property_annotation_tuple[0] if len(property_annotation_tuple) > 0 else None
+            return list_item_type
+        
+        def is_settings_subclass(clazz):
+            return Settings in clazz.__mro__
+        
+        def get_settings_subclasses_metadata(property, value_type, subclasses = None):
+            subclassesInstances = [sublass() for sublass in list(ConfigurationService.itersubclasses(value_type))] if subclasses is None else subclasses
+            return  {
+                        "property": property,
+                        "value": [
+                            {
+                                "name": type(subclass).__name__,
+                                "settings": [
+                                    get_settings_metadata(property, value, subclass, expand_subclasses=subclasses is None)
+                                    for property, value in subclass.settings.items()
+                                    if not property.startswith("__")
+                                ]
+                            }
+                            for subclass in subclassesInstances
+                        ],
+                        "type": "settingsList",
+                        "mandatory": True,
+                        "editable": False
+                    }
+            
+        def convert_value(value):
+            if type(value).__name__ == 'list':
+                return ",".join([str(val) for val in value])
+            elif type(value) == Uuid.UUID:
+                return str(value)
+            return value
+
+        def get_settings_metadata(property, value, clazz, expand_subclasses = False):
             if isinstance(value, Enum):
                 return {
                     "property": property,
@@ -148,26 +212,35 @@ class ConfigurationService:
                     "type": "select",
                     "options": [
                         member.value for member in type(value)],
-                    "mandatory": True
+                    "mandatory": True,
+                    "editable": get_value_type(property, clazz) is not None
                 }
-            else:
-                return {
-                    "property": property,
-                    "value": value,
-                    "type": type(value).__name__,
-                    "mandatory": True
-                }
+            elif isinstance(value, Settings):
+                value_type = get_value_type(property, clazz)
+                return get_settings_subclasses_metadata(property, value_type, value if not expand_subclasses else None)
+            elif isinstance(value, list):
+                value_type = get_list_item_type(property, clazz)
+                if value_type and is_settings_subclass(value_type):
+                    return get_settings_subclasses_metadata(property, value_type, value if not expand_subclasses else None)
+
+            return {
+                "property": property,
+                "value": convert_value(value),
+                "type": type(value).__name__,
+                "mandatory": True,
+                "editable": get_value_type(property, clazz) is not None
+            }
 
         metadata = [
             {
                 "property": category.__name__,
                 "value": [
                     {
-                        "uuid": Uuid.uuid4(),
+                        "uuid": str(Uuid.uuid4()),
                         "name": settings[1].__name__,
                         "settings": [
-                            get_setting_metadata(property, value)
-                            for property, value in settings[0].settings.items() if not property.startswith("__")
+                            get_settings_metadata(property, value, settings[0].__class__, expand_subclasses=settingsList is None)
+                            for property, value in settings[0].settings.items() if not property.startswith("__") and get_value_type(property, settings[0].__class__) is not None
                         ],
                         "doc": settings[1].__doc__
                     } for settings in list(settingsMetadata)]

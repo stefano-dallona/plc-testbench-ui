@@ -36,6 +36,7 @@ class ExecutionService:
         execution = RunExecution(run_id=run_id, hierarchy=[])
         
         #for file_tree in run.__ecctestbench__.data_manager.get_data_trees():
+
         plc_testbench = self.ecctestbench_service.build_testbench_from_run(run, user, readonly=True)
         for file_tree in plc_testbench.data_manager.get_data_trees():
             execution.hierarchy.append(self.__build_output_hierarchy__(file_tree, status=run.status))
@@ -110,7 +111,10 @@ class ExecutionService:
             category = ConfigurationService.get_output_analyser_category(node.worker.__class__)
         node_id = str(node.get_id())
         print("level:%d, name:%s, type:%s, uuid:%s, file:%s" % (node.depth, name, type, node_id, file))
-        transformed_node = Node(name, parent=parent, parent_id=parent.uuid if parent != None else None, type=type, file=file, uuid=node_id, category=category, status=status, worker_settings=node.worker.settings.settings)
+        node.worker.settings.unflatten()
+        node_settings = node.worker.settings.settings
+        node_settings = ConfigurationService.find_settings_metadata([node.worker.settings])
+        transformed_node = Node(name, parent=parent, parent_id=parent.uuid if parent != None else None, type=type, file=file, uuid=node_id, category=category, status=status, worker_settings=node_settings)
         #transformed_node = Node(name, parent=parent, parent_id=parent.get_id() if parent != None else None, type=type, file=file, uuid=node_id, category=category)
         transformed_node.children = [ExecutionService.__build_output_hierarchy__(child, transformed_node, status) for child in node.children]
         return transformed_node
