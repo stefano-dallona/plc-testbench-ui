@@ -1,6 +1,9 @@
 #from gevent import monkey
 #monkey.patch_all()
 import eventlet
+import debugpy
+
+debugpy.listen(("0.0.0.0", 5678))
 
 from ui.models.user import User
 

@@ -5,6 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: Remote Attach",
+            "type": "python",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}",
+                    "remoteRoot": "."
+                }
+            ],
+            "justMyCode": false
+        },
+        {
             "name": "Python: app.py",
             "type": "python",
             "request": "launch",
@@ -55,7 +71,7 @@
                 "KEY_FILE": "C:\\Data\\plc-testbench-ui\\plc-testbench-ui\\secrets\\key.pem"
             },
             "justMyCode": false
-        },   
+        },
         {
             "name": "Python: file corrente",
             "type": "python",
@@ -93,6 +109,21 @@
             ],
             "jinja": true,
             "justMyCode": false
+        },
+        {
+            "name": "Docker: Python - General",
+            "type": "docker",
+            "request": "launch",
+            "preLaunchTask": "docker-run: debug",
+            "python": {
+                "pathMappings": [
+                    {
+                        "localRoot": "${workspaceFolder}",
+                        "remoteRoot": "/app"
+                    }
+                ],
+                "projectType": "general"
+            }
         }
     ]
 }

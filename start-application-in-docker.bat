@@ -12,6 +12,7 @@ rem start plc-testbench-ui container
 docker run --rm --detach ^
 --memory=16g ^
 --publish 9071:5000 ^
+--publish 5678:5678 ^
 --env APP_PORT=5000 ^
 --env CERT_FILE=/plc-testbench-ui/secrets/cert.pem ^
 --env DB_CONN_STRING=mongodb://mongo:27017 ^
@@ -28,6 +29,7 @@ docker run --rm --detach ^
 --env KEY_FILE=/plc-testbench-ui/secrets/key.pem ^
 --env REQUESTS_CA_BUNDLE=/plc-testbench-ui/secrets/cacert.pem ^
 --env SECURITY_ENABLED=True ^
+--env DEBUGPY_PROCESS_SPAWN_TIMEOUT=180 ^
 --volume /c/Data/plc-testbench-ui/plc-testbench-ui/secrets:/plc-testbench-ui/secrets ^
 --volume /c/Data/personale/Università/2022-2023/original_tracks:/plc-testbench-ui/original_tracks ^
 --name plc-testbench-ui ^
