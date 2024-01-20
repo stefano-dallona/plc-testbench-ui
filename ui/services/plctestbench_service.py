@@ -210,12 +210,14 @@ class EccTestbenchService:
                 copy_attributes(setting, { "settings" : [ property["data"] for property in setting_data["children"][index]["children"] ] })
             return settings
         
-        def get_conversion_function(value_type, setting_data):
+        def get_conversion_function(value_type, settings, setting):
             try:
                 if value_type == "settingsList" :
                     return settingsList_conversion
                 elif value_type == "list" :
                     return lambda x: x.split(",") if type(x) is str else x
+                elif value_type == "select" :
+                    return type(settings.settings[setting["property"]])
                 else:
                     return globals()['__builtins__'][value_type]
             except:
@@ -226,7 +228,7 @@ class EccTestbenchService:
                 try:
                     setting = setting_data["data"] if "data" in setting_data.keys() else setting_data
                     value = setting_data if setting["valueType"] == "settingsList" else setting["value"]
-                    conversion_function = get_conversion_function(setting["valueType"], setting_data)
+                    conversion_function = get_conversion_function(setting["valueType"], settings, setting)
                     value = conversion_function(value)
                     if (hasattr(settings, "settings") and type(settings.settings) is dict):
                         settings.settings[setting["property"]] = value
