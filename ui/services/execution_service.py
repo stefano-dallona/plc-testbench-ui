@@ -111,7 +111,7 @@ class ExecutionService:
             category = ConfigurationService.get_output_analyser_category(node.worker.__class__)
         node_id = str(node.get_id())
         print("level:%d, name:%s, type:%s, uuid:%s, file:%s" % (node.depth, name, type, node_id, file))
-        node.worker.settings.unflatten()
+        #node.worker.settings.unflatten()
         node_settings = node.worker.settings.settings
         node_settings = ConfigurationService.find_settings_metadata([node.worker.settings])
         transformed_node = Node(name, parent=parent, parent_id=parent.uuid if parent != None else None, type=type, file=file, uuid=node_id, category=category, status=status, worker_settings=node_settings)
