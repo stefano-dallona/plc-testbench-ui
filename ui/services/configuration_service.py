@@ -207,7 +207,7 @@ class ConfigurationService:
             
         def convert_value(value):
             if type(value).__name__ == 'list':
-                return ",".join([str(val) for val in value])
+                return ",".join([str(val) for val in value]) if len(value) > 0 else []
             elif type(value) == Uuid.UUID:
                 return str(value)
             return value
