@@ -167,18 +167,26 @@ class ConfigurationService:
             value_type = class_constructor_annotations[property] if property in class_constructor_annotations.keys() else None
             return value_type
         
-        def get_list_item_type(property, clazz):
+        def get_collection_item_type(property, clazz):
             class_constructor_annotations = inspect.getfullargspec(clazz.__init__).annotations
             property_name = re.sub(r'\.\d+$', '', property)
-            property_annotation_tuple = typing_extensions.get_args(class_constructor_annotations[property_name])
-            list_item_type = property_annotation_tuple[0] if len(property_annotation_tuple) > 0 else None
-            return list_item_type
+            if property_name in class_constructor_annotations.keys():
+                property_annotation = class_constructor_annotations[property_name]
+                property_annotation_tuple = typing_extensions.get_args(property_annotation)
+                collection_item_type = property_annotation_tuple[0] if len(property_annotation_tuple) > 0 else None
+                if collection_item_type is None and property_annotation is not None:
+                    m = re.search('.*\[(\w+Settings)\].*', property_annotation)
+                    if m is not None and len(m.groups()) > 0:
+                        return type(globals()[m.group(1)]())
+                return collection_item_type
+            return None
         
         def is_settings_subclass(clazz):
             return Settings in clazz.__mro__
         
-        def get_settings_subclasses_metadata(property, value_type, subclasses = None):
-            subclassesInstances = [sublass() for sublass in list(ConfigurationService.itersubclasses(value_type))] if subclasses is None else subclasses
+        def get_settings_subclasses_metadata(property, value_type, subclasses = None, root_class = None):
+            subclassesInstances = [sublass() for sublass in ConfigurationService.itersubclasses(value_type)] if subclasses is None else subclasses
+            subclassesInstances = list(filter(lambda x: type(x) != root_class, subclassesInstances))
             return  {
                         "property": property,
                         "value": [
@@ -199,12 +207,12 @@ class ConfigurationService:
             
         def convert_value(value):
             if type(value).__name__ == 'list':
-                return ",".join([str(val) for val in value])
+                return ",".join([str(val) for val in value]) if len(value) > 0 else []
             elif type(value) == Uuid.UUID:
                 return str(value)
             return value
 
-        def get_settings_metadata(property, value, clazz, expand_subclasses = False):
+        def get_settings_metadata(property, value, clazz, expand_subclasses = False, value_type = None, root_class = None):
             if isinstance(value, Enum):
                 return {
                     "property": property,
@@ -213,22 +221,34 @@ class ConfigurationService:
                     "options": [
                         member.value for member in type(value)],
                     "mandatory": True,
-                    "editable": get_value_type(property, clazz) is not None
+                    "editable": clazz is None or get_value_type(property, clazz) is not None
                 }
             elif isinstance(value, Settings):
-                value_type = get_value_type(property, clazz)
-                return get_settings_subclasses_metadata(property, value_type, value if not expand_subclasses else None)
+                inferred_value_type = get_value_type(property, clazz)
+                return get_settings_subclasses_metadata(property, inferred_value_type, value if not expand_subclasses else None, root_class)
             elif isinstance(value, list):
-                value_type = get_list_item_type(property, clazz)
-                if value_type and is_settings_subclass(value_type):
-                    return get_settings_subclasses_metadata(property, value_type, value if not expand_subclasses else None)
+                inferred_value_type = value_type if value_type is not None else get_collection_item_type(property, clazz)
+                if inferred_value_type and is_settings_subclass(inferred_value_type):
+                    return get_settings_subclasses_metadata(property, inferred_value_type, value if not expand_subclasses else None, root_class)
+            elif isinstance(value, dict):
+                inferred_value_type = get_collection_item_type(property, clazz)
+                return {
+                    "property": property,
+                    "type": "dictionary",
+                    "value": [
+                        get_settings_metadata(str(entryKey), entryValue, None, expand_subclasses, inferred_value_type, root_class)
+                        for entryKey, entryValue in value.items()
+                    ],
+                    "mandatory": True,
+                    "editable": False
+                }
 
             return {
                 "property": property,
                 "value": convert_value(value),
                 "type": type(value).__name__,
                 "mandatory": True,
-                "editable": get_value_type(property, clazz) is not None
+                "editable": clazz is None or get_value_type(property, clazz) is not None
             }
 
         metadata = [
@@ -239,7 +259,7 @@ class ConfigurationService:
                         "uuid": str(Uuid.uuid4()),
                         "name": settings[1].__name__,
                         "settings": [
-                            get_settings_metadata(property, value, settings[0].__class__, expand_subclasses=settingsList is None)
+                            get_settings_metadata(property, value, settings[0].__class__, expand_subclasses=settingsList is None, value_type=None, root_class=settings[0].__class__)
                             for property, value in settings[0].settings.items() if not property.startswith("__") and get_value_type(property, settings[0].__class__) is not None
                         ],
                         "doc": settings[1].__doc__

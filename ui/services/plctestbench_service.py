@@ -207,15 +207,23 @@ class EccTestbenchService:
         def settingsList_conversion(setting_data):
             settings = [ globals()[child["data"]["value"]]() for child in setting_data["children"]]
             for index, setting in enumerate(settings):
-                copy_attributes(setting, { "settings" : [ property["data"] for property in setting_data["children"][index]["children"] ] })
+                copy_attributes(setting, { "settings" : [ property for property in setting_data["children"][index]["children"] ] })
             return settings
+        
+        def dictionary_conversion(setting_data):
+            return {
+                property["data"]["property"]: get_conversion_function(property["data"]["valueType"], None, property["data"])(property if property["data"]["valueType"] in ["settingsList", "dictionary"] else property["data"]["value"])
+                for property in setting_data["children"]
+            }
         
         def get_conversion_function(value_type, settings, setting):
             try:
                 if value_type == "settingsList" :
                     return settingsList_conversion
                 elif value_type == "list" :
-                    return lambda x: x.split(",") if type(x) is str else x
+                    return lambda x: (x.split(",") if x.strip() != "" else []) if type(x) is str else x
+                elif value_type == "dictionary" :
+                    return dictionary_conversion
                 elif value_type == "select" :
                     return type(settings.settings[setting["property"]])
                 else:
@@ -227,7 +235,7 @@ class EccTestbenchService:
             for setting_data in json_dict["settings"]:
                 try:
                     setting = setting_data["data"] if "data" in setting_data.keys() else setting_data
-                    value = setting_data if setting["valueType"] == "settingsList" else setting["value"]
+                    value = setting_data if setting["valueType"] in ["settingsList", "dictionary"] else setting["value"]
                     conversion_function = get_conversion_function(setting["valueType"], settings, setting)
                     value = conversion_function(value)
                     if (hasattr(settings, "settings") and type(settings.settings) is dict):
