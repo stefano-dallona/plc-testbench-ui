@@ -221,7 +221,7 @@ class EccTestbenchService:
                 if value_type == "settingsList" :
                     return settingsList_conversion
                 elif value_type == "list" :
-                    return lambda x: x.split(",") if type(x) is str else x
+                    return lambda x: (x.split(",") if x.strip() != "" else []) if type(x) is str else x
                 elif value_type == "dictionary" :
                     return dictionary_conversion
                 elif value_type == "select" :
