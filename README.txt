@@ -238,3 +238,5 @@ mongorestore \
 # <venv_root>/Lib/Scripts/activate
 python -m pip install ipykernel==6.16.2
 python -m pip install ipywidgets
+
+docker image pull docker.io/stdallona/plc-testbench-ui:x.x.x

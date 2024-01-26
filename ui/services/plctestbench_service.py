@@ -93,11 +93,6 @@ class MessageAnnouncer:
 
 announcer = MessageAnnouncer()
 
-
-class InputFileSelection:
-    pass
-
-
 class EccTestbenchService:
 
     def __init__(self, root_folder: str, run_repository: RunRepository, socketio: SocketIO = None):
@@ -195,88 +190,7 @@ class EccTestbenchService:
         return plc_testbench
 
     def create_run(self, json_dict, run_id, user) -> PLCTestbench:
-
-        configuration_map = {
-            InputFileSelection: None,
-            # GlobalSettings: [],
-            PacketLossSimulator: [],
-            PLCAlgorithm: [],
-            OutputAnalyser: []
-        }
-        
-        def settingsList_conversion(setting_data):
-            settings = [ globals()[child["data"]["value"]]() for child in setting_data["children"]]
-            for index, setting in enumerate(settings):
-                copy_attributes(setting, { "settings" : [ property for property in setting_data["children"][index]["children"] ] })
-            return settings
-        
-        def dictionary_conversion(setting_data):
-            return {
-                property["data"]["property"]: get_conversion_function(property["data"]["valueType"], None, property["data"])(property if property["data"]["valueType"] in ["settingsList", "dictionary"] else property["data"]["value"])
-                for property in setting_data["children"]
-            }
-        
-        def get_conversion_function(value_type, settings, setting):
-            try:
-                if value_type == "settingsList" :
-                    return settingsList_conversion
-                elif value_type == "list" :
-                    return lambda x: (x.split(",") if x.strip() != "" else []) if type(x) is str else x
-                elif value_type == "dictionary" :
-                    return dictionary_conversion
-                elif value_type == "select" :
-                    return type(settings.settings[setting["property"]])
-                else:
-                    return globals()['__builtins__'][value_type]
-            except:
-                return lambda x: x
-
-        def copy_attributes(settings, json_dict):
-            for setting_data in json_dict["settings"]:
-                try:
-                    setting = setting_data["data"] if "data" in setting_data.keys() else setting_data
-                    value = setting_data if setting["valueType"] in ["settingsList", "dictionary"] else setting["value"]
-                    conversion_function = get_conversion_function(setting["valueType"], settings, setting)
-                    value = conversion_function(value)
-                    if (hasattr(settings, "settings") and type(settings.settings) is dict):
-                        settings.settings[setting["property"]] = value
-                    else:
-                        setattr(settings, setting["property"], value)
-                except:
-                    self.logger.info(
-                        "Could not set property %s of type %s on Settings", setting["property"], setting["type"])
-
-        def parse_configuration(configuration_map, json_dict) -> dict:
-            worker_name = json_dict["name"].replace(" ", "")
-            worker_constructor = globals(
-            )[worker_name] if worker_name in globals() else None
-            worker_settings_name = worker_name + \
-                "Settings" if not worker_name.endswith(
-                    "Settings") else worker_name
-            worker_settings_constructor = globals(
-            )[worker_settings_name] if worker_settings_name in globals() else None
-            worker_settings = worker_settings_constructor(
-            ) if worker_settings_constructor != None else json_dict["settings"]
-            worker_base = worker_constructor.__base__ if worker_constructor != None \
-                and worker_constructor.__base__ != object \
-                and worker_constructor.__base__ != Settings \
-                else None
-            worker_base = ConfigurationService.get_worker_base_class(
-                worker_constructor)
-            worker_key = worker_base if worker_base != None else worker_constructor
-            worker_id = str(uuid.uuid4())
-
-            if worker_settings_constructor != None:
-                copy_attributes(worker_settings, json_dict)
-            if isinstance(configuration_map[worker_key], list):
-                configuration_map[worker_key].extend([(worker_constructor, worker_settings, worker_id) if worker_settings_constructor !=
-                                                     None and worker_constructor != worker_settings.__class__ else worker_settings])
-            else:
-                configuration_map[worker_key] = worker_settings
-            return configuration_map
-
-        configuration_map = functools.reduce(
-            parse_configuration, json_dict, configuration_map)
+        configuration_map = ConfigurationService.parse_settings_from_json(json_dict)
 
         run = Run(root_folder=self.root_folder,
                   selected_input_files=configuration_map[InputFileSelection],
