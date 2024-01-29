@@ -193,21 +193,32 @@ class ConfigurationService:
         def is_settings_subclass(clazz):
             return Settings in clazz.__mro__
         
-        def get_settings_subclasses_metadata(property, value_type, subclasses = None, root_class = None):
-            subclassesInstances = [sublass() for sublass in ConfigurationService.itersubclasses(value_type)] if subclasses is None else subclasses
-            subclassesInstances = list(filter(lambda x: type(x) != root_class, subclassesInstances))
+        def get_settings_subclasses_metadata(property, value_type, children, root_class = None):
+            subclassesInstances = [sublass() for sublass in ConfigurationService.itersubclasses(value_type) if sublass != root_class ]
+            safe_children_list = list(filter(lambda x: type(x) != root_class, children))
             return  {
                 "property": property,
                 "value": [
                     {
-                        "name": type(subclass).__name__,
+                        "name": type(child).__name__,
                         "settings": [
-                            get_settings_metadata(property, value, subclass, expand_subclasses=subclasses is None)
-                            for property, value in subclass.settings.items()
+                            get_settings_metadata(property, value, child)
+                            for property, value in child.settings.items()
                             if not property.startswith("__")
+                        ],
+                        "options": [
+                            {
+                                "name": type(subclass).__name__,
+                                "settings": [
+                                    get_settings_metadata(property, value, subclass)
+                                    for property, value in subclass.settings.items()
+                                    if not property.startswith("__")
+                                ]
+                            }
+                            for subclass in subclassesInstances
                         ]
                     }
-                    for subclass in subclassesInstances
+                    for child in safe_children_list
                 ],
                 "valueType": "settingsList",
                 "mandatory": True,
@@ -221,7 +232,7 @@ class ConfigurationService:
                 return str(value)
             return value
 
-        def get_settings_metadata(property, value, clazz, expand_subclasses = False, value_type = None, root_class = None):
+        def get_settings_metadata(property, value, clazz, value_type = None, root_class = None):
             if isinstance(value, Enum):
                 return {
                     "property": property,
@@ -235,18 +246,18 @@ class ConfigurationService:
                 }
             elif isinstance(value, Settings):
                 inferred_value_type = get_value_type(property, clazz)
-                return get_settings_subclasses_metadata(property, inferred_value_type, value if not expand_subclasses else None, root_class)
+                return get_settings_subclasses_metadata(property, inferred_value_type, value, root_class)
             elif isinstance(value, list):
                 inferred_value_type = value_type if value_type is not None else get_collection_item_type(property, clazz)
                 if inferred_value_type and is_settings_subclass(inferred_value_type):
-                    return get_settings_subclasses_metadata(property, inferred_value_type, value if not expand_subclasses else None, root_class)
+                    return get_settings_subclasses_metadata(property, inferred_value_type, value, root_class)
             elif isinstance(value, dict):
                 inferred_value_type = get_collection_item_type(property, clazz)
                 return {
                     "property": property,
                     "valueType": "dictionary",
                     "value": [
-                        get_settings_metadata(str(entryKey), entryValue, None, expand_subclasses, inferred_value_type, root_class)
+                        get_settings_metadata(str(entryKey), entryValue, None, inferred_value_type, root_class)
                         for entryKey, entryValue in value.items()
                     ],
                     "mandatory": True,
@@ -280,7 +291,7 @@ class ConfigurationService:
                         "uuid": str(Uuid.uuid4()),
                         "name": settings[1].__name__,
                         "settings": [
-                            get_settings_metadata(property, value, settings[0].__class__, expand_subclasses=settings_list is None, value_type=None, root_class=settings[0].__class__)
+                            get_settings_metadata(property, value, settings[0].__class__, value_type=None, root_class=settings[0].__class__)
                             for property, value in settings[0].settings.items() if not property.startswith("__") and get_value_type(property, settings[0].__class__) is not None
                         ],
                         "doc": settings[1].__doc__
@@ -288,6 +299,52 @@ class ConfigurationService:
             } for category, settingsMetadata in groupby(settings_instances, key=itemgetter(2))
         ]
         return metadata
+    
+    @staticmethod    
+    def get_conversion_function(value_type, settings, setting):
+        try:
+            if value_type == "settingsList" :
+                return ConfigurationService.settingsList_conversion
+            elif value_type == "list" :
+                return lambda x: (x.split(",") if x.strip() != "" else []) if type(x) is str else x
+            elif value_type == "dictionary" :
+                return ConfigurationService.dictionary_conversion
+            elif value_type == "select" :
+                return type(settings.settings[setting["property"]])
+            else:
+                return globals()['__builtins__'][value_type]
+        except:
+            return lambda x: x
+    
+    @staticmethod
+    def copy_attributes(settings, json_dict):
+        for setting_data in json_dict["settings"]:
+            try:
+                setting = setting_data["data"] if "data" in setting_data.keys() else setting_data
+                value = setting_data if setting["valueType"] in ["settingsList", "dictionary"] else setting["value"]
+                conversion_function = ConfigurationService.get_conversion_function(setting["valueType"], settings, setting)
+                value = conversion_function(value)
+                if (hasattr(settings, "settings") and type(settings.settings) is dict):
+                    settings.settings[setting["property"]] = value
+                else:
+                    setattr(settings, setting["property"], value)
+            except:
+                ConfigurationService._logger.info(
+                    "Could not set property %s of type %s on Settings", setting["property"], setting["valueType"])
+    
+    @staticmethod 
+    def settingsList_conversion(setting_data):
+        settings = [ globals()[child["data"]["value"]]() for child in setting_data["children"]]
+        for index, setting in enumerate(settings):
+            ConfigurationService.copy_attributes(setting, { "settings" : [ property for property in setting_data["children"][index]["children"] ] })
+        return settings
+    
+    @staticmethod
+    def dictionary_conversion(setting_data):
+        return {
+            property["data"]["property"]: ConfigurationService.get_conversion_function(property["data"]["valueType"], None, property["data"])(property if property["data"]["valueType"] in ["settingsList", "dictionary"] else property["data"]["value"])
+            for property in setting_data["children"]
+        }
     
     @staticmethod 
     def parse_settings_from_json(json_dict) -> dict:
@@ -299,48 +356,6 @@ class ConfigurationService:
             PLCAlgorithm: [],
             OutputAnalyser: []
         }
-        
-        def settingsList_conversion(setting_data):
-            settings = [ globals()[child["data"]["value"]]() for child in setting_data["children"]]
-            for index, setting in enumerate(settings):
-                copy_attributes(setting, { "settings" : [ property for property in setting_data["children"][index]["children"] ] })
-            return settings
-        
-        def dictionary_conversion(setting_data):
-            return {
-                property["data"]["property"]: get_conversion_function(property["data"]["valueType"], None, property["data"])(property if property["data"]["valueType"] in ["settingsList", "dictionary"] else property["data"]["value"])
-                for property in setting_data["children"]
-            }
-        
-        def get_conversion_function(value_type, settings, setting):
-            try:
-                if value_type == "settingsList" :
-                    return settingsList_conversion
-                elif value_type == "list" :
-                    return lambda x: (x.split(",") if x.strip() != "" else []) if type(x) is str else x
-                elif value_type == "dictionary" :
-                    return dictionary_conversion
-                elif value_type == "select" :
-                    return type(settings.settings[setting["property"]])
-                else:
-                    return globals()['__builtins__'][value_type]
-            except:
-                return lambda x: x
-
-        def copy_attributes(settings, json_dict):
-            for setting_data in json_dict["settings"]:
-                try:
-                    setting = setting_data["data"] if "data" in setting_data.keys() else setting_data
-                    value = setting_data if setting["valueType"] in ["settingsList", "dictionary"] else setting["value"]
-                    conversion_function = get_conversion_function(setting["valueType"], settings, setting)
-                    value = conversion_function(value)
-                    if (hasattr(settings, "settings") and type(settings.settings) is dict):
-                        settings.settings[setting["property"]] = value
-                    else:
-                        setattr(settings, setting["property"], value)
-                except:
-                    ConfigurationService._logger.info(
-                        "Could not set property %s of type %s on Settings", setting["property"], setting["valueType"])
 
         def parse_configuration(configuration_map, json_dict) -> dict:
             worker_name = json_dict["name"].replace(" ", "")
@@ -363,7 +378,7 @@ class ConfigurationService:
             worker_id = str(uuid.uuid4())
 
             if worker_settings_constructor != None:
-                copy_attributes(worker_settings, json_dict)
+                ConfigurationService.copy_attributes(worker_settings, json_dict)
             if isinstance(configuration_map[worker_key], list):
                 configuration_map[worker_key].extend([(worker_constructor, worker_settings, worker_id) if worker_settings_constructor !=
                                                      None and worker_constructor != worker_settings.__class__ else worker_settings])

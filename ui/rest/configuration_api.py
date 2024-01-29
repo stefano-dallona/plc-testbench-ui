@@ -45,7 +45,11 @@ def output_analysers(user):
 def recalculate_metadata(user = None):
   settings_list = request.get_json()
   modified_setting = request.args.get("modified_setting", type=str, default=None)
-  new_value = request.args.get("new_value", type=str, default=None)
+  new_value = json.loads(request.args.get("new_value", type=str, default=None))
+  valueType = new_value["data"]["valueType"]
+  new_value = new_value["data"]["value"] if not valueType in ["settingsList", "dictionary"] else new_value
+  conversion_function = configuration_service.get_conversion_function(valueType, settings_list, new_value)
+  new_value = conversion_function(new_value)
   settings = None
   if settings_list:
     settings_groups = [settings for settings in configuration_service.parse_settings_from_json(settings_list).values() if settings and len(settings) > 0]
