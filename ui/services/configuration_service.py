@@ -5,6 +5,7 @@ import os
 import uuid as Uuid
 import inspect
 import typing
+import functools
 import typing_extensions
 import re
 from operator import itemgetter
@@ -149,7 +150,7 @@ class ConfigurationService:
         return subclasses
 
     @staticmethod
-    def find_settings_metadata(settingsList: List[Settings] = None):
+    def find_settings_metadata(settings_list: List[Settings] = None, modified_setting: str = None, new_value = None):
         cs = ConfigurationService
         ConfigurationService._logger.info("Retrieving settings metadata ...")
         
@@ -158,9 +159,17 @@ class ConfigurationService:
                 return cls()
             except Exception as e:
                 ConfigurationService._logger.info("Could not instantiate %s: %s", cls.__name__, str(e))
-                
-        settingsInstances = [(instantiate_settings(cls), cs.get_worker_class(cls), cs.get_worker_base_class(cs.get_worker_class(cls))) for cls in ConfigurationService.itersubclasses(Settings)
-                             if cs.get_worker_base_class(cs.get_worker_class(cls)) and instantiate_settings(cls)] if settingsList == None or settingsList == [] else [(settings, cs.get_worker_class(settings.__class__), cs.get_worker_base_class(cs.get_worker_class(settings.__class__))) for settings in settingsList]
+                      
+        def get_modifier(property, clazz) -> callable:
+            modifier_name = "set_" + property
+            return getattr(clazz, modifier_name) if hasattr(clazz, modifier_name) and callable(getattr(clazz, modifier_name)) else None
+        
+        def has_modifier(property, clazz) -> bool:
+            return get_modifier(property, clazz) is not None
+        
+        def update_setting(settings, modified_setting, new_value):
+            modifier = get_modifier(modified_setting, type(settings))
+            return modifier(settings, new_value)
 
         def get_value_type(property, clazz):
             class_constructor_annotations = inspect.getfullargspec(clazz.__init__).annotations
@@ -184,26 +193,37 @@ class ConfigurationService:
         def is_settings_subclass(clazz):
             return Settings in clazz.__mro__
         
-        def get_settings_subclasses_metadata(property, value_type, subclasses = None, root_class = None):
-            subclassesInstances = [sublass() for sublass in ConfigurationService.itersubclasses(value_type)] if subclasses is None else subclasses
-            subclassesInstances = list(filter(lambda x: type(x) != root_class, subclassesInstances))
+        def get_settings_subclasses_metadata(property, value_type, children, root_class = None):
+            subclassesInstances = [sublass() for sublass in ConfigurationService.itersubclasses(value_type) if sublass != root_class ]
+            safe_children_list = list(filter(lambda x: type(x) != root_class, children))
             return  {
-                        "property": property,
-                        "value": [
+                "property": property,
+                "value": [
+                    {
+                        "name": type(child).__name__,
+                        "settings": [
+                            get_settings_metadata(property, value, child)
+                            for property, value in child.settings.items()
+                            if not property.startswith("__")
+                        ],
+                        "options": [
                             {
                                 "name": type(subclass).__name__,
                                 "settings": [
-                                    get_settings_metadata(property, value, subclass, expand_subclasses=subclasses is None)
+                                    get_settings_metadata(property, value, subclass)
                                     for property, value in subclass.settings.items()
                                     if not property.startswith("__")
                                 ]
                             }
                             for subclass in subclassesInstances
-                        ],
-                        "type": "settingsList",
-                        "mandatory": True,
-                        "editable": False
+                        ]
                     }
+                    for child in safe_children_list
+                ],
+                "valueType": "settingsList",
+                "mandatory": True,
+                "editable": False
+            }
             
         def convert_value(value):
             if type(value).__name__ == 'list':
@@ -212,44 +232,56 @@ class ConfigurationService:
                 return str(value)
             return value
 
-        def get_settings_metadata(property, value, clazz, expand_subclasses = False, value_type = None, root_class = None):
+        def get_settings_metadata(property, value, clazz, value_type = None, root_class = None):
             if isinstance(value, Enum):
                 return {
                     "property": property,
                     "value": value.value,
-                    "type": "select",
+                    "valueType": "select",
                     "options": [
                         member.value for member in type(value)],
                     "mandatory": True,
-                    "editable": clazz is None or get_value_type(property, clazz) is not None
+                    "editable": clazz is None or get_value_type(property, clazz) is not None,
+                    "is_modifier": has_modifier(property, clazz)
                 }
             elif isinstance(value, Settings):
                 inferred_value_type = get_value_type(property, clazz)
-                return get_settings_subclasses_metadata(property, inferred_value_type, value if not expand_subclasses else None, root_class)
+                return get_settings_subclasses_metadata(property, inferred_value_type, value, root_class)
             elif isinstance(value, list):
                 inferred_value_type = value_type if value_type is not None else get_collection_item_type(property, clazz)
                 if inferred_value_type and is_settings_subclass(inferred_value_type):
-                    return get_settings_subclasses_metadata(property, inferred_value_type, value if not expand_subclasses else None, root_class)
+                    return get_settings_subclasses_metadata(property, inferred_value_type, value, root_class)
             elif isinstance(value, dict):
                 inferred_value_type = get_collection_item_type(property, clazz)
                 return {
                     "property": property,
-                    "type": "dictionary",
+                    "valueType": "dictionary",
                     "value": [
-                        get_settings_metadata(str(entryKey), entryValue, None, expand_subclasses, inferred_value_type, root_class)
+                        get_settings_metadata(str(entryKey), entryValue, None, inferred_value_type, root_class)
                         for entryKey, entryValue in value.items()
                     ],
                     "mandatory": True,
-                    "editable": False
+                    "editable": False,
+                    "is_modifier": has_modifier(property, clazz)
                 }
 
             return {
                 "property": property,
                 "value": convert_value(value),
-                "type": type(value).__name__,
+                "valueType": type(value).__name__,
                 "mandatory": True,
-                "editable": clazz is None or get_value_type(property, clazz) is not None
+                "editable": clazz is None or get_value_type(property, clazz) is not None,
+                "is_modifier": has_modifier(property, clazz)
             }
+
+        settings_instances = [(instantiate_settings(cls), cs.get_worker_class(cls), cs.get_worker_base_class(cs.get_worker_class(cls))) for cls in ConfigurationService.itersubclasses(Settings)
+                             if cs.get_worker_base_class(cs.get_worker_class(cls)) and instantiate_settings(cls)] if settings_list == None or settings_list == [] else [(settings, cs.get_worker_class(settings.__class__), cs.get_worker_base_class(cs.get_worker_class(settings.__class__))) for settings in settings_list]
+        
+        if modified_setting is not None and new_value is not None:
+            assert len(settings_instances) == 1, "Only one settings instance can be modified at a time!"
+            settings_tuple = settings_instances[0]
+            if has_modifier(modified_setting, type(settings_tuple[0])):
+                settings_instances[0] = (update_setting(settings_tuple[0], modified_setting, new_value), settings_tuple[1], settings_tuple[2])
 
         metadata = [
             {
@@ -259,14 +291,103 @@ class ConfigurationService:
                         "uuid": str(Uuid.uuid4()),
                         "name": settings[1].__name__,
                         "settings": [
-                            get_settings_metadata(property, value, settings[0].__class__, expand_subclasses=settingsList is None, value_type=None, root_class=settings[0].__class__)
+                            get_settings_metadata(property, value, settings[0].__class__, value_type=None, root_class=settings[0].__class__)
                             for property, value in settings[0].settings.items() if not property.startswith("__") and get_value_type(property, settings[0].__class__) is not None
                         ],
                         "doc": settings[1].__doc__
                     } for settings in list(settingsMetadata)]
-            } for category, settingsMetadata in groupby(settingsInstances, key=itemgetter(2))
+            } for category, settingsMetadata in groupby(settings_instances, key=itemgetter(2))
         ]
         return metadata
+    
+    @staticmethod    
+    def get_conversion_function(value_type, settings, setting):
+        try:
+            if value_type == "settingsList" :
+                return ConfigurationService.settingsList_conversion
+            elif value_type == "list" :
+                return lambda x: (x.split(",") if x.strip() != "" else []) if type(x) is str else x
+            elif value_type == "dictionary" :
+                return ConfigurationService.dictionary_conversion
+            elif value_type == "select" :
+                return type(settings.settings[setting["property"]])
+            else:
+                return globals()['__builtins__'][value_type]
+        except:
+            return lambda x: x
+    
+    @staticmethod
+    def copy_attributes(settings, json_dict):
+        for setting_data in json_dict["settings"]:
+            try:
+                setting = setting_data["data"] if "data" in setting_data.keys() else setting_data
+                value = setting_data if setting["valueType"] in ["settingsList", "dictionary"] else setting["value"]
+                conversion_function = ConfigurationService.get_conversion_function(setting["valueType"], settings, setting)
+                value = conversion_function(value)
+                if (hasattr(settings, "settings") and type(settings.settings) is dict):
+                    settings.settings[setting["property"]] = value
+                else:
+                    setattr(settings, setting["property"], value)
+            except:
+                ConfigurationService._logger.info(
+                    "Could not set property %s of type %s on Settings", setting["property"], setting["valueType"])
+    
+    @staticmethod 
+    def settingsList_conversion(setting_data):
+        settings = [ globals()[child["data"]["value"]]() for child in setting_data["children"]]
+        for index, setting in enumerate(settings):
+            ConfigurationService.copy_attributes(setting, { "settings" : [ property for property in setting_data["children"][index]["children"] ] })
+        return settings
+    
+    @staticmethod
+    def dictionary_conversion(setting_data):
+        return {
+            property["data"]["property"]: ConfigurationService.get_conversion_function(property["data"]["valueType"], None, property["data"])(property if property["data"]["valueType"] in ["settingsList", "dictionary"] else property["data"]["value"])
+            for property in setting_data["children"]
+        }
+    
+    @staticmethod 
+    def parse_settings_from_json(json_dict) -> dict:
+
+        configuration_map = {
+            InputFileSelection: None,
+            # GlobalSettings: [],
+            PacketLossSimulator: [],
+            PLCAlgorithm: [],
+            OutputAnalyser: []
+        }
+
+        def parse_configuration(configuration_map, json_dict) -> dict:
+            worker_name = json_dict["name"].replace(" ", "")
+            worker_constructor = globals(
+            )[worker_name] if worker_name in globals() else None
+            worker_settings_name = worker_name + \
+                "Settings" if not worker_name.endswith(
+                    "Settings") else worker_name
+            worker_settings_constructor = globals(
+            )[worker_settings_name] if worker_settings_name in globals() else None
+            worker_settings = worker_settings_constructor(
+            ) if worker_settings_constructor != None else json_dict["settings"]
+            worker_base = worker_constructor.__base__ if worker_constructor != None \
+                and worker_constructor.__base__ != object \
+                and worker_constructor.__base__ != Settings \
+                else None
+            worker_base = ConfigurationService.get_worker_base_class(
+                worker_constructor)
+            worker_key = worker_base if worker_base != None else worker_constructor
+            worker_id = str(uuid.uuid4())
+
+            if worker_settings_constructor != None:
+                ConfigurationService.copy_attributes(worker_settings, json_dict)
+            if isinstance(configuration_map[worker_key], list):
+                configuration_map[worker_key].extend([(worker_constructor, worker_settings, worker_id) if worker_settings_constructor !=
+                                                     None and worker_constructor != worker_settings.__class__ else worker_settings])
+            else:
+                configuration_map[worker_key] = worker_settings
+            return configuration_map
+
+        configuration_map = functools.reduce(parse_configuration, json_dict, configuration_map)
+        return configuration_map
 
     def get_search_fields(self):
 
@@ -445,6 +566,8 @@ class ConfigurationService:
     def validate_worker(worker: Worker):
         pass
 
+class InputFileSelection:
+    pass
 
 class UploadException(Exception):
 

@@ -39,6 +39,25 @@ def output_analysers(user):
   category = request.args.get("category", type=str, default=None)
   return json.dumps(configuration_service.find_output_analysers(category)), status.HTTP_200_OK
 
+@configuration_api.route('/settings_metadata', methods=['PUT'])
+#@login_required
+@token_required
+def recalculate_metadata(user = None):
+  settings_list = request.get_json()
+  modified_setting = request.args.get("modified_setting", type=str, default=None)
+  new_value = json.loads(request.args.get("new_value", type=str, default=None))
+  valueType = new_value["data"]["valueType"]
+  new_value = new_value["data"]["value"] if not valueType in ["settingsList", "dictionary"] else new_value
+  conversion_function = configuration_service.get_conversion_function(valueType, settings_list, new_value)
+  new_value = conversion_function(new_value)
+  settings = None
+  if settings_list:
+    settings_groups = [settings for settings in configuration_service.parse_settings_from_json(settings_list).values() if settings and len(settings) > 0]
+    settings_type = settings_groups[0]
+    settings_tuple = settings_type[0]
+    settings = settings_tuple[1]
+  return json.dumps(configuration_service.find_settings_metadata([settings], modified_setting, new_value)), status.HTTP_200_OK
+
 @configuration_api.route('/settings_metadata', methods=['GET'])
 #@login_required
 @token_required
