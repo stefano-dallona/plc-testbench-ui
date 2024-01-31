@@ -8,4 +8,8 @@ class Serializable:
 class DefaultJsonEncoder:
     @classmethod
     def to_json(cls, obj):
-        return obj.__dict__ if hasattr(obj, '__dict__') else obj
+        if hasattr(obj, 'toJson') and callable(obj.toJson):
+            return obj.toJson()
+        if hasattr(obj, '__dict__'):
+            return obj.__dict__
+        return obj
