@@ -224,11 +224,7 @@ class EccTestbenchService:
                         {
                             "uuid": str(uuid.uuid4()),
                             "name": worker_class.__name__,
-                            "settings": [{
-                                "property": key,
-                                "mandatory": True,
-                                "type": type(value).__name__,
-                                "value": value} for key, value in worker_settings.settings.items()]
+                            "settings": next(iter(next(iter(ConfigurationService.find_settings_metadata([worker_settings])))["value"]))["settings"]
                         }
                         for (worker_class, worker_settings) in worker_group]
             else:
