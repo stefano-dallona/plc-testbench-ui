@@ -150,6 +150,12 @@ class ConfigurationService:
         return subclasses
 
     @staticmethod
+    def get_value_type(property, clazz):
+        class_constructor_annotations = inspect.getfullargspec(clazz.__init__).annotations
+        value_type = class_constructor_annotations[property] if property in class_constructor_annotations.keys() else None
+        return value_type
+
+    @staticmethod
     def find_settings_metadata(settings_list: List[Settings] = None, modified_setting: str = None, new_value = None):
         cs = ConfigurationService
         ConfigurationService._logger.info("Retrieving settings metadata ...")
@@ -170,11 +176,6 @@ class ConfigurationService:
         def update_setting(settings, modified_setting, new_value):
             modifier = get_modifier(modified_setting, type(settings))
             return modifier(settings, new_value)
-
-        def get_value_type(property, clazz):
-            class_constructor_annotations = inspect.getfullargspec(clazz.__init__).annotations
-            value_type = class_constructor_annotations[property] if property in class_constructor_annotations.keys() else None
-            return value_type
         
         def get_collection_item_type(property, clazz):
             class_constructor_annotations = inspect.getfullargspec(clazz.__init__).annotations
@@ -241,11 +242,11 @@ class ConfigurationService:
                     "options": [
                         member.value for member in type(value)],
                     "mandatory": True,
-                    "editable": clazz is None or get_value_type(property, clazz) is not None,
+                    "editable": clazz is None or ConfigurationService.get_value_type(property, clazz) is not None,
                     "is_modifier": has_modifier(property, clazz)
                 }
             elif isinstance(value, Settings):
-                inferred_value_type = get_value_type(property, clazz)
+                inferred_value_type = ConfigurationService.get_value_type(property, clazz)
                 return get_settings_subclasses_metadata(property, inferred_value_type, value, root_class)
             elif isinstance(value, list):
                 inferred_value_type = value_type if value_type is not None else get_collection_item_type(property, clazz)
@@ -270,7 +271,7 @@ class ConfigurationService:
                 "value": convert_value(value),
                 "valueType": type(value).__name__,
                 "mandatory": True,
-                "editable": clazz is None or get_value_type(property, clazz) is not None,
+                "editable": clazz is None or ConfigurationService.get_value_type(property, clazz) is not None,
                 "is_modifier": has_modifier(property, clazz)
             }
 
@@ -292,7 +293,7 @@ class ConfigurationService:
                         "name": settings[1].__name__,
                         "settings": [
                             get_settings_metadata(property, value, settings[0].__class__, value_type=None, root_class=settings[0].__class__)
-                            for property, value in settings[0].settings.items() if not property.startswith("__") and get_value_type(property, settings[0].__class__) is not None
+                            for property, value in settings[0].settings.items() if not property.startswith("__") and ConfigurationService.get_value_type(property, settings[0].__class__) is not None
                         ],
                         "doc": settings[1].__doc__
                     } for settings in list(settingsMetadata)]
@@ -301,7 +302,7 @@ class ConfigurationService:
         return metadata
     
     @staticmethod    
-    def get_conversion_function(value_type, settings, setting):
+    def get_conversion_function(value_type, settings, setting_value, setting_name = None, settings_class = None):
         try:
             if value_type == "settingsList" :
                 return ConfigurationService.settingsList_conversion
@@ -310,7 +311,9 @@ class ConfigurationService:
             elif value_type == "dictionary" :
                 return ConfigurationService.dictionary_conversion
             elif value_type == "select" :
-                return type(settings.settings[setting["property"]])
+                return type(settings.settings[setting_value["property"]]) if not setting_name else ConfigurationService.get_value_type(setting_name, settings_class)
+            elif value_type == "bool" :
+                return lambda x: x == 'true'
             else:
                 return globals()['__builtins__'][value_type]
         except:
