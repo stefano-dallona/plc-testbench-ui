@@ -246,17 +246,17 @@ PLC-Testbench-UI - Compliance rules
 1) Each algorithm must extend directly or indirectly the base algorithm for the corresponding category (PacketLossSimulator, PLCAlgorithm, OutputAnalyser)
 2) For each algorithm a corresponding Settings class must be provided
 3) Each Settings class must inherit directly or indirectly from the base Settings class
-4) Each Settings class must be named after the algorithm it belongs to by suffixing the algorithm class name with 'Settings'
+4) Each Settings class must be named after the algorithm it belongs to, by suffixing the algorithm class name with 'Settings'
 5) Each Settings class must have a constructor that supports instantiation with no arguments, providing therefore sensible defaults
 6) If the change of any individual setting is supposed to enforce business rules or changes in the structure of the Settings, the class
-   must expose a modifier for each such setting named after the setting by prefixing the setting name with "set_", having the new setting
-   value as the only argument and returning a copy of the Settings consistent with the application of the needed logic.   
+   must expose a modifier for each such setting named after the setting by prefixing the setting name with "set_". The modifier method
+   must have the new setting value as the only argument and must return a copy of the Settings consistent with the application of the needed logic.   
 7) The type of each setting in a Settings class must be a base Python type (int, float, bool, str), an enumeration, a list of base types, a dictionary of base types,
-   a list of other Settings classes, a dictionary having other Settings as values and strings as keys. Type hints must be provided for each constructor argument
+   a list of other Settings classes, a dictionary having other Settings as values and a base type or enumeration as keys. Type hints must be provided for each constructor argument
    to allow proper type inference. All settings must appear as arguments in the constructor, except calculated/functionally dependent attributes that must be omitted from the constructor signature.
 8) Enumeration must provide meaningful names for the values
 9) Each algorithm must have a constructor that supports instantiation with the corresponding settings as the only argument
-10) Each algorithm must provide progress events through tqdm iterators
+10) Each algorithm must provide progress events through tqdm iterators wrappers in the run method for the UI to be able to report progress properly
 
 Any violation of these rules could end in the best case with the application ignoring the new algorithm, or in the worst case
 with the application failing in unpredictable ways. 
