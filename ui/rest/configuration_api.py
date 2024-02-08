@@ -55,11 +55,19 @@ def recalculate_metadata(user = None):
     settings_tuple = settings_type[0]
     settings = settings_tuple[1]
   
-  new_value = new_value["data"]["value"] if not valueType in ["settingsList", "dictionary"] else new_value
+  new_value = new_value["data"]["value"] if valueType not in ["settingsList", "dictionary"] else new_value
   conversion_function = configuration_service.get_conversion_function(valueType, settings_list, new_value, modified_setting, type(settings_tuple[1]))
   new_value = conversion_function(new_value)
 
   return json.dumps(configuration_service.find_settings_metadata([settings], modified_setting, new_value)), status.HTTP_200_OK
+
+@configuration_api.route('/settings/validate', methods=['PUT'])
+#@login_required
+@token_required
+def validate_settings(user = None):
+  settings_list = request.get_json()
+  errors = configuration_service.validate_settings([settings_list])
+  return json.dumps({} if len(errors) == 0 else { "errors": errors }), status.HTTP_200_OK
 
 @configuration_api.route('/settings_metadata', methods=['GET'])
 #@login_required

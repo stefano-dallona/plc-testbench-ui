@@ -13,6 +13,7 @@ from itertools import groupby
 from collections import ChainMap, OrderedDict
 from enum import Enum
 from bson.objectid import ObjectId
+from typing import List
 
 from plctestbench.worker import *
 from plctestbench.loss_simulator import *
@@ -301,6 +302,13 @@ class ConfigurationService:
         ]
         return metadata
     
+    @staticmethod
+    def validate_settings(settings_list: List[Settings] = None) -> List[str]:
+        return [
+            #"'setting-1' is not valid",
+            #"'setting-2' is not valid"
+        ]
+    
     @staticmethod    
     def get_conversion_function(value_type, settings, setting_value, setting_name = None, settings_class = None):
         try:
@@ -565,9 +573,6 @@ class ConfigurationService:
         else:
             self._logger.debug(f'Chunk {current_chunk + 1} of {total_chunks} '
                                f'for file {file.filename} complete')
-            
-    def validate_worker(worker: Worker):
-        pass
 
 class InputFileSelection:
     pass
