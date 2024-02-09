@@ -9,7 +9,7 @@ import functools
 import typing_extensions
 import re
 from operator import itemgetter
-from itertools import groupby
+from itertools import groupby, chain
 from collections import ChainMap, OrderedDict
 from enum import Enum
 from bson.objectid import ObjectId
@@ -196,7 +196,7 @@ class ConfigurationService:
             return Settings in clazz.__mro__
         
         def get_settings_subclasses_metadata(property, value_type, children, root_class = None):
-            subclassesInstances = [sublass() for sublass in ConfigurationService.itersubclasses(value_type) if sublass != root_class ]
+            subclassesInstances = [subclass() for subclass in ConfigurationService.itersubclasses(value_type) if subclass != root_class ]
             safe_children_list = list(filter(lambda x: type(x) != root_class, children))
             return  {
                 "property": property,
@@ -304,10 +304,15 @@ class ConfigurationService:
     
     @staticmethod
     def validate_settings(settings_list: List[Settings] = None) -> List[str]:
-        return [
-            #"'setting-1' is not valid",
-            #"'setting-2' is not valid"
-        ]
+        try:
+            configuration_map = ConfigurationService.parse_settings_from_json(settings_list)
+            for configuration in chain(*filter(None, configuration_map.values())):
+                settings = configuration[1]
+                if hasattr(settings, "__validate__") and callable(getattr(settings, "__validate__")):
+                    settings.__validate__()
+            return []
+        except Exception as e:
+            return [str(e)]
     
     @staticmethod    
     def get_conversion_function(value_type, settings, setting_value, setting_name = None, settings_class = None):

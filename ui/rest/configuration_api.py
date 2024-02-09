@@ -46,7 +46,7 @@ def recalculate_metadata(user = None):
   settings_list = request.get_json()
   modified_setting = request.args.get("modified_setting", type=str, default=None)
   new_value = json.loads(request.args.get("new_value", type=str, default=None))
-  valueType = new_value["data"]["valueType"]
+  value_type = new_value["data"]["valueType"]
   
   settings = None
   if settings_list:
@@ -55,8 +55,8 @@ def recalculate_metadata(user = None):
     settings_tuple = settings_type[0]
     settings = settings_tuple[1]
   
-  new_value = new_value["data"]["value"] if valueType not in ["settingsList", "dictionary"] else new_value
-  conversion_function = configuration_service.get_conversion_function(valueType, settings_list, new_value, modified_setting, type(settings_tuple[1]))
+  new_value = new_value["data"]["value"] if value_type not in ["settingsList", "dictionary"] else new_value
+  conversion_function = configuration_service.get_conversion_function(value_type, settings_list, new_value, modified_setting, type(settings_tuple[1]))
   new_value = conversion_function(new_value)
 
   return json.dumps(configuration_service.find_settings_metadata([settings], modified_setting, new_value)), status.HTTP_200_OK
