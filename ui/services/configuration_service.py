@@ -233,6 +233,11 @@ class ConfigurationService:
             elif type(value) == Uuid.UUID:
                 return str(value)
             return value
+        
+        def get_nested_type(property, clazz):
+            value_type = ConfigurationService.get_value_type(property, clazz) if clazz is not None else None
+            nested_type = value_type.__args__[0] if value_type is not None and hasattr(value_type, "__args__") and len(getattr(value_type, "__args__")) > 0 else None
+            return nested_type
 
         def get_settings_metadata(property, value, clazz, value_type = None, root_class = None):
             if isinstance(value, Enum):
@@ -271,6 +276,7 @@ class ConfigurationService:
                 "property": property,
                 "value": convert_value(value),
                 "valueType": type(value).__name__,
+                "nestedType": get_nested_type(property, clazz).__name__ if get_nested_type(property, clazz) is not None else "",
                 "mandatory": True,
                 "editable": clazz is None or ConfigurationService.get_value_type(property, clazz) is not None,
                 "is_modifier": has_modifier(property, clazz)
