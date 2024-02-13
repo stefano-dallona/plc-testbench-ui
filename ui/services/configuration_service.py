@@ -13,7 +13,7 @@ from itertools import groupby, chain
 from collections import ChainMap, OrderedDict
 from enum import Enum
 from bson.objectid import ObjectId
-from typing import List
+from typing import List, Dict
 
 from plctestbench.worker import *
 from plctestbench.loss_simulator import *
@@ -184,7 +184,7 @@ class ConfigurationService:
             if property_name in class_constructor_annotations.keys():
                 property_annotation = class_constructor_annotations[property_name]
                 property_annotation_tuple = typing_extensions.get_args(property_annotation)
-                collection_item_type = property_annotation_tuple[0] if len(property_annotation_tuple) > 0 else None
+                collection_item_type = property_annotation_tuple[-1] if len(property_annotation_tuple) > 0 else None
                 if collection_item_type is None and property_annotation is not None:
                     m = re.search('.*\[(\w+Settings)\].*', property_annotation)
                     if m is not None and len(m.groups()) > 0:
@@ -193,10 +193,10 @@ class ConfigurationService:
             return None
         
         def is_settings_subclass(clazz):
-            return Settings in clazz.__mro__
+            return hasattr(clazz, "__mro__") and Settings in clazz.__mro__
         
         def get_settings_subclasses_metadata(property, value_type, children, root_class = None):
-            subclassesInstances = [subclass() for subclass in ConfigurationService.itersubclasses(value_type) if subclass != root_class ]
+            subclasses_instances = [subclass() for subclass in ConfigurationService.itersubclasses(value_type) if subclass != root_class ]
             safe_children_list = list(filter(lambda x: type(x) != root_class, children))
             return  {
                 "property": property,
@@ -217,7 +217,7 @@ class ConfigurationService:
                                     if not property.startswith("__")
                                 ]
                             }
-                            for subclass in subclassesInstances
+                            for subclass in subclasses_instances
                         ]
                     }
                     for child in safe_children_list
@@ -234,12 +234,12 @@ class ConfigurationService:
                 return str(value)
             return value
         
-        def get_nested_type(property, clazz):
-            value_type = ConfigurationService.get_value_type(property, clazz) if clazz is not None else None
+        def get_nested_type_by_value_type(value_type):
             nested_type = value_type.__args__[0] if value_type is not None and hasattr(value_type, "__args__") and len(getattr(value_type, "__args__")) > 0 else None
             return nested_type
 
         def get_settings_metadata(property, value, clazz, value_type = None, root_class = None):
+            inferred_value_type = None
             if isinstance(value, Enum):
                 return {
                     "property": property,
@@ -260,11 +260,12 @@ class ConfigurationService:
                     return get_settings_subclasses_metadata(property, inferred_value_type, value, root_class)
             elif isinstance(value, dict):
                 inferred_value_type = get_collection_item_type(property, clazz)
+                nested_value_type = get_nested_type_by_value_type(inferred_value_type)
                 return {
                     "property": property,
                     "valueType": "dictionary",
                     "value": [
-                        get_settings_metadata(str(entryKey), entryValue, None, inferred_value_type, root_class)
+                        get_settings_metadata(str(entryKey), entryValue, None, nested_value_type if nested_value_type is not None else inferred_value_type, root_class)
                         for entryKey, entryValue in value.items()
                     ],
                     "mandatory": True,
@@ -276,7 +277,7 @@ class ConfigurationService:
                 "property": property,
                 "value": convert_value(value),
                 "valueType": type(value).__name__,
-                "nestedType": get_nested_type(property, clazz).__name__ if get_nested_type(property, clazz) is not None else "",
+                "nestedType": inferred_value_type.__name__ if inferred_value_type is not None else "",
                 "mandatory": True,
                 "editable": clazz is None or ConfigurationService.get_value_type(property, clazz) is not None,
                 "is_modifier": has_modifier(property, clazz)
@@ -321,20 +322,32 @@ class ConfigurationService:
             return [str(e)]
     
     @staticmethod    
-    def get_conversion_function(value_type, settings, setting_value, setting_name = None, settings_class = None):
+    def get_conversion_function(value_type, settings, setting_value, setting_name: str = None, settings_class = None):
+        
+        def convert_to_base_value(setting_name, value_type, value):
+            try:
+                return globals()['__builtins__'][value_type](value)
+            except:
+                raise ConversionException("{setting_name} must be of type {value_type}".format(setting_name=setting_name, value_type=value_type))
+        
+        def list_conversion(setting_name, nested_type, value):
+            list_values = (value.split(",") if value.strip() != "" else []) if type(value) is str else value
+            return [convert_to_base_value(setting_name, nested_type, value) if nested_type is not None and nested_type.strip() != "" else value for value in list_values]
+        
         try:
             if value_type == "settingsList" :
                 return ConfigurationService.settingsList_conversion
             elif value_type == "list" :
-                return lambda x: (x.split(",") if x.strip() != "" else []) if type(x) is str else x
+                nested_type = setting_value["nestedType"] if setting_value["nestedType"] is not None else str
+                return lambda x: list_conversion(setting_name, nested_type, x)
             elif value_type == "dictionary" :
                 return ConfigurationService.dictionary_conversion
             elif value_type == "select" :
-                return type(settings.settings[setting_value["property"]]) if not setting_name else ConfigurationService.get_value_type(setting_name, settings_class)
+                return ConfigurationService.get_value_type(setting_name, settings_class) if setting_name and settings_class else type(settings.settings[setting_value["property"]])
             elif value_type == "bool" :
                 return lambda x: x == 'true'
             else:
-                return globals()['__builtins__'][value_type]
+                return lambda value: convert_to_base_value(setting_name, value_type, value)
         except:
             return lambda x: x
     
@@ -344,15 +357,20 @@ class ConfigurationService:
             try:
                 setting = setting_data["data"] if "data" in setting_data.keys() else setting_data
                 value = setting_data if setting["valueType"] in ["settingsList", "dictionary"] else setting["value"]
-                conversion_function = ConfigurationService.get_conversion_function(setting["valueType"], settings, setting)
+                setting_name = setting["property"]
+                conversion_function = ConfigurationService.get_conversion_function(setting["valueType"], settings, setting, setting_name)
                 value = conversion_function(value)
                 if (hasattr(settings, "settings") and type(settings.settings) is dict):
-                    settings.settings[setting["property"]] = value
+                    settings.settings[setting_name] = value
                 else:
-                    setattr(settings, setting["property"], value)
-            except:
+                    setattr(settings, setting_name, value)
+            except ConversionException as e:
+                raise e
+            except Exception as e:
+                #raise Exception("Could not set property {property} of type {value_type} on Settings".format(property=setting["property"], value_type=setting["valueType"]))
                 ConfigurationService._logger.info(
                     "Could not set property %s of type %s on Settings", setting["property"], setting["valueType"])
+
     
     @staticmethod 
     def settingsList_conversion(setting_data):
@@ -605,6 +623,11 @@ class ValidationException(Exception):
         super().__init__(message)
    
 class KeyNotFoundException(Exception):
+
+    def __init__(self, message):
+        super().__init__(message)
+
+class ConversionException(Exception):
 
     def __init__(self, message):
         super().__init__(message)
