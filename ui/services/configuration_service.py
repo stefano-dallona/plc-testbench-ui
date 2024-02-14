@@ -434,21 +434,48 @@ class ConfigurationService:
         def get_field(setting):
             field = {
                 setting["property"]: {
-                    "type": "number" if setting["valueType"] in ["int", "float"] else "",
-                    "valueSources": ["value"],
+                    "type": ""
                 }
             }
+            
+            if setting["valueType"] == "str":
+                field[setting["property"]]["type"] = "text"
+            
+            if setting["valueType"] in ["int", "float"]:
+                field[setting["property"]]["type"] = "number"
+                field[setting["property"]]["valueSources"] = ["value"]
+            
             if setting["valueType"] == "select":
                 field[setting["property"]]["type"] = "select"
                 field[setting["property"]]["fieldSettings"] = { "listValues": setting["options"] }
 
             if setting["valueType"] == "settingsList":
-                field[setting["property"]]["type"] = "select"
-                field[setting["property"]]["fieldSettings"] = { "listValues": [ settings["name"] for settings in setting["value"][0]["options"]] }
+                subfields = [{
+                    "worker": {
+                        "type": "select",
+                        "fieldSettings": {
+                            "listValues": [ settings["name"] for settings in setting["value"][0]["options"]],
+                        },
+                        "valueSources": ["value"]
+                    }
+                }]
+                subfields += [{
+                    worker["name"] + "_Settings": {
+                        "label": worker["name"],
+                        "tooltip": "Group of fields",
+                        "type": "!struct",
+                        "subfields":  OrderedDict(ChainMap(*[get_field(setting)
+                                                             for setting in worker["settings"]
+                                                             if setting["editable"]]))
+                    }
+                } for index, worker in enumerate(setting["value"][0]["options"])]
+                
+                field[setting["property"]]["label"] = setting["property"]
+                field[setting["property"]]["type"] = "!group"
+                field[setting["property"]]["subfields"] = OrderedDict(ChainMap(*subfields))
                 
             if setting["valueType"] == "list":
-                field[setting["property"]]["type"] = "select"
-                field[setting["property"]]["fieldSettings"] = { "listValues": setting["value"] }
+                field[setting["property"]]["type"] = "text"
                 
             if setting["valueType"] == "dictionary":
                 field[setting["property"]]["type"] = "select"
