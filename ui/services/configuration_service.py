@@ -434,13 +434,28 @@ class ConfigurationService:
         def get_field(setting):
             field = {
                 setting["property"]: {
-                    "type": "number" if setting["type"] in ["int", "float"] else "",
+                    "type": "number" if setting["valueType"] in ["int", "float"] else "",
                     "valueSources": ["value"],
                 }
             }
-            if setting["type"] == "select":
+            if setting["valueType"] == "select":
                 field[setting["property"]]["type"] = "select"
                 field[setting["property"]]["fieldSettings"] = { "listValues": setting["options"] }
+
+            if setting["valueType"] == "settingsList":
+                field[setting["property"]]["type"] = "select"
+                field[setting["property"]]["fieldSettings"] = { "listValues": [ settings["name"] for settings in setting["value"][0]["options"]] }
+                
+            if setting["valueType"] == "list":
+                field[setting["property"]]["type"] = "select"
+                field[setting["property"]]["fieldSettings"] = { "listValues": setting["value"] }
+                
+            if setting["valueType"] == "dictionary":
+                field[setting["property"]]["type"] = "select"
+                field[setting["property"]]["fieldSettings"] = { "listValues": setting["value"] }
+
+            if setting["valueType"] == "bool":
+                field[setting["property"]]["type"] = "boolean"
 
             return field
 
