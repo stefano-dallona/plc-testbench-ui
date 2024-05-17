@@ -7,7 +7,7 @@ executors:
   docker-publisher:
     # Define the image tag
     environment:
-      IMAGE_TAG: stdallona/plc-testbench-ui:1.0.2
+      IMAGE_TAG: stdallona/plc-testbench-ui:1.2.0
     # Use `docker:stable` as the Docker image for this executor
     docker:
       - image: docker:stable
@@ -70,11 +70,11 @@ workflows:
       # Run the build first
       - build
       # Push the image second
-#      - push:
-#          # Build needs to finish first
-#          requires:
-#            - build
-#          # Only push images from the master branch
-#          filters:
-#            branches:
-#              only: master
+      - push:
+          # Build needs to finish first
+          requires:
+            - build
+          # Only push images from the master branch
+          filters:
+            branches:
+              only: master
