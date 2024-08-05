@@ -7,7 +7,7 @@ executors:
   docker-publisher:
     # Define the image tag
     environment:
-      IMAGE_TAG: stdallona/plc-testbench-ui:1.3.0
+      IMAGE_TAG: stdallona/plc-testbench-ui:1.4.0
     # Use `docker:stable` as the Docker image for this executor
     docker:
       - image: docker:stable
