@@ -28,10 +28,10 @@ docker run --rm --detach ^
 --env GOOGLE_OAUTH_CERTS=https://www.googleapis.com/oauth2/v1/certs ^
 --env KEY_FILE=/plc-testbench-ui/secrets/key.pem ^
 --env REQUESTS_CA_BUNDLE=/plc-testbench-ui/secrets/cacert.pem ^
---env SECURITY_ENABLED=True ^
+--env SECURITY_ENABLED=False ^
 --env DEBUGPY_PROCESS_SPAWN_TIMEOUT=180 ^
 --volume /c/Data/plc-testbench-ui/plc-testbench-ui/secrets:/plc-testbench-ui/secrets ^
 --volume /c/Data/personale/Università/2022-2023/original_tracks:/plc-testbench-ui/original_tracks ^
 --name plc-testbench-ui ^
 --link mongo:mongo ^
-stdallona/plc-testbench-ui:1.2.0
+stdallona/plc-testbench-ui:1.4.0
